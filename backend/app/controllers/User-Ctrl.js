@@ -8,7 +8,50 @@ import otpGenerator from "otp-generator";
 import twilio from "twilio";
 import nodemailer from "nodemailer";
 
+import axios from "axios";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const UserCtrl = {};
+
+UserCtrl.googleLogin = async (req, res) => {
+    const { token } = req.body;
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+        const payload = ticket.getPayload();
+        const { email, name, picture } = payload;
+
+        let user = await UserModel.findOne({ email });
+
+        if (!user) {
+            // Check if this is the first user (admin)
+            const usersCount = await UserModel.countDocuments();
+            const role = usersCount === 0 ? 'admin' : 'user';
+
+            user = new UserModel({
+                userName: name,
+                email: email,
+                role: role,
+                profilePic: picture,
+                wallet: 0,
+                // password and phoneNumber are optional now
+            });
+            await user.save();
+        }
+
+        const tokenData = { userId: user._id, role: user.role };
+        const jwtToken = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
+
+        res.json({ token: jwtToken });
+    } catch (error) {
+        console.log("Google Login Error:", error.message);
+        res.status(400).json({ error: "Google authentication failed" });
+    }
+}
 
 UserCtrl.register = async (req, res) => {
     const body = req.body;
@@ -58,7 +101,7 @@ UserCtrl.login = async (req, res) => {
     }
     // generate JWT Token 
     const tokenData = { userId: userPresent._id, role: userPresent.role };
-    const token = jwt.sign(tokenData, process.env.jwt_key, { expiresIn: "7d" });
+    const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
     res.json({ token: token })
 }
 
@@ -149,7 +192,7 @@ UserCtrl.forgotPassword = async (req, res) => {
                     pass: process.env.EMAIL_PASS
                 }
             });
-            
+
             let mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: sendtogmail,
@@ -159,26 +202,26 @@ UserCtrl.forgotPassword = async (req, res) => {
 
             await transporter.sendMail(mailOptions);
             console.log('OTP sent to email successfully');
-            return res.json({"BackendOPT": otp});
+            return res.json({ "BackendOPT": otp });
         }
 
         if (sendtotwillo !== undefined) {
-            const accountSid = process.env.TWILIO_SID ;
-            const authToken = process.env.TWILIO_TOKEN ;
+            const accountSid = process.env.TWILIO_SID;
+            const authToken = process.env.TWILIO_TOKEN;
 
             const client = twilio(accountSid, authToken);
             const formattedNumber = `+91${sendtotwillo}`;
-            console.log({"formattedNumber":formattedNumber})
+            console.log({ "formattedNumber": formattedNumber })
 
             async function sendOtp(formattedNumber, otp) {
                 await client.messages.create({
                     body: `Your OTP is ${otp}. It will expire in 5 minutes.`,
-                    from: process.env.TWILIO_PHONE_NO ,
+                    from: process.env.TWILIO_PHONE_NO,
                     to: formattedNumber
                 });
 
                 console.log('OTP sent successfully');
-                return res.json({"BackendOPT":otp});
+                return res.json({ "BackendOPT": otp });
             }
 
             await sendOtp(formattedNumber, otp);
@@ -208,5 +251,16 @@ UserCtrl.resetPassword = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-
+UserCtrl.switchRole = async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+        user.role = user.role == "user" ? "vendor" : "user";
+        await user.save();
+        res.json({ message: "Role updated successfully", user });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
 export default UserCtrl;

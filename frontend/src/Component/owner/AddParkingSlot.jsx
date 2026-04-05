@@ -4,8 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AddSlot } from "../../slices/parkingSlot";
 import { useLocation } from "react-router-dom";
-
-import { fetchBookings } from "../../slices/BookingSlices.jsx";
 import { updateSlot } from "../../slices/parkingSlot";
 
 
@@ -13,6 +11,7 @@ export default function AddParkingSlot() {
     const userDetails = useSelector((state) => {
         return state.auth
     })
+
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -155,14 +154,14 @@ export default function AddParkingSlot() {
             formData.append("proof", file);
         });
         console.log("Form Data:", formData);
-        
+
         if (!Data) {
             dispatch(AddSlot({ form: formData }))
-                .then(() => navigate("/myslots"));
+                .then(() => navigate("/mySlot"));
         } else {
             formData.append("slotId", Data._id);
             dispatch(updateSlot({ formData }))
-                .then(() => navigate("/myslots"));
+                .then(() => navigate("/mySlot"));
         }
 
     };
@@ -174,7 +173,7 @@ export default function AddParkingSlot() {
                 <div><button onClick={() => {
                     navigate(-1);
                 }}>BACK</button></div>
-                {Data ? (
+                {Data ===null ? (
                     <h2 className="text-3xl font-bold text-indigo-600 mb-8 text-center">
                         Add Parking Slot
                     </h2>

@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema({
 
   password: {
     type: String,
-    required: true
+    required: false
   },
   wallet:{
     type:Number,
@@ -33,7 +33,7 @@ const UserSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    required: true
+    required: false
   },
 }, { timestamps: true });
 

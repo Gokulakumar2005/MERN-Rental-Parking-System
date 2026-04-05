@@ -7,24 +7,34 @@ import { deleteSlot } from "../../slices/parkingSlot";
 
 export default function MySlot() {
     const dispatch = useDispatch();
-    const navigate=useNavigate();
+    const navigate = useNavigate();
 
     const { Slot } = useSelector((state) => state.slot);
     const { user } = useSelector((state) => state.auth);
     // console.log({ " Data Inside the own Slot ": Slot });
-
+    if (!user) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p>Loading user...</p>
+            </div>
+        );
+    }
+   
     useEffect(() => {
         dispatch(FetchSlots());
     }, [dispatch]);
-    const CommonId = Slot.filter((ele) => ele.vendorId === user?._id);
+
+    // const CommonId = Slot.filter((ele) => ele.vendorId === user?._id);
+    const CommonId = user ? Slot.filter((ele) => ele.vendorId === user._id) : [];
     // console.log({ "Common ID ": CommonId });
-const handleDelete = (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
-    
-    if (confirmDelete) {
-        dispatch(deleteSlot(id));
-    }
-};
+    const handleDelete = (id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
+
+        if (confirmDelete) {
+            dispatch(deleteSlot(id));
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             <div className="max-w-5xl mx-auto">
@@ -63,7 +73,7 @@ const handleDelete = (id) => {
                                         </div>
                                         <div className="flex flex-col sm:flex-row w-full sm:space-x-4 space-y-3 sm:space-y-0 mt-6 px-4">
                                             <div >
-                                                <button onClick={()=>navigate("/addparkingslot",{state:ele})}
+                                                <button onClick={() => navigate("/addparkingslot", { state: ele })}
                                                     className="flex-1 bg-green-400 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-500 transition duration-300 shadow-md transform hover:-translate-y-0.5">
                                                     Update Slot
                                                 </button>

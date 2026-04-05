@@ -5,16 +5,20 @@ import { UserAccount } from "../slices/authSlices";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function DashBoard() {
     const dispatch = useDispatch();
+    const navigate=useNavigate();
 
     useEffect(() => {
         dispatch(UserAccount());
     }, [dispatch])
     
     const { user } = useSelector((state) => state.auth);
-
+const  loginRedirect=()=>{
+    navigate("/login")
+}
     if (!user) return (
         <div className="flex items-center justify-center h-screen bg-gray-50">
             <p className="text-xl font-semibold text-gray-500 animate-pulse">Loading Dashboard...</p>

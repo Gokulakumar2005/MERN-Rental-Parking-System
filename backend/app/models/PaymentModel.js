@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const PaymentSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "UserModel",
         required: true
     },
     VendorId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Slot",
+        ref: "UserModel",
         required: true
     },
     slotcount: {

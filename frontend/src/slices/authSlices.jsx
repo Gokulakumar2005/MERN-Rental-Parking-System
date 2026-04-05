@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../config/axiosInstance.jsx";
+import { Navigate } from "react-router-dom";
 
 export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormData, redirect }, { rejectWithValue }) => {
     try {
@@ -10,15 +11,29 @@ export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormD
         redirect();
         return response.data;
     } catch (err) {
-        const msg = err.response.data.error;
+        const msg = err.response?.data?.error || err.message || "Something went wrong";
         console.log(msg);
         return rejectWithValue(msg);
     }
 })
-export const LoginUser = createAsyncThunk("auth/LoginUser", async ({ formData, redirect }, { rejectWithValue }) => {
+export const GoogleLoginUser = createAsyncThunk("auth/GoogleLoginUser", async ({ credential, redirect }, { rejectWithValue }) => {
+    try {
+        const response = await axios.post("/user/google-login", { token: credential });
+        alert("successfully logged in with google");
+        localStorage.setItem("token", response.data.token);
+        const userResponse = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
+        redirect();
+        return userResponse.data;
+    } catch (err) {
+        const msg = err.response?.data?.error || err.message || "Something went wrong";
+        return rejectWithValue(msg);
+    }
+})
+
+export const LoginUser = createAsyncThunk("auth/LoginUser", async ({ formData, redirect, loginRedirect }, { rejectWithValue }) => {
     try {
         const response = await axios.post("/user/login", formData);
-        // alert("successfully logged in");
+        alert("successfully logged in");
         console.log(response.data);
         localStorage.setItem("token", response.data.token);
         const userResponse = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
@@ -26,45 +41,62 @@ export const LoginUser = createAsyncThunk("auth/LoginUser", async ({ formData, r
         return userResponse.data;
 
     } catch (err) {
-        const msg = err.response.data.error;
-        console.log(msg);
+        const msg = err.response?.data?.error || err.message || "Something went wrong";
+        if (msg === "invalid user" || msg === "invalid Email") {
+            alert(msg);
+        }
         return rejectWithValue(msg);
     }
 
 })
+
+
 export const UserAccount = createAsyncThunk("auth/UserAccount", async (_, { rejectWithValue }) => {
-    
+
     try {
         const response = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
         // console.log(response.data);
         return response.data;
     } catch (err) {
-        const msg = err.response.data.error;
+        const msg = err.response?.data?.error || err.message || "Something went wrong";
+
         console.log(msg);
         return rejectWithValue(msg);
     }
 })
 
 export const UpdateProfile = createAsyncThunk("auth/UpdateProfile", async ({ formData }, { rejectWithValue }) => {
-    console.log({"Update form Data ":formData});
-    const id=formData.get("id");
-    console.log({"userId":id});
+    console.log({ "Update form Data ": formData });
+    const id = formData.get("id");
+    console.log({ "userId": id });
     try {
-        const response = await axios.put(`/update/profile/${id}`,formData, { 
-            headers: { 
+        const response = await axios.put(`/update/profile/${id}`, formData, {
+            headers: {
                 Authorization: localStorage.getItem("token"),
-                "Content-Type": "multipart/form-data" 
-            } 
+                "Content-Type": "multipart/form-data"
+            }
         });
         console.log(response.data);
         return response.data;
     } catch (error) {
-        const msg = error.response?.data?.error || "An error occurred";
+        const msg = err.response?.data?.error || err.message || "Something went wrong";
         console.log(msg);
         return rejectWithValue(msg);
     }
 })
 
+export const switchRole = createAsyncThunk("auth/switchRole", async (id, { rejectWithValue }) => {
+    try {
+        const response = await axios.put(`/user/switchRole/${id}`, { id }, { headers: { Authorization: localStorage.getItem("token") } });
+        console.log(response.data);
+        
+        return response.data;
+    } catch (error) {
+        const msg = error.response?.data?.error || error.message || "Something went wrong";
+        console.log(msg);
+        return rejectWithValue(msg);
+    }
+})
 const authSlices = createSlice({
     name: "auth",
     initialState: {
@@ -102,25 +134,55 @@ const authSlices = createSlice({
             state.Error = null;
 
         })
+        builder.addCase(LoginUser.pending, (state) => {
+            state.Error = null
+        })
+
         builder.addCase(LoginUser.rejected, (state, action) => {
             state.Error = action.payload;
             state.isLoggedIn = false;
         })
 
+        builder.addCase(GoogleLoginUser.fulfilled, (state, action) => {
+            state.user = action.payload;
+            state.isLoggedIn = true;
+            state.Error = null;
+        })
+
         builder.addCase(UserAccount.fulfilled, (state, action) => {
             state.user = action.payload;
             state.isLoggedIn = true;
-             state.Error = null;
+            state.Error = null;
 
         })
-        builder.addCase(UpdateProfile.fulfilled,(state,action)=>{
-            state.user=action.payload;
+        builder.addCase(UserAccount.pending, (state) => {
+            state.Error = null
+        })
+        builder.addCase(UserAccount.rejected, (state, action) => {
+            state.Error = action.payload;
+            state.isLoggedIn = false
+        })
+        builder.addCase(UpdateProfile.fulfilled, (state, action) => {
+            state.user = action.payload;
             //  state.Error = null;
         })
-         builder.addCase(UpdateProfile.rejected, (state, action) => {
+        builder.addCase(UpdateProfile.rejected, (state, action) => {
             state.Error = action.payload;
             // state.isLoggedIn = false;
         })
+        builder.addCase(switchRole.fulfilled, (state, action) => {
+            state.user.role = action.payload.user.role;
+             state.Error = null;
+            
+        })
+        builder.addCase(switchRole.rejected, (state, action) => {
+            state.Error = action.payload;
+            // state.isLoggedIn = false;
+        })  
+        builder.addCase(switchRole.pending, (state) => {
+            state.Error = null
+        })
+   
 
     }
 

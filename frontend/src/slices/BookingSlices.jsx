@@ -19,7 +19,7 @@ export const createOrder = createAsyncThunk(
       );
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -40,7 +40,7 @@ export const verifyPayment = createAsyncThunk(
       );
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -60,6 +60,16 @@ export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (_,
   }
 })
 
+export const CancelBooking = createAsyncThunk("booking/CancelBooking", async (id, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`/user/cancelBooking/${id}`, id, { headers: { Authorization: localStorage.getItem("token") } });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error.response.data);
+    return rejectWithValue(error.response.data);
+  }
+})
 const BookingSlices = createSlice({
   name: "booking",
   initialState: {
@@ -109,14 +119,38 @@ const BookingSlices = createSlice({
       state.myBooking = action.payload;
     });
     builder.addCase(fetchBookings.rejected, (state, action) => {
-      state.error - action.payload;
+      state.error = action.payload;
     });
     builder.addCase(fetchBookings.pending, (state) => {
       state.loading = true;
       state.error = null;
     })
+    // builder.addCase(CancelBooking.fulfilled, (state, action) => {
+    //   const id = action.payload._id;
+    //   const index = state.myBooking.findIndex(b => b._id === id);
+    //   if (index !== -1) {
+    //     state.myBooking[index].status = "Cancelled";
+    //   }
+    // });
+    builder.addCase(CancelBooking.fulfilled, (state, action) => {
+      const updatedBooking = action.payload.booking; // ✅ correct
 
+      const index = state.myBooking.findIndex(
+        (b) => b._id === updatedBooking._id
+      );
+      if (index !== -1) {
+        state.myBooking[index] = updatedBooking;
+      }
+      state.loading = false;
+    });
+    builder.addCase(CancelBooking.rejected, (state, action) => {
+      state.error = action.payload;
+    });
 
+    builder.addCase(CancelBooking.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
   },
 });
 

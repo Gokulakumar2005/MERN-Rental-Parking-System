@@ -110,7 +110,7 @@ export default function ChatPage() {
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                     <div className="bg-blue-600 p-4 text-white">
                         <h1 className="text-xl font-bold">
-                            Chat with{" "}
+                            Chat with
                             {String(user?._id) === bookingUserId
                                 ? "Vendor"
                                 : "User"}

@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
         return res.status(401).json({error:'token not provided'})
     }
     try{
-        const tokenData=jwt.verify(token,process.env.jwt_key);
+        const tokenData=jwt.verify(token,process.env.JWT_KEY);
         // console.log("tokendata",tokenData);
         req.userId=tokenData.userId;
         // console.log(req.userId);

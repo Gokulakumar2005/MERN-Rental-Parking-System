@@ -1,32 +1,41 @@
 
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBookings } from "../slices/BookingSlices";
 import { useNavigate } from "react-router-dom";
-
-
+import { CancelBooking } from "../slices/BookingSlices";
 
 export default function Mybookings() {
 
-
-    const { myBooking } = useSelector((state) => state.booking);
-
+    const { myBooking, error } = useSelector((state) => state.booking);
     const { user } = useSelector((state) => state.auth);
-
-
-
     // console.log({ "booking Inside Mybooking Component": myBooking });
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [serverError, setServerError] = useState(null);
 
     useEffect(() => {
         dispatch(fetchBookings());
     }, [dispatch]);
 
-    const CommonId_Bookings = myBooking.filter((ele) => (ele.userId === user._id || ele.vendorId === user._id));
+    // const CommonId_Bookings = myBooking.filter((ele) => (ele.userId === user._id || ele.vendorId === user._id));
+    const CommonId_Bookings = Array.isArray(myBooking) && user?._id
+        ? myBooking.filter((ele) => ele.userId === user._id || ele.vendorId === user._id)
+        : [];
     console.log({ "common_id_bookings": CommonId_Bookings });
 
+    useEffect(() => {
+        if (error) {
+            setServerError(error);
+        }
+    }, [error]);
+
+    const handleCancle = (ele) => {
+        console.log({ "ele": ele });
+        if (window.confirm("Are you sure. You Want to Cancle the Booking")) {
+            dispatch(CancelBooking(ele._id))
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
@@ -37,6 +46,13 @@ export default function Mybookings() {
                 <p className="text-center text-gray-500 mb-6">
                     Here you can view all your parking slot bookings.
                 </p>
+                {serverError && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {typeof serverError === "string"
+                            ? serverError
+                            : serverError?.message || "Something went wrong"}
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     {CommonId_Bookings.length === 0 ? (
@@ -55,19 +71,34 @@ export default function Mybookings() {
                                             <h4 className="font-medium">  Slot Status:<span className="ml-2 font-normal text-blue-600">{ele.status}</span> </h4>
                                             <h4 className="font-medium">Start Time: <span className="ml-2 font-normal"> {new Date(ele.startTime).toLocaleString()} </span> </h4>
                                             <h4 className="font-medium"> End Time:<span className="ml-2 font-normal">{new Date(ele.endTime).toLocaleString()}</span></h4>
-                                        </div>
-                                        <div className="mt-4 flex justify-end">
                                             {ele.status === "Booked" && (
-                                                <button
-                                                    onClick={() => navigate("/chatPage", { state: ele })}
-                                                    className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
-                                                >
-                                                    💬
-                                                </button>
+                                                <h6 className="font-medium text-red-400 w-full" > Note * :Cancle the Booking will Availble Before 8 Hours of Booking</h6>
                                             )}
                                         </div>
-                                        <div className="mt-4">
+                                        <div className="flex space-x-4 pt-4 justify-end" >
+                                            <div>
+                                                {ele.status === "Booked" && (
+                                                    <button
+                                                        onClick={() => navigate("/chatPage", { state: ele })}
+                                                        className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
+                                                    >
+                                                        💬
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="mt-4">
+                                            </div>
+
+                                            <div>
+                                                {ele.status === "Booked" && (
+                                                    <button onClick={() => handleCancle(ele)}
+                                                        className="w-full bg-red-400 text-white font-semibold py-3 rounded-xl hover:bg-red-500 transition duration-300">
+                                                        Cancel Booking
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
+
 
                                     </div>
                                 );
