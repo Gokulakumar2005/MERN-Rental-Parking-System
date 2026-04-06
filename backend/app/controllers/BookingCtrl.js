@@ -156,7 +156,7 @@ BookingCtrl.verifyPayment = async (req, res) => {
             const Amount = Number(bookingData.Amount);
 
             await UserModel.findByIdAndUpdate(VendorID, { $inc: { wallet: Amount } });
-            
+
             // Create notification for the vendor
             const notification = new NotificationModel({
                 recipient: VendorID,
@@ -256,13 +256,16 @@ BookingCtrl.CancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
 
+
         const findBooking = await BookingModel.findById(id);
+        // console.log({ "find Booking In ctrl": findBooking }) 
 
         if (!findBooking) {
             return res.status(404).json({
                 message: "Booking not found"
             });
         }
+        const { userId, Amount } = findBooking
 
         const currentTime = new Date();
         const bookingStartTime = new Date(findBooking.startTime);
@@ -280,6 +283,10 @@ BookingCtrl.CancelBooking = async (req, res) => {
             { $set: { status: "Cancelled" } },
             { new: true }
         );
+
+        // userId
+        const updateUserWallet = await UserModel.findByIdAndUpdate(userId, { $inc: { wallet: Amount } })
+        await updateUserWallet.save();
 
         // Create notification for the vendor
         const cancellationNotification = new NotificationModel({

@@ -379,11 +379,7 @@ export default function AddParkingSlot() {
                                         onChange={(e) =>
                                             setForm({ ...form, parkingImages: [...e.target.files] })
                                         }
-                                        onBlur={() => {
-                                            if (form.parkingImages.length === 0 && !Data) {
-                                                setError({ ...Error, parkingImages: "Parking Images is Required *" })
-                                            }
-                                        }}
+                                        
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
                                     />
                                     {Error.parkingImages && (
@@ -426,11 +422,7 @@ export default function AddParkingSlot() {
                                         name="proof"
                                         multiple
                                         onChange={handlePropertyProof}
-                                        onBlur={() => {
-                                            if (form.propertyDocument.proof.length === 0 && !Data) {
-                                                setError({ ...Error, proof: "Proof is Required *" })
-                                            }
-                                        }}
+                                       
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
                                     />
                                     {Error.proof && (

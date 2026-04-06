@@ -263,4 +263,14 @@ UserCtrl.switchRole = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+UserCtrl.fetchAllUser = async (req, res) => {
+    try {
+        const response = await UserModel.find();
+        res.json(response);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
 export default UserCtrl;

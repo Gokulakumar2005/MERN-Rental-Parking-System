@@ -38,6 +38,11 @@ export default function BookSlot() {
 
     return (
         <div className="min-h-screen bg-yellow-100 flex justify-start items-start">
+
+            <div flex justify-end>
+                <button onClick={()=>navigate("/AllUserInMap")}
+                 className="bg-blue-400 text-gray-700 rounded-full flex justify-end ">Find SlotS</button>
+            </div>
             {SlotInfo.length !== 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 p-6 w-full">
                     {[...SlotInfo].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((ele, index) => (
@@ -46,7 +51,6 @@ export default function BookSlot() {
                                 <p><strong className="text-gray-700">Slot Name:</strong> {ele.name}</p>
                                 <p><strong className="text-gray-700">Address:</strong> {ele.address}</p>
                                 <p><strong className="text-gray-700">Vehicles:</strong> {ele.vehicles}</p>
-                                {/* <p><strong className="text-gray-700">Available Slot:</strong> {ele.availableSlot}</p> */}
                                 <p> <strong>Available Slot:</strong>{getAvailableSlots(ele._id, ele.totalSlot)}</p>
                             </div>
                             <div className="flex flex-wrap gap-2 mt-4">

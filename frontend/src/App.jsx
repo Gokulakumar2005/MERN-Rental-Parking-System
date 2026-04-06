@@ -19,10 +19,13 @@ import ChatPage from "./Component/chatPage.jsx";
 import MySlot from "./Component/owner/OwnSlot.jsx";
 import Profile from "./Component/Profile.jsx";
 import ForgotPassword from "./Component/ForgotPassword.jsx";
-import { switchRole } from "./slices/authSlices.jsx";
+import AllUserInMap from "./Component/user/AllUserInMap.jsx";
+
 import Notification from "./Component/notification.jsx";
 import SwitchRole from "./Component/SwitchRole.jsx";
-
+import AllBookings from "./Component/admin/AllBookings.jsx";
+import AllUser from "./Component/admin/AllUsers.jsx";
+import AllParkingSlots from "./Component/admin/AllParkingSlot.jsx";
 
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -34,23 +37,18 @@ function App() {
   const { user, isLoggedIn } = useSelector((state) => {
     return state.auth;
   });
-  const [AccountOpen, setAccountOpen] = useState(false);
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(UserAccount());
+    } else {
+      navigate("/login")
     }
   }, [dispatch]);
 
-  const handleChangeRole = async () => {
-    const result = await dispatch(switchRole(user._id));
 
-    if (result.meta.requestStatus === "fulfilled") {
-      setAccountOpen(false);
-      navigate("/dashboard");
-    }
-  };
 
   if (localStorage.getItem("token") && isLoggedIn == false) {
     return (
@@ -73,10 +71,11 @@ function App() {
               <>
                 <ul className="flex gap-6 items-center">
                   <li><Link to="/dashboard" className="text-gray-700 font-medium hover:text-blue-600 transition" > DashBoard </Link></li>
+                  <li><Link to="/Allusers" className="text-gray-700 font-medium hover:text-blue-600 transition">Users</Link></li>
+                  <li><Link to="/AllParkingSlot" className="text-gray-700 font-medium hover:text-blue-600 transition">Parking Slots</Link></li>
+                  <li><Link to="/AllBookings" className="text-gray-700 font-medium hover:text-blue-600 transition">Bookings</Link></li>
                   <li><Link to="/profile" className="text-gray-700 font-medium hover:text-blue-600 transition">Profile</Link></li>
                   <li><Notification /></li>
-
-
                   <li>
                     <button
                       onClick={() => {
@@ -172,7 +171,12 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/notification" element={<Notification />} />
+            <Route path="/AllUserInMap" element={<AllUserInMap />} />
+            <Route path="/Allusers" element={<AllUser />} />
+            <Route path="/AllParkingSlot" element={<AllParkingSlots/>} />
+            <Route path="/AllBookings" element={<AllBookings />} />
           </Routes>
+
         </div>
 
 

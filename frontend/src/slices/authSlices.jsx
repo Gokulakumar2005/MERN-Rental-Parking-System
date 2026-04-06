@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../config/axiosInstance.jsx";
-import { Navigate } from "react-router-dom";
+
 
 export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormData, redirect }, { rejectWithValue }) => {
     try {
@@ -59,7 +59,6 @@ export const UserAccount = createAsyncThunk("auth/UserAccount", async (_, { reje
         return response.data;
     } catch (err) {
         const msg = err.response?.data?.error || err.message || "Something went wrong";
-
         console.log(msg);
         return rejectWithValue(msg);
     }
@@ -89,7 +88,18 @@ export const switchRole = createAsyncThunk("auth/switchRole", async (id, { rejec
     try {
         const response = await axios.put(`/user/switchRole/${id}`, { id }, { headers: { Authorization: localStorage.getItem("token") } });
         console.log(response.data);
-        
+
+        return response.data;
+    } catch (error) {
+        const msg = error.response?.data?.error || error.message || "Something went wrong";
+        console.log(msg);
+        return rejectWithValue(msg);
+    }
+})
+export const FetchAllUser = createAsyncThunk("auth/FetchAllUser", async (_, { rejectWithValue }) => {
+    try {
+        const response = await axios.get("/admin/fetch/allUser", { headers: { Authorization: localStorage.getItem("token") } });
+        console.log({ "response": response.data });
         return response.data;
     } catch (error) {
         const msg = error.response?.data?.error || error.message || "Something went wrong";
@@ -101,6 +111,7 @@ const authSlices = createSlice({
     name: "auth",
     initialState: {
         user: null,
+        Alluser: [],
         isLoggedIn: false,
         Error: null
 
@@ -172,17 +183,27 @@ const authSlices = createSlice({
         })
         builder.addCase(switchRole.fulfilled, (state, action) => {
             state.user.role = action.payload.user.role;
-             state.Error = null;
-            
+            state.Error = null;
+
         })
         builder.addCase(switchRole.rejected, (state, action) => {
             state.Error = action.payload;
             // state.isLoggedIn = false;
-        })  
+        })
         builder.addCase(switchRole.pending, (state) => {
             state.Error = null
         })
-   
+        builder.addCase(FetchAllUser.fulfilled,(state,action)=>{
+            state.Alluser=action.payload;
+            state.Error=null;
+        })
+        builder.addCase(FetchAllUser.pending,(state)=>{
+            state.Error=null;
+        })
+        builder.addCase(FetchAllUser.rejected,(state,action)=>{
+            state.Error=action.payload
+        })
+
 
     }
 
