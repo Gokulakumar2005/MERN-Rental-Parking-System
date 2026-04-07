@@ -1,6 +1,7 @@
 import axios from "axios";
 import { SlotModel } from "../models/ParkingSlot.js";
 import { PslotValidation } from "../validations/ParkingSlotValidation.js";
+import { paginate } from "../utils/pagination.js";
 
 
 const ParkingController = {};
@@ -196,13 +197,19 @@ ParkingController.deleteSlot = async (req, res) => {
 
 ParkingController.fetchSlots = async (req, res) => {
     try {
-        const response = await SlotModel.find();
+        const response = await paginate(SlotModel,req.query,{
+            query:{},
+            sort:{createdAt: -1},
+
+        })
         res.json(response);
     } catch (error) {
         console.log(err);
         res.status(500).json({ error: err.message });
     }
 }
+
+
 
 
 export default ParkingController;

@@ -5,10 +5,14 @@ import { Calendar, Car, Clock, CreditCard, Tag, User, MapPin, CheckCircle, XCirc
 
 export default function AllBookings() {
     const dispatch = useDispatch();
-    const { myBooking } = useSelector((state) => state.booking);
+    const { myBooking, pagination } = useSelector((state) => state.booking);
+    const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
 
+    const handlePageChange = (page) => {
+        dispatch(fetchBookings({ page, limit: 24 }));
+    };
     useEffect(() => {
-        dispatch(fetchBookings())
+        dispatch(fetchBookings({ page: 1, limit: 24 }))
     }, [dispatch])
 
     const getStatusColor = (status) => {
@@ -45,17 +49,17 @@ export default function AllBookings() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {[...myBooking]
-                        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                        .map((ele, i) => {
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {(myBooking || [])
+                        ?.slice()?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                        ?.map((ele, i) => {
                             return (
                                 <div
                                     key={i}
                                     className="group bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all duration-500 relative overflow-hidden"
                                 >
                                     <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-50 -mr-10 -mt-10 rounded-full opacity-30 group-hover:scale-110 transition-transform duration-700"></div>
-                                    
+
                                     <div className="relative flex flex-col h-full">
                                         <div className="flex items-center justify-between mb-8">
                                             <div className="flex items-center gap-4">
@@ -126,6 +130,36 @@ export default function AllBookings() {
                                 </div>
                             )
                         })}
+                </div>
+                <div className="flex justify-center items-center gap-6 mt-12">
+
+                    {/* Prev */}
+                    <button
+                        disabled={currentPage === 1}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 
+               shadow-sm hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        ← Prev
+                    </button>
+
+                    {/* Current Page */}
+                    <div className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gray-900 text-white shadow-md">
+                        <span className="text-sm text-gray-300">Page</span>
+                        <span className="text-lg font-bold">{currentPage}</span>
+                        <span className="text-sm text-gray-400">/ {totalPages || 1}</span>
+                    </div>
+
+                    {/* Next */}
+                    <button
+                        disabled={currentPage === totalPages || totalPages === 0}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 
+               shadow-sm hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        Next →
+                    </button>
+
                 </div>
             </div>
         </div>

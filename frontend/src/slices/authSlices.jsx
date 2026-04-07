@@ -96,9 +96,17 @@ export const switchRole = createAsyncThunk("auth/switchRole", async (id, { rejec
         return rejectWithValue(msg);
     }
 })
-export const FetchAllUser = createAsyncThunk("auth/FetchAllUser", async (_, { rejectWithValue }) => {
+export const FetchAllUser = createAsyncThunk("auth/FetchAllUser", async (
+    { page = 1, limit = 24 },
+    { rejectWithValue }
+) => {
     try {
-        const response = await axios.get("/admin/fetch/allUser", { headers: { Authorization: localStorage.getItem("token") } });
+        const response = await axios.get("/admin/fetch/allUser", {
+            headers: { Authorization: localStorage.getItem("token") }, params: {
+                page,
+                limit,
+            },
+        });
         console.log({ "response": response.data });
         return response.data;
     } catch (error) {
@@ -113,7 +121,13 @@ const authSlices = createSlice({
         user: null,
         Alluser: [],
         isLoggedIn: false,
-        Error: null
+        Error: null,
+        pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 0,
+            pageSize: 10,
+        }
 
     },
 
@@ -193,15 +207,16 @@ const authSlices = createSlice({
         builder.addCase(switchRole.pending, (state) => {
             state.Error = null
         })
-        builder.addCase(FetchAllUser.fulfilled,(state,action)=>{
-            state.Alluser=action.payload;
-            state.Error=null;
+        builder.addCase(FetchAllUser.fulfilled, (state, action) => {
+            state.Alluser = action?.payload?.data || [];
+            state.Error = null;
+            state.pagination = action.payload?.pagination || {};
         })
-        builder.addCase(FetchAllUser.pending,(state)=>{
-            state.Error=null;
+        builder.addCase(FetchAllUser.pending, (state) => {
+            state.Error = null;
         })
-        builder.addCase(FetchAllUser.rejected,(state,action)=>{
-            state.Error=action.payload
+        builder.addCase(FetchAllUser.rejected, (state, action) => {
+            state.Error = action.payload
         })
 
 

@@ -17,9 +17,17 @@ export const AddSlot = createAsyncThunk("VendorSlot/AddSlot", async ({ form }, {
     }
 })
 
-export const FetchSlots = createAsyncThunk("VendorSlots,FetchSlots", async (_, { rejectWithValue }) => {
+export const FetchSlots = createAsyncThunk("VendorSlots,FetchSlots", async (
+    { page = 1, limit = 24 },
+    { rejectWithValue }
+) => {
     try {
-        const response = await axios.get("/user/fetchSlots", { headers: { Authorization: localStorage.getItem("token") } });
+        const response = await axios.get("/user/fetchSlots", {
+            headers: { Authorization: localStorage.getItem("token") }, params: {
+                page,
+                limit,
+            },
+        });
         // console.log(response.data);
         return response.data;
     } catch (error) {
@@ -55,7 +63,13 @@ const ParkingSlices = createSlice({
     initialState: {
         Slot: [],
         error: null,
-        
+        pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 0,
+            pageSize: 10,
+        }
+
 
     },
     extraReducers: (builder) => {
@@ -69,7 +83,9 @@ const ParkingSlices = createSlice({
             state.error = action.payload;
         })
         builder.addCase(FetchSlots.fulfilled, (state, action) => {
-            state.Slot = action.payload;
+            state.Slot = action.payload?.data || [];
+            state.loading = false;
+            state.pagination = action.payload?.pagination || {};
         })
         builder.addCase(FetchSlots.pending, (state, action) => {
             state.error = null;
@@ -90,7 +106,7 @@ const ParkingSlices = createSlice({
         //     state.Slot = action.payload;
         // })
         builder.addCase(deleteSlot.fulfilled, (state, action) => {
-            const deletedId = action.meta.arg; 
+            const deletedId = action.meta.arg;
             state.Slot = state.Slot.filter(slot => slot._id !== deletedId);
         });
         builder.addCase(deleteSlot.pending, (state) => {

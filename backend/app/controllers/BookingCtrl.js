@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { createOrderSchema } from "../validations/BookingValidationSchema.js";
 import { verifyPaymentSchema } from "../validations/BookingValidationSchema.js";
 import NotificationModel from "../models/NotificationModel.js";
+import { paginate } from "../utils/pagination.js";
 
 // import { createOrderSchema } from "../validators/bookingValidation.js";
 
@@ -201,19 +202,40 @@ BookingCtrl.verifyPayment = async (req, res) => {
 };
 
 
-BookingCtrl.fetchBookings = async (req, res) => {
-    // console.log({"request":req});
-    // const userId = req.userId;
-    try {
-        const response = await BookingModel.find();
-        // console.log({ "response inside the ctrl": response })
-        res.json(response);
+// BookingCtrl.fetchBookings = async (req, res) => {
+//     // console.log({"request":req});
+//     // const userId = req.userId;
+//     try {
+//         const response = await BookingModel.find();
+//         // console.log({ "response inside the ctrl": response })
+//         res.json(response);
 
-    } catch (error) {
-        console.log(error);
-        res.json(error.message);
-    }
-}
+//     } catch (error) {
+//         console.log(error);
+//         res.json(error.message);
+//     }
+// }
+// controllers/BookingCtrl.js
+
+
+
+
+BookingCtrl.fetchBookings = async (req, res) => {
+  try {
+    console.log("USER ID:", req.userId);
+
+    const result = await paginate(BookingModel, req.query, {
+      query: {},
+      sort: { createdAt: -1 },
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 BookingCtrl.fetchPayments = async (req, res) => {
     // const body = req.body;

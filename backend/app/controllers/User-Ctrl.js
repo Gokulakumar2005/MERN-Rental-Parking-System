@@ -7,8 +7,8 @@ import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import twilio from "twilio";
 import nodemailer from "nodemailer";
+import { paginate } from "../utils/pagination.js";
 
-import axios from "axios";
 import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -266,11 +266,28 @@ UserCtrl.switchRole = async (req, res) => {
 
 UserCtrl.fetchAllUser = async (req, res) => {
     try {
-        const response = await UserModel.find();
+        const response = await paginate(UserModel,req.query,{
+            query:{},
+            sort:{createdAt:-1}
+        })
         res.json(response);
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: error.message });
     }
 }
+// BookingCtrl.fetchBookings = async (req, res) => {
+//   try {
+//     console.log("USER ID:", req.userId);
+
+//     const result = await paginate(BookingModel, req.query, {
+//       query: {},
+//       sort: { createdAt: -1 },
+//     });
+
+//     res.status(200).json(result);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 export default UserCtrl;

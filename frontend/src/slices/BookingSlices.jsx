@@ -46,10 +46,32 @@ export const verifyPayment = createAsyncThunk(
 );
 
 
-export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (_, { rejectWithValue }) => {
+// export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (_, { rejectWithValue }) => {
+//   try {
+//     const response = await axios.get("/user/myBookings", { headers: { Authorization: localStorage.getItem("token") } });
+//     // console.log(response.data);
+//     return response.data;
+
+
+
+//   } catch (error) {
+//     console.log(error.response.data);
+//     return rejectWithValue(error.response.data);
+//   }
+// })
+export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (
+  { page = 1, limit = 24 },
+  { rejectWithValue }
+) => {
   try {
-    const response = await axios.get("/user/myBookings", { headers: { Authorization: localStorage.getItem("token") } });
-    // console.log(response.data);
+    const response = await axios.get("/user/myBookings", {
+      headers: { Authorization: localStorage.getItem("token") }, params: {
+        page,
+        limit,
+
+      },
+    });
+    console.log(response.data);
     return response.data;
 
 
@@ -78,6 +100,12 @@ const BookingSlices = createSlice({
     order: null,
     success: false,
     error: null,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      pageSize: 10,
+    }
   },
 
   reducers: {
@@ -116,7 +144,9 @@ const BookingSlices = createSlice({
       });
 
     builder.addCase(fetchBookings.fulfilled, (state, action) => {
-      state.myBooking = action.payload;
+      state.loading = false;
+      state.myBooking = action.payload?.data || [];  
+      state.pagination = action.payload?.pagination || {};
     });
     builder.addCase(fetchBookings.rejected, (state, action) => {
       state.error = action.payload;
@@ -133,7 +163,7 @@ const BookingSlices = createSlice({
     //   }
     // });
     builder.addCase(CancelBooking.fulfilled, (state, action) => {
-      const updatedBooking = action.payload.booking; // ✅ correct
+      const updatedBooking = action.payload.booking;
 
       const index = state.myBooking.findIndex(
         (b) => b._id === updatedBooking._id
