@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchAllUser } from "../../slices/authSlices";
+import Pagination from "../../config/pagination";
 import { User, Phone, Mail, Wallet, Shield } from "lucide-react";
 
 export default function AllUser() {
@@ -89,36 +90,7 @@ export default function AllUser() {
                             )
                         })}
                 </div>
-                <div className="flex justify-center items-center gap-6 mt-12">
-
-                    {/* Prev */}
-                    <button
-                        disabled={currentPage === 1}
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 
-               shadow-sm hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        ← Prev
-                    </button>
-
-                    {/* Current Page */}
-                    <div className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gray-900 text-white shadow-md">
-                        <span className="text-sm text-gray-300">Page</span>
-                        <span className="text-lg font-bold">{currentPage}</span>
-                        <span className="text-sm text-gray-400">/ {totalPages || 1}</span>
-                    </div>
-
-                    {/* Next */}
-                    <button
-                        disabled={currentPage === totalPages || totalPages === 0}
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 
-               shadow-sm hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        Next →
-                    </button>
-
-                </div>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
             </div>
         </div>
     )

@@ -202,7 +202,6 @@ const authSlices = createSlice({
         })
         builder.addCase(switchRole.rejected, (state, action) => {
             state.Error = action.payload;
-            // state.isLoggedIn = false;
         })
         builder.addCase(switchRole.pending, (state) => {
             state.Error = null

@@ -11,7 +11,8 @@ import morgan from "morgan";
 import fs from "fs";
 import path from "path";
 import "./config/node-cron/expiryBooking.js";
-
+import "./config/node-cron/peakHours.js";
+import "./config/node-cron/restPrice.js";
 
 
 // modules
@@ -22,8 +23,10 @@ import { authenticateUser } from './app/middlewares/authenticateUser.js';
 import ChatController from './app/controllers/chatCtrl.js';
 import { authorizeUser } from './app/middlewares/authorize.js';
 import { upload } from './config/multer.js';
-import socketHandler from './app/sockets/sockets.js';
+// import socketHandler from './app/sockets/sockets.js';
+import socketHandler from "./app/Sockets/sockets.js";
 import NotificationCtrl from './app/controllers/Notification-Ctrl.js';
+
 
 
 

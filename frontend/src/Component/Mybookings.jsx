@@ -4,18 +4,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchBookings } from "../slices/BookingSlices";
 import { useNavigate } from "react-router-dom";
 import { CancelBooking } from "../slices/BookingSlices";
-
+import Pagination from "../config/pagination";
 export default function Mybookings() {
 
-    const { myBooking, error } = useSelector((state) => state.booking);
+    const { myBooking, error, pagination } = useSelector((state) => state.booking);
     const { user } = useSelector((state) => state.auth);
     // console.log({ "booking Inside Mybooking Component": myBooking });
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [serverError, setServerError] = useState(null);
+    const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
+    const handlePageChange = (page) => {
+        dispatch(FetchSlots({ page, limit: 24 }));
+    };
 
     useEffect(() => {
-        dispatch(fetchBookings());
+        dispatch(fetchBookings({ page: 1, limit: 24 }));
     }, [dispatch]);
 
     // const CommonId_Bookings = myBooking.filter((ele) => (ele.userId === user._id || ele.vendorId === user._id));
@@ -104,6 +108,7 @@ export default function Mybookings() {
                                 );
 
                             })}
+                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
                         </div>
                     )}
                 </div>

@@ -21,19 +21,6 @@ const PaymentSchema = new mongoose.Schema({
     },
     orderId: String,
     paymentId: String,
-    // status: {
-    //     type: String,
-    //     enum: ["notBooked", "active", "Expired"],
-    //     default: "notBooked"
-    // },
-    // startTime:{
-    //     type: Date,
-    //     required: true
-    // },
-    // endTime: {
-    //     type: Date,
-    //     required: true
-    // },
     PaymentStatus: {
         type: String,
         enum: ["pending", "completed", "rejected"],

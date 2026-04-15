@@ -23,6 +23,7 @@ export default function AddParkingSlot() {
     const [form, setForm] = useState({
         name: "",
         address: "",
+        Area: "",
         vehicles: "",
         totalSlot: "",
         pricing: {
@@ -42,6 +43,7 @@ export default function AddParkingSlot() {
             setForm({
                 name: Data.name || "",
                 address: Data.address || "",
+                Area: Data.Area || "",
                 vehicles: Data.vehicles || "",
                 totalSlot: Data.totalSlot || "",
                 pricing: {
@@ -106,19 +108,22 @@ export default function AddParkingSlot() {
         if (form.address.trim().length === 0) {
             error.address = "Address is Required *"
         }
+        if (form.Area.trim().length === 0) {
+            error.Area = "Area is Required *"
+        }
         if (form.vehicles.trim().length === 0) {
             error.vehicles = "vehicles is Required *"
         }
-        if (form.totalSlot.trim().length === 0) {
+        if (form.totalSlot.length === 0) {
             error.totalSlot = "Total Slot is Required *"
         }
-        if (form.pricing.hourly.trim().length === 0) {
+        if (form.pricing.hourly.length === 0) {
             error.hourly = "Hour's is Required *"
         }
-        if (form.pricing.daily.trim().length === 0) {
+        if (form.pricing.daily.length === 0) {
             error.daily = "Daily is Required *"
         }
-        if (form.pricing.monthly.trim().length === 0) {
+        if (form.pricing.monthly.length === 0) {
             error.monthly = "Monthly is Required *"
         }
         if (form.facilities.length === 0) {
@@ -141,6 +146,7 @@ export default function AddParkingSlot() {
 
         formData.append("name", form.name);
         formData.append("address", form.address);
+        formData.append("Area", form.Area);
         formData.append("vehicles", form.vehicles);
         formData.append("totalSlot", form.totalSlot);
         formData.append("vendorId", userDetails.user._id);
@@ -173,7 +179,7 @@ export default function AddParkingSlot() {
                 <div><button onClick={() => {
                     navigate(-1);
                 }}>BACK</button></div>
-                {Data ===null ? (
+                {Data === null ? (
                     <h2 className="text-3xl font-bold text-indigo-600 mb-8 text-center">
                         Add Parking Slot
                     </h2>
@@ -228,9 +234,35 @@ export default function AddParkingSlot() {
                         )}
                     </div>
 
+                    <div>
+                        <label className="block text-gray-700 font-semibold mb-1">Area</label>
+                        <input
+                            type="text"
+                            value={form.Area}
+                            placeholder="Enter the Area"
+                            name="Area"
+                            onChange={handleChange}
+                            onBlur={() => {
+                                if (form.Area.trim().length === 0) {
+                                    setError({ ...Error, Area: "Area is Required *" })
+                                }
+                            }}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                        />
+                        {Error.Area && (
+                            <span className="text-red-500 text-sm block mt-1 text-left">
+                                {Error.Area}
+                            </span>
+                        )}
+                    </div>
+
 
                     <div>
-                        <div>
+                        <div onBlur={() => {
+                            if (form.vehicles.trim().length === 0) {
+                                setError({ ...Error, vehicles: "Vechicles is Required *" })
+                            }
+                        }}>
                             <label>Bike <input type="radio" value="bike" name="vehicles" onChange={handleChange} checked={form.vehicles === 'bike'} /> </label>
                             <label>Car <input type="radio" value="car" name="vehicles" onChange={handleChange} checked={form.vehicles === 'car'} /> </label>
                             {Error.vehicles && (
@@ -240,211 +272,203 @@ export default function AddParkingSlot() {
                             )}
                         </div>
 
-                        {(form.vehicles == "bike" || form.vehicles == "car") &&
-                            <>
+
+                        <div>
+                            <label className="block text-gray-700 font-semibold mb-1">Total Slots</label>
+                            <input
+                                type="text"
+                                value={form.totalSlot}
+                                placeholder="Enter the slot Count"
+                                name="totalSlot"
+                                onChange={handleChange}
+                                onBlur={() => {
+                                    if (form.totalSlot.trim().length === 0) {
+                                        setError({ ...Error, totalSlot: "Slot is Required *" })
+                                    }
+                                }}
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                            />
+                            {Error.totalSlot && (
+                                <span className="text-red-500 text-sm block mt-1 text-left">
+                                    {Error.totalSlot}
+                                </span>
+                            )}
+                        </div>
+
+
+                        <div>
+                            <label className="block text-gray-700 font-semibold mb-2">Pricing</label>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
                                 <div>
-                                    <label className="block text-gray-700 font-semibold mb-1">Total Slots</label>
+                                    <label className="text-sm text-gray-600">Per Hour</label>
                                     <input
                                         type="text"
-                                        value={form.totalSlot}
-                                        placeholder="Enter the slot Count"
-                                        name="totalSlot"
-                                        onChange={handleChange}
+                                        value={form.pricing.hourly}
+                                        name="hourly"
+                                        onChange={handlePricingChange}
                                         onBlur={() => {
-                                            if (form.totalSlot.trim().length === 0) {
-                                                setError({ ...Error, totalSlot: "Slot is Required *" })
+                                            if (form.pricing.hourly.trim().length === 0) {
+                                                setError({ ...Error, hourly: "Hour's is Required *" })
                                             }
                                         }}
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
                                     />
-                                    {Error.totalSlot && (
+                                    {Error.hourly && (
                                         <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.totalSlot}
+                                            {Error.hourly}
                                         </span>
                                     )}
                                 </div>
 
-
                                 <div>
-                                    <label className="block text-gray-700 font-semibold mb-2">Pricing</label>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                                        <div>
-                                            <label className="text-sm text-gray-600">Per Hour</label>
-                                            <input
-                                                type="text"
-                                                value={form.pricing.hourly}
-                                                name="hourly"
-                                                onChange={handlePricingChange}
-                                                onBlur={() => {
-                                                    if (form.pricing.hourly.trim().length === 0) {
-                                                        setError({ ...Error, hourly: "Hour's is Required *" })
-                                                    }
-                                                }}
-                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-                                            />
-                                            {Error.hourly && (
-                                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                                    {Error.hourly}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <label className="text-sm text-gray-600">Daily</label>
-                                            <input
-                                                type="text"
-                                                value={form.pricing.daily}
-                                                name="daily"
-                                                onChange={handlePricingChange}
-                                                onBlur={() => {
-                                                    if (form.pricing.daily.trim().length === 0) {
-                                                        setError({ ...Error, daily: "Daily is Required *" })
-                                                    }
-                                                }}
-                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-                                            />
-                                            {Error.daily && (
-                                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                                    {Error.daily}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <label className="text-sm text-gray-600">Monthly</label>
-                                            <input
-                                                type="text"
-                                                value={form.pricing.monthly}
-                                                name="monthly"
-                                                onChange={handlePricingChange}
-                                                onBlur={() => {
-                                                    if (form.pricing.monthly.trim().length === 0) {
-                                                        setError({ ...Error, monthly: "Monthly is Required *" })
-                                                    }
-                                                }}
-                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-                                            />
-                                            {Error.monthly && (
-                                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                                    {Error.monthly}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                    </div>
-                                </div>
-
-
-                                <div>
-                                    <label className="block text-gray-700 font-semibold mb-1">Facilities</label>
+                                    <label className="text-sm text-gray-600">Daily</label>
                                     <input
                                         type="text"
-                                        value={form.facilities.join(",")}
-                                        name="facilities"
-                                        placeholder="CCTV, Security, EV Charging..."
-                                        // onChange={(e) => {
-                                        //     setForm({ ...form, [e.target.name]: e.target.value.split(",") })
-                                        // }}
-                                        onChange={(e) => {
-                                            const value = e.target.value
-                                                .split(",")
-                                                .map(item => item.trim())
-                                                .filter(Boolean);
-
-                                            setForm({ ...form, facilities: value });
-                                        }}
+                                        value={form.pricing.daily}
+                                        name="daily"
+                                        onChange={handlePricingChange}
                                         onBlur={() => {
-                                            if (form.facilities.length === 0) {
-                                                setError({ ...Error, facilities: "Facilities is Required *" })
+                                            if (form.pricing.daily.trim().length === 0) {
+                                                setError({ ...Error, daily: "Daily is Required *" })
                                             }
                                         }}
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
                                     />
-                                    {Error.facilities && (
+                                    {Error.daily && (
                                         <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.facilities}
+                                            {Error.daily}
                                         </span>
                                     )}
                                 </div>
-
 
                                 <div>
-                                    <label className="block text-gray-700 font-semibold mb-1">Slot Images</label>
+                                    <label className="text-sm text-gray-600">Monthly</label>
                                     <input
-                                        type="file"
-                                        name="parkingImages"
-                                        multiple
-                                        onChange={(e) =>
-                                            setForm({ ...form, parkingImages: [...e.target.files] })
-                                        }
-                                        
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
-                                    />
-                                    {Error.parkingImages && (
-                                        <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.parkingImages}
-                                        </span>
-                                    )}
-                                </div>
-
-
-                                <div className="border-t pt-6">
-
-                                    <h3 className="text-lg font-semibold text-indigo-600 mb-3">
-                                        Property Details
-                                    </h3>
-
-                                    <select
-                                        value={form.propertyDocument.documentType}
-                                        name="documentType"
-                                        onChange={handlePropertyChange}
+                                        type="text"
+                                        value={form.pricing.monthly}
+                                        name="monthly"
+                                        onChange={handlePricingChange}
                                         onBlur={() => {
-                                            if (form.propertyDocument.documentType.trim().length === 0) {
-                                                setError({ ...Error, documentType: "Document Type is Required *" })
+                                            if (form.pricing.monthly.trim().length === 0) {
+                                                setError({ ...Error, monthly: "Monthly is Required *" })
                                             }
                                         }}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                        <option value="">Select Document Type</option>
-                                        <option value="registration-document">Registration Document</option>
-                                        <option value="rental-document">Rental Document</option>
-
-                                    </select>
-                                    {Error.documentType && (
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
+                                    />
+                                    {Error.monthly && (
                                         <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.documentType}
+                                            {Error.monthly}
                                         </span>
                                     )}
-                                    <input
-                                        type="file"
-                                        name="proof"
-                                        multiple
-                                        onChange={handlePropertyProof}
-                                       
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
-                                    />
-                                    {Error.proof && (
-                                        <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.proof}
-                                        </span>
-                                    )}
-
                                 </div>
 
+                            </div>
+                        </div>
 
-                                <div className="pt-4">
-                                    <input
-                                        type="submit"
-                                        value={Data ? "Update Slot" : "Add Slot"}
-                                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md"
-                                    />
-                                </div>
 
-                            </>
+                        <div>
+                            <label className="block text-gray-700 font-semibold mb-1">Facilities</label>
+                            <input
+                                type="text"
+                                value={form.facilities.join(",")}
+                                name="facilities"
+                                placeholder="CCTV, Security, EV Charging..."
+                                onChange={(e) => {
+                                    const value = e.target.value
+                                        .split(",")
+                                        .map(item => item.trim())
+                                        .filter(Boolean);
 
-                        }
+                                    setForm({ ...form, facilities: value });
+                                }}
+                                onBlur={() => {
+                                    if (form.facilities.length === 0) {
+                                        setError({ ...Error, facilities: "Facilities is Required *" })
+                                    }
+                                }}
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400"
+                            />
+                            {Error.facilities && (
+                                <span className="text-red-500 text-sm block mt-1 text-left">
+                                    {Error.facilities}
+                                </span>
+                            )}
+                        </div>
+
+
+                        <div>
+                            <label className="block text-gray-700 font-semibold mb-1">Slot Images</label>
+                            <input
+                                type="file"
+                                name="parkingImages"
+                                multiple
+                                onChange={(e) =>
+                                    setForm({ ...form, parkingImages: [...e.target.files] })
+                                }
+
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
+                            />
+                            {Error.parkingImages && (
+                                <span className="text-red-500 text-sm block mt-1 text-left">
+                                    {Error.parkingImages}
+                                </span>
+                            )}
+                        </div>
+
+
+                        <div className="border-t pt-6">
+
+                            <h3 className="text-lg font-semibold text-indigo-600 mb-3">
+                                Property Details
+                            </h3>
+
+                            <select
+                                value={form.propertyDocument.documentType}
+                                name="documentType"
+                                onChange={handlePropertyChange}
+                                onBlur={() => {
+                                    if (form.propertyDocument.documentType.trim().length === 0) {
+                                        setError({ ...Error, documentType: "Document Type is Required *" })
+                                    }
+                                }}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-indigo-400"
+                            >
+                                <option value="">Select Document Type</option>
+                                <option value="registration-document">Registration Document</option>
+                                <option value="rental-document">Rental Document</option>
+
+                            </select>
+                            {Error.documentType && (
+                                <span className="text-red-500 text-sm block mt-1 text-left">
+                                    {Error.documentType}
+                                </span>
+                            )}
+                            <input
+                                type="file"
+                                name="proof"
+                                multiple
+                                onChange={handlePropertyProof}
+
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
+                            />
+                            {Error.proof && (
+                                <span className="text-red-500 text-sm block mt-1 text-left">
+                                    {Error.proof}
+                                </span>
+                            )}
+
+                        </div>
+
+
+                        <div className="pt-4">
+                            <input
+                                type="submit"
+                                value={Data ? "Update Slot" : "Add Slot"}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md"
+                            />
+                        </div>
                     </div>
                 </form>
 

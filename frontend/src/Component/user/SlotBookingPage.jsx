@@ -113,53 +113,6 @@ export default function SlotBookingPage() {
 
         try {
 
-            // const result = await dispatch(createOrder(Number(amount)));
-
-            // if (result.meta.requestStatus !== "fulfilled") {
-            //     return alert("Order creation failed");
-            // }
-
-            // const order = result.payload;
-
-            // // 💳 2. Razorpay popup
-            // const options = {
-            //     key: "rzp_test_SWwVlUPdU5OT4W",
-            //     amount: order.amount,
-            //     currency: order.currency,
-            //     order_id: order.id,
-
-            //     name: "Parking Booking",
-            //     description: "Slot Booking Payment",
-
-            //     handler: async function (response) {
-
-            //         const verifyRes = await dispatch(verifyPayment({
-            //             razorpay_order_id: response.razorpay_order_id,
-            //             razorpay_payment_id: response.razorpay_payment_id,
-            //             razorpay_signature: response.razorpay_signature,
-            //             bookingData: finalData
-            //         }));
-
-            //         if (verifyRes.meta.requestStatus === "fulfilled") {
-            //             alert("✅ Booking Confirmed!");
-            //             dispatch(resetPaymentState());
-            //         } else {
-            //             alert("❌ Payment verification failed");
-            //         }
-            //     },
-
-            //     prefill: {
-            //         name: "User",
-            //         email: "user@email.com"
-            //     },
-
-            //     theme: {
-            //         color: "#3399cc"
-            //     }
-            // };
-
-            // const rzp = new window.Razorpay(options);
-            // rzp.open();
             const result = await dispatch(createOrder(Number(amount)));
 
             if (result.meta.requestStatus !== "fulfilled") {
@@ -174,7 +127,7 @@ export default function SlotBookingPage() {
             }
 
             const options = {
-                key: "rzp_test_SZjnQX6aTQwSjC", // ✅ fixed key
+                key: "rzp_test_SZjnQX6aTQwSjC",
                 amount: order.amount,
                 currency: order.currency,
                 order_id: order.id,
@@ -515,8 +468,6 @@ export default function SlotBookingPage() {
                             <label className="block text-gray-700 font-medium mb-1"> Amount </label>
                             <input type="text" name="Amount" value={calculateAmount() || ""} readOnly
                                 className="w-full p-2 border rounded-lg bg-gray-100" />
-
-
 
                         </div>
                         <div>

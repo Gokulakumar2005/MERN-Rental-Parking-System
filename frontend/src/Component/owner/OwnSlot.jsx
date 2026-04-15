@@ -4,13 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { FetchSlots } from "../../slices/parkingSlot";
 import { useNavigate } from "react-router-dom";
 import { deleteSlot } from "../../slices/parkingSlot";
+import Pagination from "../../config/pagination";
 
 export default function MySlot() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { Slot } = useSelector((state) => state.slot);
+    const { Slot, pagination } = useSelector((state) => state.slot);
     const { user } = useSelector((state) => state.auth);
+    const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
     // console.log({ " Data Inside the own Slot ": Slot });
     if (!user) {
         return (
@@ -19,14 +21,19 @@ export default function MySlot() {
             </div>
         );
     }
-   
+    const handlePageChange = (page) => {
+        dispatch(FetchSlots({ page, limit: 24 }));
+    };
     useEffect(() => {
-        dispatch(FetchSlots());
+        dispatch(FetchSlots({ page: 1, limit: 24 }));
     }, [dispatch]);
 
-    // const CommonId = Slot.filter((ele) => ele.vendorId === user?._id);
-    const CommonId = user ? Slot.filter((ele) => ele.vendorId === user._id) : [];
-    // console.log({ "Common ID ": CommonId });
+    // const CommonId = user ? Slot.filter((ele) => ele.vendorId === user._id) : [];
+    const CommonId = user
+        ? Slot.filter((ele) => String(ele.vendorId) === String(user._id))
+        : [];
+    console.log({ "Common ID ": CommonId });
+
     const handleDelete = (id) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
 
@@ -34,6 +41,7 @@ export default function MySlot() {
             dispatch(deleteSlot(id));
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
@@ -88,6 +96,7 @@ export default function MySlot() {
                                     </div>
                                 );
                             })}
+                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-40">
@@ -97,6 +106,7 @@ export default function MySlot() {
                     </div>
                 )}
             </div>
+
         </div>
     );
 }

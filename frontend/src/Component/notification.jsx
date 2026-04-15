@@ -19,28 +19,62 @@ export default function NotificationDropdown() {
         }
     };
 
+    // useEffect(() => {
+    //     if (isLoggedIn && user) {
+    //         fetchNotifications();
+
+    //         socketRef.current = io(axios.defaults.baseURL);
+
+    //         // Join personal room for private notifications
+    //         socketRef.current.emit("joinUserRoom", user._id);
+
+    //         // Listen for user-specific notifications
+    //         socketRef.current.on("notification", (notification) => {
+    //             setNotifications((prev) => [notification, ...prev]);
+    //             // Optional: Show a toast or play a sound
+    //         });
+
+
+    //         return () => {
+    //             if (socketRef.current) {
+    //                 socketRef.current.disconnect();
+    //             }
+    //         };
+    //     }
+    // }, [isLoggedIn, user]);
     useEffect(() => {
-        if (isLoggedIn && user) {
-            fetchNotifications();
 
-            socketRef.current = io(axios.defaults.baseURL);
+    if (isLoggedIn && user) {
 
-            // Join personal room for private notifications
-            socketRef.current.emit("joinUserRoom", user._id);
+        fetchNotifications();
 
-            // Listen for user-specific notifications
-            socketRef.current.on("notification", (notification) => {
-                setNotifications((prev) => [notification, ...prev]);
-                // Optional: Show a toast or play a sound
-            });
+        socketRef.current = io(axios.defaults.baseURL);
 
-            return () => {
-                if (socketRef.current) {
-                    socketRef.current.disconnect();
-                }
-            };
-        }
-    }, [isLoggedIn, user]);
+        socketRef.current.emit("joinUserRoom", user._id);
+
+        socketRef.current.on("connect", () => {
+            console.log("Socket connected");
+        });
+
+        socketRef.current.on("notification", (notification) => {
+
+            setNotifications((prev) => [notification, ...prev]);
+
+            if (notification.type === "peakHours") {
+                alert(notification.message);
+            }
+
+        });
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+        };
+
+    }
+
+}, [isLoggedIn, user]);
 
     const markAsRead = async (id) => {
         try {

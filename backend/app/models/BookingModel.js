@@ -1,59 +1,36 @@
 import mongoose from "mongoose";
-
-
 const BookingSchema = new mongoose.Schema({
-    slotId: {
-        type: mongoose.Schema.Types.ObjectId,
+    slotId: {type: mongoose.Schema.Types.ObjectId,
         ref: "Slot",
-        required: true
-    },
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        required: true},
+    userId: {type: mongoose.Schema.Types.ObjectId,
         ref: "UserModel",
-        required: true
-    },
-    vendorId: {
-        type: mongoose.Schema.Types.ObjectId,
+        required: true},
+    vendorId: {type: mongoose.Schema.Types.ObjectId,
         ref: "UserModel",
-        required: true
-    },
-    vehicletype: {
-        type: String,
-        required: true
-    },
-    vehiclesNumber: {
-        type: String,
-        required: true
-    },
-    Based: {
-        type: String,
-        required: true
-    },
-    startTime: {
-        type: Date,
-        required: true
-    },
+        required: true},
+    vehicletype: {type: String,
+        required: true},
+    vehiclesNumber: { type: String,
+        required: true},
+    Based: {type: String,
+        required: true},
+    startTime: { type: Date,
+        required: true },
     endTime: {
-        type: Date,
-        required: true
-    },
-    Amount: {
-        type: Number,
-        required: true
-    },
-    BookedSlots: {
-        type: [Number],
-        required: true
-    },
-    paymentId: {
+        type: Date, required: true},
+    Amount: {type: Number,
+        required: true},
+    BookedSlots: { type: [Number],
+        required: true },
+    paymentId: {type: String, required: true},
+    Area: {
         type: String,
-        required: true
-    },
+        required: true },
     status: {
         type: String,
         enum: ["Cancelled", "Booked", "Expired"],
-        default: "Booked"
-    }
+        default: "Booked"}
 }, {
     timestamps: true
 });

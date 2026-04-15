@@ -4,7 +4,7 @@ import UserModel from "../models/UserModel.js";
 
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
-    // console.log("User connected:", socket.id);
+    console.log("User connected:", socket.id);
 
     // Join room
     socket.on("joinRoom", (roomId) => {
@@ -15,7 +15,7 @@ const socketHandler = (io) => {
     // Join user specific room for notifications
     socket.on("joinUserRoom", (userId) => {
       socket.join(`user_${userId}`);
-      console.log(`User joined personal room: user_${userId}`);
+      // console.log(`User joined personal room: user_${userId}`);
     });
 
     // Send message

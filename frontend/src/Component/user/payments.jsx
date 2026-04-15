@@ -3,27 +3,33 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "../../config/axiosInstance";
 import { fetchBookings } from "../../slices/BookingSlices";
+import Pagination from "../../config/pagination.jsx";
 import { useDispatch } from "react-redux";
 export default function Payments() {
     const [payment, setpayment] = useState([]);
+    const [pagination, setPagination] = useState({});
     const dispatch = useDispatch();
     const { myBooking } = useSelector((state) => state.booking);
-   
-    // console.log({ "common": common });
 
+    // console.log({ "common": common });
+    const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
+    const handlePageChange = (page) => {
+        dispatch(FetchSlots({ page, limit: 24 }));
+    };
     useEffect(() => {
-        const fetchPayment = async (req, res) => {
+        const fetchPayment = async (page = 1) => {
             try {
-                const response = await axios.get("/user/fetch/payments", { headers: { Authorization: localStorage.getItem("token") } });
+                const response = await axios.get("/user/fetch/payments", { headers: { Authorization: localStorage.getItem("token") }, params: { page, limit: 24 } });
                 const data = response.data;
                 // console.log(data);
                 setpayment(data);
+                setPagination(response.data?.pagination || {});
             } catch (error) {
                 console.log(error.response.data);
             }
         }
-        fetchPayment();
-        dispatch(fetchBookings());
+        fetchPayment(1);
+        dispatch(fetchBookings({ page: 1, limit: 24 }));
 
     }, [dispatch]);
 
@@ -58,6 +64,7 @@ export default function Payments() {
                                 </div>
                             );
                         })}
+                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
                     </div>
                 ) : (
                     <div className="text-center text-gray-500 bg-white p-6 rounded-xl shadow">

@@ -1,15 +1,14 @@
 import { PaymentModel } from "../models/PaymentModel.js";
 import { BookingModel } from "../models/BookingModel.js";
 import { SlotModel } from "../models/ParkingSlot.js";
-import UserModel from "../models/UserModel.js";
 import razorpay from "../../config/razorpay.js";
+import UserModel from "../models/UserModel.js";
 import crypto from "crypto";
 import { createOrderSchema } from "../validations/BookingValidationSchema.js";
 import { verifyPaymentSchema } from "../validations/BookingValidationSchema.js";
 import NotificationModel from "../models/NotificationModel.js";
 import { paginate } from "../utils/pagination.js";
 
-// import { createOrderSchema } from "../validators/bookingValidation.js";
 
 const BookingCtrl = {};
 
@@ -36,7 +35,7 @@ BookingCtrl.createOrder = async (req, res) => {
         };
 
         const order = await razorpay.orders.create(options);
-        console.log("RAZORPAY ORDER CREATED:", order);
+        // console.log("RAZORPAY ORDER CREATED:", order);
 
         res.status(200).json(order);
 
@@ -49,27 +48,7 @@ BookingCtrl.createOrder = async (req, res) => {
     }
 };
 
-// BookingCtrl.createOrder = async (req, res) => {
-//     try {
-//         const { amount } = req.body;
 
-//         const options = {
-//             amount: amount * 100, // ₹ → paise
-//             currency: "INR",
-//             receipt: `receipt_${Date.now()}`,
-//         };
-
-//         const order = await razorpay.orders.create(options);
-
-//         res.status(200).json(order);
-
-//     } catch (error) {
-//         res.status(500).json({
-//             message: "Error creating order",
-//             error: error.message,
-//         });
-//     }
-// };
 
 BookingCtrl.verifyPayment = async (req, res) => {
     console.log({ "Data inside the VerifyPayment ": req.body });
@@ -95,8 +74,8 @@ BookingCtrl.verifyPayment = async (req, res) => {
             bookingData
         } = value;
 
-        console.log("bookingData:", bookingData);
-        console.log("slotcount:", bookingData?.slotcount);
+        // console.log("bookingData:", bookingData);
+        // console.log("slotcount:", bookingData?.slotcount);
 
         if (!bookingData || !bookingData.Amount) {
             return res.status(400).json({
@@ -105,6 +84,13 @@ BookingCtrl.verifyPayment = async (req, res) => {
             });
         }
 
+        const findArea = await SlotModel.findById(bookingData.slotId)
+          if (!findArea) {
+            return res.status(400).json({
+                message: "Something Went Wrong"
+            });
+        }
+        // console.log({ "Find Area": findArea });
         const body = razorpay_order_id + "|" + razorpay_payment_id;
 
         const expectedSignature = crypto
@@ -112,8 +98,8 @@ BookingCtrl.verifyPayment = async (req, res) => {
             .update(body)
             .digest("hex");
 
-        console.log("EXPECTED SIGNATURE:", expectedSignature);
-        console.log("RECEIVED SIGNATURE:", razorpay_signature);
+        // console.log("EXPECTED SIGNATURE:", expectedSignature);
+        // console.log("RECEIVED SIGNATURE:", razorpay_signature);
 
         if (expectedSignature === razorpay_signature) {
 
@@ -126,6 +112,7 @@ BookingCtrl.verifyPayment = async (req, res) => {
                 amount: Number(bookingData.Amount),
                 orderId: razorpay_order_id,
                 paymentId: razorpay_payment_id,
+
                 // startTime: bookingData.startTime,
                 // endTime: bookingData.endTime,
                 // status: "active",
@@ -146,6 +133,7 @@ BookingCtrl.verifyPayment = async (req, res) => {
                 startTime: bookingData.startTime,
                 endTime: bookingData.endTime,
                 Amount: Number(bookingData.Amount),
+                Area:findArea.Area,
                 BookedSlots: slotArray,
                 paymentId: razorpay_payment_id,
                 status: "Booked"
@@ -202,37 +190,20 @@ BookingCtrl.verifyPayment = async (req, res) => {
 };
 
 
-// BookingCtrl.fetchBookings = async (req, res) => {
-//     // console.log({"request":req});
-//     // const userId = req.userId;
-//     try {
-//         const response = await BookingModel.find();
-//         // console.log({ "response inside the ctrl": response })
-//         res.json(response);
-
-//     } catch (error) {
-//         console.log(error);
-//         res.json(error.message);
-//     }
-// }
-// controllers/BookingCtrl.js
-
-
-
 
 BookingCtrl.fetchBookings = async (req, res) => {
-  try {
-    console.log("USER ID:", req.userId);
+    try {
+        // console.log("USER ID:", req.userId);
 
-    const result = await paginate(BookingModel, req.query, {
-      query: {},
-      sort: { createdAt: -1 },
-    });
+        const result = await paginate(BookingModel, req.query, {
+            query: {},
+            sort: { createdAt: -1 },
+        });
 
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 
@@ -251,34 +222,9 @@ BookingCtrl.fetchPayments = async (req, res) => {
     }
 }
 
-// BookingCtrl.CancelBooking = async (req, res) => {
-//     try {
-
-//         const { id } = req.params;
-//         const findBooking = await BookingModel.findById(id);
-//         if (!findBooking) {
-//             res.status(404).json({ message: "Booking not found" });
-//         }
-//         const currentTime = new Date();
-//         const bookingStartTime = new Date(findBooking.startTime);
-//         const timeDiff = bookingStartTime - currentTime;
-//         const hoursDiff = timeDiff / (1000 * 60 * 60);
-
-//         if (hoursDiff < 8) {
-//             res.status(400).json({ message: "Booking cannot be cancelled before 8 hours" });
-//         }
-//         await BookingModel.findByIdAndUpdate(id, { $set: { status: "Cancelled" } });
-//         res.json({message:"Booking Cancelled"});
-//     } catch (error) {
-//         console.log(error);
-//         res.json(error.message);
-//     }
-// }
 BookingCtrl.CancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
-
-
         const findBooking = await BookingModel.findById(id);
         // console.log({ "find Booking In ctrl": findBooking }) 
 

@@ -14,10 +14,15 @@ const notificationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    // type: {
+    //     type: String,
+    //     enum: ["booking", "cancellation", "message", "other"],
+    //     default: "other"
+    // },
     type: {
         type: String,
-        enum: ["booking", "cancellation", "message", "other"],
-        default: "other"
+        enum: ["booking", "cancellation", "message", "peakHours"],
+        required: true
     },
     data: {
         bookingId: {

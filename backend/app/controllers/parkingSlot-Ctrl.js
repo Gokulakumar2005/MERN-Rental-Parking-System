@@ -8,7 +8,7 @@ const ParkingController = {};
 
 ParkingController.addSlot = async (req, res) => {
     const body = req.body;
-    console.log({ "body inside Ctlr": body })
+    // console.log({ "body inside Ctlr": body })
     body.pricing = JSON.parse(body.pricing);
     body.facilities = JSON.parse(body.facilities);
     body.propertyDocument = JSON.parse(body.propertyDocument);
@@ -73,6 +73,7 @@ ParkingController.addSlot = async (req, res) => {
                 }
             },
             vehicles: value.vehicles,
+            Area: value.Area,
             totalSlot: value.totalSlot,
             pricing: value.pricing,
             facilities: value.facilities,
@@ -97,7 +98,7 @@ ParkingController.addSlot = async (req, res) => {
 ParkingController.updateSlot = async (req, res) => {
     try {
         const body = req.body;
-        console.log({ "body inside update Ctlr": body });
+        // console.log({ "body inside update Ctlr": body });
 
         const slotId = body.slotId;
         if (!slotId) {
@@ -195,19 +196,37 @@ ParkingController.deleteSlot = async (req, res) => {
     }
 }
 
+// ParkingController.fetchSlots = async (req, res) => {
+//     try {
+//         const response = await paginate(SlotModel,req.query,{
+//             query:{},
+//             sort:{createdAt: -1},
+
+//         })
+//         res.json(response);
+//     } catch (error) {
+//         console.log(err);
+//         res.status(500).json({ error: err.message });
+//     }
+// }
 ParkingController.fetchSlots = async (req, res) => {
     try {
-        const response = await paginate(SlotModel,req.query,{
-            query:{},
-            sort:{createdAt: -1},
+        // console.log({"req":req});
+        const query = {};
 
-        })
+
+        const response = await paginate(SlotModel, req.query, {
+            query,
+            sort: { createdAt: -1 },
+        });
+   
         res.json(response);
     } catch (error) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
+        console.log(error); // also fix this (see below)
+        res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 
 
