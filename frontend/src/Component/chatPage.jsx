@@ -1,10 +1,10 @@
-
 import { io } from "socket.io-client";
 import axios from "../config/axiosInstance";
 import { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchBookings } from "../slices/BookingSlices";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Send, ArrowLeft, MessageSquare } from "lucide-react";
 
 export default function ChatPage() {
     const { user } = useSelector((state) => state.auth);
@@ -17,6 +17,15 @@ export default function ChatPage() {
     const socketRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
         dispatch(fetchBookings());
@@ -34,16 +43,20 @@ export default function ChatPage() {
 
     if (!Data || !Data.userId || !Data.vendorId) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <p className="text-xl text-gray-600 mb-4">
-                    Invalid chat data.
-                </p>
-                <button
-                    onClick={() => navigate(-1)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                >
-                    Go Back
-                </button>
+            <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-slate-50">
+                <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col items-center">
+                    <MessageSquare size={48} className="text-slate-300 mb-4" />
+                    <p className="text-xl font-bold text-slate-800 mb-6">
+                        Invalid chat session
+                    </p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition shadow-sm flex items-center gap-2"
+                    >
+                        <ArrowLeft size={18} />
+                        Go Back
+                    </button>
+                </div>
             </div>
         );
     }
@@ -98,72 +111,69 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-            <div className="max-w-3xl mx-auto">
+        <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-8 animate-in fade-in duration-500">
+            <div className="max-w-3xl mx-auto h-[calc(100vh-10rem)] flex flex-col">
                 <button
                     onClick={() => navigate(-1)}
-                    className="mb-4 bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+                    className="self-start mb-6 text-slate-500 hover:text-indigo-600 font-bold px-4 py-2 rounded-xl hover:bg-white transition shadow-sm border border-transparent hover:border-slate-200 flex items-center gap-2 cursor-pointer"
                 >
-                    ← Back
+                    <ArrowLeft size={18} />
+                    Back to Bookings
                 </button>
 
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div className="bg-blue-600 p-4 text-white">
-                        <h1 className="text-xl font-bold">
-                            Chat with
-                            {String(user?._id) === bookingUserId
-                                ? "Vendor"
-                                : "User"}
-                        </h1>
-                        <p className="text-sm opacity-80">
-                            Vehicle: {Data.vehiclesNumber} ({Data.vehicletype})
-                        </p>
+                <div className="flex-1 bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col">
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white flex items-center gap-4">
+                        <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                            <MessageSquare size={24} className="text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-extrabold tracking-tight">
+                                Chat with {String(user?._id) === bookingUserId ? "Vendor" : "User"}
+                            </h1>
+                            <p className="text-sm font-medium text-indigo-100 mt-1">
+                                Regarding: {Data.vehiclesNumber} ({Data.vehicletype})
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="p-4 bg-gray-50 flex flex-col h-[60vh]">
-                        <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-3 pr-2">
+                    <div className="flex-1 p-6 bg-slate-50/50 flex flex-col overflow-hidden">
+                        <div className="flex-1 overflow-y-auto mb-6 flex flex-col gap-4 pr-2 no-scrollbar">
                             {messages.length === 0 ? (
-                                <div className="text-center text-gray-500 my-auto">
-                                    No messages yet. Start the conversation!
+                                <div className="text-center flex flex-col items-center justify-center h-full m-auto">
+                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 text-slate-300 shadow-sm border border-slate-100">
+                                        <MessageSquare size={28} />
+                                    </div>
+                                    <p className="text-slate-800 font-bold text-lg">Send a message to start!</p>
+                                    <p className="text-slate-500 text-sm mt-1">Your conversation will appear here.</p>
                                 </div>
                             ) : (
                                 messages.map((msg, i) => {
-                                    const isMe =
-                                        String(msg.senderId) ===
-                                        String(user?._id);
+                                    const isMe = String(msg.senderId) === String(user?._id);
 
                                     return (
                                         <div
                                             key={i}
-                                            className={`flex ${
-                                                isMe
-                                                    ? "justify-end"
-                                                    : "justify-start"
-                                            }`}
+                                            className={`flex animate-in fade-in slide-in-from-bottom-2 duration-300 ${isMe ? "justify-end" : "justify-start"}`}
                                         >
                                             <div
-                                                className={`px-4 py-2 rounded-2xl max-w-[75%] shadow-sm ${
+                                                className={`px-5 py-3.5 max-w-[80%] shadow-sm ${
                                                     isMe
-                                                        ? "bg-blue-500 text-white rounded-tr-none"
-                                                        : "bg-white text-gray-800 border border-gray-200 rounded-tl-none"
+                                                        ? "bg-indigo-600 text-white rounded-2xl rounded-tr-sm"
+                                                        : "bg-white text-slate-800 border border-slate-100 rounded-2xl rounded-tl-sm shadow-slate-200/40"
                                                 }`}
                                             >
-                                                <p className="text-xs font-semibold mb-1 opacity-75">
+                                                <p className={`text-xs font-bold mb-1 opacity-75 ${isMe ? "text-indigo-100" : "text-slate-400"}`}>
                                                     {isMe
                                                         ? "You"
-                                                        : String(user?._id) ===
-                                                          bookingUserId
+                                                        : String(user?._id) === bookingUserId
                                                         ? "Vendor"
                                                         : "User"}
                                                 </p>
-                                                <p className="break-words">
+                                                <p className="break-words font-medium leading-snug">
                                                     {msg.message}
                                                 </p>
-                                                <p className="text-[10px] text-right mt-1 opacity-60">
-                                                    {new Date(
-                                                        msg.createdAt ||
-                                                            Date.now()
-                                                    ).toLocaleTimeString([], {
+                                                <p className={`text-[10px] text-right mt-2 font-bold ${isMe ? "text-indigo-200" : "text-slate-400"}`}>
+                                                    {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
                                                         hour: "2-digit",
                                                         minute: "2-digit",
                                                     })}
@@ -173,25 +183,25 @@ export default function ChatPage() {
                                     );
                                 })
                             )}
+                            <div ref={messagesEndRef} />
                         </div>
 
-                        <div className="flex gap-2 pt-2 border-t border-gray-200">
+                        <div className="flex gap-3 pt-4 border-t border-slate-100 bg-white p-3 rounded-2xl shadow-sm">
                             <input
                                 value={message}
-                                onChange={(e) =>
-                                    setMessage(e.target.value)
-                                }
+                                onChange={(e) => setMessage(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter") sendMessage();
                                 }}
-                                className="flex-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Type your message..."
+                                className="flex-1 px-4 py-3 bg-slate-50 rounded-xl border-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 placeholder-slate-400 font-medium"
+                                placeholder="Type a message..."
                             />
                             <button
                                 onClick={sendMessage}
-                                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700"
+                                disabled={!message.trim()}
+                                className="bg-indigo-600 text-white px-5 rounded-xl font-bold hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Send
+                                <Send size={20} className={message.trim() ? "translate-x-0.5 -translate-y-0.5 transition-transform" : ""} />
                             </button>
                         </div>
                     </div>

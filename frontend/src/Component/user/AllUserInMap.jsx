@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FetchSlots } from "../../slices/parkingSlot";
 import { fetchBookings } from "../../slices/BookingSlices";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { ArrowLeft } from "lucide-react";
 
 
 export default function AllUserInMap() {
@@ -16,10 +17,6 @@ export default function AllUserInMap() {
     }, [dispatch])
 
     const { Slot } = useSelector((state) => state.slot)
-    const lat = Slot?.[0]?.location?.geo?.lat;
-    const lng = Slot?.[0]?.location?.geo?.lng;
-    // console.log({ "lat": lat, "lng": lng })
-
     const { myBooking } = useSelector((state) => state.booking);
 
     const getAvailableSlots = (slotId, totalSlots) => {
@@ -31,14 +28,20 @@ export default function AllUserInMap() {
     };
 
     return (
-        <div>
-            <div>
-                <button onClick={() => navigate(-1)}
-                    className="bg-gray-600 text-white-900 rounded-full w-15 h-8 "
-                >Back</button>
+        <div className="p-6 max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-6">
+                <button 
+                    onClick={() => navigate(-1)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                    <ArrowLeft size={24} />
+                </button>
+                <div className="bg-white shadow-sm border border-gray-200 px-6 py-3 rounded-xl flex-grow">
+                    <h3 className="text-xl font-semibold text-gray-800">Parking Slots Map</h3>
+                </div>
             </div>
-            <center><h3>Slot's In Maps </h3></center>
-            <div>
+            
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200">
                 <MapContainer
                     center={[
                         Slot?.[0]?.location?.geo?.lat || 12.9716,

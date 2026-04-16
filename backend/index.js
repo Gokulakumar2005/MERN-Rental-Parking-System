@@ -1,4 +1,4 @@
-// import 'dotenv/config';
+
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -113,3 +113,53 @@ server.listen(port, () => {
 });
 
 
+// Area: Kukatpally PeakHour: 22
+// Area: T Nagar PeakHour: 2
+// Area: Chromepet PeakHour: 22
+// Area: Juhu PeakHour: 3
+// Area: Madhapur PeakHour: 23
+// Area: Andheri PeakHour: 0
+// Area: Connaught Place PeakHour: 4
+// Area: Guindy PeakHour: 21
+// Area: HSR Layout PeakHour: 3
+// Area: Electronic City PeakHour: 3
+// Area: HITEC City PeakHour: 7
+// Area: Nehru Place PeakHour: 19
+// Area: Dilsukhnagar PeakHour: 2
+// Area: Whitefield PeakHour: 2
+// Area: Jubilee Hills PeakHour: 0
+// Area: Lajpat Nagar PeakHour: 1
+// Area: Porur PeakHour: 7
+// Area: Saket PeakHour: 11
+// Area: Hauz Khas PeakHour: 22
+// Area: Secunderabad PeakHour: 17
+// Area: Dadar PeakHour: 0
+// Area: Adyar PeakHour: 21
+// Area: Thiruvanmiyur PeakHour: 6
+// Area: Dwarka PeakHour: 7
+// Area: Malad PeakHour: 17
+// Area: Gachibowli PeakHour: 2
+// Area: Goregaon PeakHour: 0
+// Area: Thane PeakHour: 18
+// Area: Powai PeakHour: 7
+// Area: Rohini PeakHour: 0
+// Area: Tambaram PeakHour: 6
+// Area: Bandra PeakHour: 5
+// Area: Ameerpet PeakHour: 3
+// Area: Jayanagar PeakHour: 21
+// Area: Malleshwaram PeakHour: 19
+// Area: Anna Nagar PeakHour: 20
+// Area: Navi Mumbai PeakHour: 7
+// Area: Pitampura PeakHour: 7
+// Area: Karol Bagh PeakHour: 7
+// Area: Koramangala PeakHour: 10
+// Area: Borivali PeakHour: 5
+// Area: JP Nagar PeakHour: 13
+// Area: BTM Layout PeakHour: 2
+// Area: Janakpuri PeakHour: 14
+// Area: Indiranagar PeakHour: 11
+// Area: Mylapore PeakHour: 4
+// Area: Banjara Hills PeakHour: 20
+// Area: Velachery PeakHour: 15
+// Area: LB Nagar PeakHour: 20
+// Area: Basavangudi PeakHour: 17

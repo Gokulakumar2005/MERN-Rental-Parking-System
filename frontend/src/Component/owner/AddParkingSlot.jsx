@@ -1,18 +1,11 @@
-
 import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { AddSlot } from "../../slices/parkingSlot";
-import { useLocation } from "react-router-dom";
-import { updateSlot } from "../../slices/parkingSlot";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { AddSlot, updateSlot } from "../../slices/parkingSlot";
+import { ArrowLeft, MapPin, Car, LayoutGrid, IndianRupee, Shield, Image, FileText, AlertCircle, ParkingCircle } from "lucide-react";
 
 export default function AddParkingSlot() {
-    const userDetails = useSelector((state) => {
-        return state.auth
-    })
-
-
+    const userDetails = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -38,6 +31,7 @@ export default function AddParkingSlot() {
             proof: []
         }
     })
+
     useEffect(() => {
         if (Data) {
             setForm({
@@ -60,9 +54,9 @@ export default function AddParkingSlot() {
             })
         }
     }, [Data])
+
     const handlePropertyChange = (e) => {
         const { name, value } = e.target;
-
         setForm({
             ...form,
             propertyDocument: {
@@ -74,7 +68,6 @@ export default function AddParkingSlot() {
 
     const handlePricingChange = (e) => {
         const { name, value } = e.target;
-
         setForm({
             ...form,
             pricing: {
@@ -169,116 +162,129 @@ export default function AddParkingSlot() {
             dispatch(updateSlot({ formData }))
                 .then(() => navigate("/mySlot"));
         }
-
     };
 
+    const inputClass = "w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition placeholder-slate-400";
+    const labelClass = "block text-sm font-bold text-slate-700 mb-2";
+    const errorClass = "text-rose-500 text-sm font-semibold mt-1.5 flex items-center gap-1";
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-blue-100 flex items-center justify-center p-6">
+        <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-8">
+            <div className="max-w-3xl mx-auto">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-bold px-4 py-2 rounded-xl hover:bg-white transition shadow-sm border border-transparent hover:border-slate-200 cursor-pointer mb-6"
+                >
+                    <ArrowLeft size={18} /> Back to My Slots
+                </button>
 
-            <div className="w-full max-w-3xl bg-white shadow-2xl rounded-2xl p-10 border border-gray-100">
-                <div><button onClick={() => {
-                    navigate(-1);
-                }}>BACK</button></div>
-                {Data === null ? (
-                    <h2 className="text-3xl font-bold text-indigo-600 mb-8 text-center">
-                        Add Parking Slot
-                    </h2>
-                ) : (
-                    <h2 className="text-3xl font-bold text-indigo-600 mb-8 text-center">Update Slot </h2>
-                )}
-
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-
-                    <div>
-                        <label className="block text-gray-700 font-semibold mb-1">Name</label>
-                        <input
-                            type="text"
-                            value={form.name}
-                            placeholder="Enter the Name"
-                            name="name"
-                            onChange={handleChange}
-                            onBlur={() => {
-                                if (form.name.trim().length === 0) {
-                                    setError({ ...Error, name: "Name is Required *" })
-                                }
-                            }}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                        />
-                        {Error.name && (
-                            <span className="text-red-500 text-sm block mt-1 text-left">
-                                {Error.name}
-                            </span>
-                        )}
+                <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2.5 bg-indigo-100 rounded-2xl text-indigo-600">
+                            <ParkingCircle size={24} />
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">
+                            {Data === null ? "Add Parking Slot" : "Update Parking Slot"}
+                        </h2>
                     </div>
 
-                    <div>
-                        <label className="block text-gray-700 font-semibold mb-1">Address</label>
-                        <input
-                            type="text"
-                            value={form.address}
-                            placeholder="Enter the Address"
-                            name="address"
-                            onChange={handleChange}
-                            onBlur={() => {
-                                if (form.address.trim().length === 0) {
-                                    setError({ ...Error, address: "Address is Required *" })
-                                }
-                            }}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                        />
-                        {Error.address && (
-                            <span className="text-red-500 text-sm block mt-1 text-left">
-                                {Error.address}
-                            </span>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block text-gray-700 font-semibold mb-1">Area</label>
-                        <input
-                            type="text"
-                            value={form.Area}
-                            placeholder="Enter the Area"
-                            name="Area"
-                            onChange={handleChange}
-                            onBlur={() => {
-                                if (form.Area.trim().length === 0) {
-                                    setError({ ...Error, Area: "Area is Required *" })
-                                }
-                            }}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                        />
-                        {Error.Area && (
-                            <span className="text-red-500 text-sm block mt-1 text-left">
-                                {Error.Area}
-                            </span>
-                        )}
-                    </div>
-
-
-                    <div>
-                        <div onBlur={() => {
-                            if (form.vehicles.trim().length === 0) {
-                                setError({ ...Error, vehicles: "Vechicles is Required *" })
-                            }
-                        }}>
-                            <label>Bike <input type="radio" value="bike" name="vehicles" onChange={handleChange} checked={form.vehicles === 'bike'} /> </label>
-                            <label>Car <input type="radio" value="car" name="vehicles" onChange={handleChange} checked={form.vehicles === 'car'} /> </label>
-                            {Error.vehicles && (
-                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                    {Error.vehicles}
-                                </span>
-                            )}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label className={labelClass}>
+                                <span className="flex items-center gap-2"><MapPin size={14} /> Slot Name</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={form.name}
+                                placeholder="e.g., Sunshine Parking Complex"
+                                name="name"
+                                onChange={handleChange}
+                                onBlur={() => {
+                                    if (form.name.trim().length === 0) {
+                                        setError({ ...Error, name: "Name is Required *" })
+                                    }
+                                }}
+                                className={inputClass}
+                            />
+                            {Error.name && <p className={errorClass}><AlertCircle size={14} />{Error.name}</p>}
                         </div>
 
+                        <div>
+                            <label className={labelClass}>Address</label>
+                            <input
+                                type="text"
+                                value={form.address}
+                                placeholder="Full street address"
+                                name="address"
+                                onChange={handleChange}
+                                onBlur={() => {
+                                    if (form.address.trim().length === 0) {
+                                        setError({ ...Error, address: "Address is Required *" })
+                                    }
+                                }}
+                                className={inputClass}
+                            />
+                            {Error.address && <p className={errorClass}><AlertCircle size={14} />{Error.address}</p>}
+                        </div>
 
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-1">Total Slots</label>
+                            <label className={labelClass}>Area / Locality</label>
+                            <input
+                                type="text"
+                                value={form.Area}
+                                placeholder="e.g., Koramangala, Bangalore"
+                                name="Area"
+                                onChange={handleChange}
+                                onBlur={() => {
+                                    if (form.Area.trim().length === 0) {
+                                        setError({ ...Error, Area: "Area is Required *" })
+                                    }
+                                }}
+                                className={inputClass}
+                            />
+                            {Error.Area && <p className={errorClass}><AlertCircle size={14} />{Error.Area}</p>}
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>
+                                <span className="flex items-center gap-2"><Car size={14} /> Vehicle Type</span>
+                            </label>
+                            <div
+                                className="flex gap-3"
+                                onBlur={() => {
+                                    if (form.vehicles.trim().length === 0) {
+                                        setError({ ...Error, vehicles: "Vehicles is Required *" })
+                                    }
+                                }}
+                            >
+                                {["bike", "car"].map((type) => (
+                                    <label
+                                        key={type}
+                                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition cursor-pointer border ${form.vehicles === type ? "bg-indigo-600 text-white border-indigo-600 shadow-sm" : "bg-slate-50 text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"}`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            value={type}
+                                            name="vehicles"
+                                            onChange={handleChange}
+                                            checked={form.vehicles === type}
+                                            className="hidden"
+                                        />
+                                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                                    </label>
+                                ))}
+                            </div>
+                            {Error.vehicles && <p className={errorClass}><AlertCircle size={14} />{Error.vehicles}</p>}
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>
+                                <span className="flex items-center gap-2"><LayoutGrid size={14} /> Total Slots</span>
+                            </label>
                             <input
                                 type="text"
                                 value={form.totalSlot}
-                                placeholder="Enter the slot Count"
+                                placeholder="Number of parking slots"
                                 name="totalSlot"
                                 onChange={handleChange}
                                 onBlur={() => {
@@ -286,90 +292,46 @@ export default function AddParkingSlot() {
                                         setError({ ...Error, totalSlot: "Slot is Required *" })
                                     }
                                 }}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                                className={inputClass}
                             />
-                            {Error.totalSlot && (
-                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                    {Error.totalSlot}
-                                </span>
-                            )}
+                            {Error.totalSlot && <p className={errorClass}><AlertCircle size={14} />{Error.totalSlot}</p>}
                         </div>
 
-
-                        <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Pricing</label>
-
+                        <div className="bg-indigo-50 rounded-2xl p-5 border border-indigo-100">
+                            <label className="block text-sm font-bold text-indigo-700 mb-4">
+                                <span className="flex items-center gap-2"><IndianRupee size={14} /> Pricing</span>
+                            </label>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                                <div>
-                                    <label className="text-sm text-gray-600">Per Hour</label>
-                                    <input
-                                        type="text"
-                                        value={form.pricing.hourly}
-                                        name="hourly"
-                                        onChange={handlePricingChange}
-                                        onBlur={() => {
-                                            if (form.pricing.hourly.trim().length === 0) {
-                                                setError({ ...Error, hourly: "Hour's is Required *" })
-                                            }
-                                        }}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-                                    />
-                                    {Error.hourly && (
-                                        <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.hourly}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="text-sm text-gray-600">Daily</label>
-                                    <input
-                                        type="text"
-                                        value={form.pricing.daily}
-                                        name="daily"
-                                        onChange={handlePricingChange}
-                                        onBlur={() => {
-                                            if (form.pricing.daily.trim().length === 0) {
-                                                setError({ ...Error, daily: "Daily is Required *" })
-                                            }
-                                        }}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-                                    />
-                                    {Error.daily && (
-                                        <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.daily}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="text-sm text-gray-600">Monthly</label>
-                                    <input
-                                        type="text"
-                                        value={form.pricing.monthly}
-                                        name="monthly"
-                                        onChange={handlePricingChange}
-                                        onBlur={() => {
-                                            if (form.pricing.monthly.trim().length === 0) {
-                                                setError({ ...Error, monthly: "Monthly is Required *" })
-                                            }
-                                        }}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400"
-                                    />
-                                    {Error.monthly && (
-                                        <span className="text-red-500 text-sm block mt-1 text-left">
-                                            {Error.monthly}
-                                        </span>
-                                    )}
-                                </div>
-
+                                {[
+                                    { label: "Per Hour", name: "hourly", errorKey: "hourly" },
+                                    { label: "Daily", name: "daily", errorKey: "daily" },
+                                    { label: "Monthly", name: "monthly", errorKey: "monthly" },
+                                ].map(({ label, name, errorKey }) => (
+                                    <div key={name}>
+                                        <label className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{label}</label>
+                                        <input
+                                            type="text"
+                                            value={form.pricing[name]}
+                                            name={name}
+                                            onChange={handlePricingChange}
+                                            onBlur={() => {
+                                                if (form.pricing[name].toString().trim().length === 0) {
+                                                    setError({ ...Error, [errorKey]: `${label} is Required *` })
+                                                }
+                                            }}
+                                            placeholder="₹"
+                                            className="w-full px-4 py-2.5 bg-white border border-indigo-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 mt-1"
+                                        />
+                                        {Error[errorKey] && <p className={errorClass}><AlertCircle size={14} />{Error[errorKey]}</p>}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
-
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-1">Facilities</label>
+                            <label className={labelClass}>
+                                <span className="flex items-center gap-2"><Shield size={14} /> Facilities</span>
+                            </label>
                             <input
                                 type="text"
                                 value={form.facilities.join(",")}
@@ -380,7 +342,6 @@ export default function AddParkingSlot() {
                                         .split(",")
                                         .map(item => item.trim())
                                         .filter(Boolean);
-
                                     setForm({ ...form, facilities: value });
                                 }}
                                 onBlur={() => {
@@ -388,90 +349,79 @@ export default function AddParkingSlot() {
                                         setError({ ...Error, facilities: "Facilities is Required *" })
                                     }
                                 }}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-400"
+                                className={inputClass}
                             />
-                            {Error.facilities && (
-                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                    {Error.facilities}
-                                </span>
-                            )}
+                            <p className="text-xs text-slate-400 font-medium mt-1">Separate multiple facilities with commas</p>
+                            {Error.facilities && <p className={errorClass}><AlertCircle size={14} />{Error.facilities}</p>}
                         </div>
-
 
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-1">Slot Images</label>
-                            <input
-                                type="file"
-                                name="parkingImages"
-                                multiple
-                                onChange={(e) =>
-                                    setForm({ ...form, parkingImages: [...e.target.files] })
-                                }
-
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
-                            />
-                            {Error.parkingImages && (
-                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                    {Error.parkingImages}
-                                </span>
-                            )}
+                            <label className={labelClass}>
+                                <span className="flex items-center gap-2"><Image size={14} /> Slot Images</span>
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="file"
+                                    name="parkingImages"
+                                    multiple
+                                    onChange={(e) =>
+                                        setForm({ ...form, parkingImages: [...e.target.files] })
+                                    }
+                                    className="w-full px-4 py-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-600 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                                />
+                            </div>
+                            {Error.parkingImages && <p className={errorClass}><AlertCircle size={14} />{Error.parkingImages}</p>}
                         </div>
 
-
-                        <div className="border-t pt-6">
-
-                            <h3 className="text-lg font-semibold text-indigo-600 mb-3">
-                                Property Details
+                        <div className="border-t border-slate-100 pt-6">
+                            <h3 className="text-lg font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+                                <FileText size={18} className="text-indigo-600" /> Property Documents
                             </h3>
 
-                            <select
-                                value={form.propertyDocument.documentType}
-                                name="documentType"
-                                onChange={handlePropertyChange}
-                                onBlur={() => {
-                                    if (form.propertyDocument.documentType.trim().length === 0) {
-                                        setError({ ...Error, documentType: "Document Type is Required *" })
-                                    }
-                                }}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-indigo-400"
-                            >
-                                <option value="">Select Document Type</option>
-                                <option value="registration-document">Registration Document</option>
-                                <option value="rental-document">Rental Document</option>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className={labelClass}>Document Type</label>
+                                    <select
+                                        value={form.propertyDocument.documentType}
+                                        name="documentType"
+                                        onChange={handlePropertyChange}
+                                        onBlur={() => {
+                                            if (form.propertyDocument.documentType.trim().length === 0) {
+                                                setError({ ...Error, documentType: "Document Type is Required *" })
+                                            }
+                                        }}
+                                        className={inputClass}
+                                    >
+                                        <option value="">Select Document Type</option>
+                                        <option value="registration-document">Registration Document</option>
+                                        <option value="rental-document">Rental Document</option>
+                                    </select>
+                                    {Error.documentType && <p className={errorClass}><AlertCircle size={14} />{Error.documentType}</p>}
+                                </div>
 
-                            </select>
-                            {Error.documentType && (
-                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                    {Error.documentType}
-                                </span>
-                            )}
-                            <input
-                                type="file"
-                                name="proof"
-                                multiple
-                                onChange={handlePropertyProof}
-
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
-                            />
-                            {Error.proof && (
-                                <span className="text-red-500 text-sm block mt-1 text-left">
-                                    {Error.proof}
-                                </span>
-                            )}
-
+                                <div>
+                                    <label className={labelClass}>Upload Proof</label>
+                                    <input
+                                        type="file"
+                                        name="proof"
+                                        multiple
+                                        onChange={handlePropertyProof}
+                                        className="w-full px-4 py-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-600 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                                    />
+                                    {Error.proof && <p className={errorClass}><AlertCircle size={14} />{Error.proof}</p>}
+                                </div>
+                            </div>
                         </div>
 
-
-                        <div className="pt-4">
-                            <input
-                                type="submit"
-                                value={Data ? "Update Slot" : "Add Slot"}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md"
-                            />
-                        </div>
-                    </div>
-                </form>
-
+                        <button
+                            type="submit"
+                            className="w-full py-4 bg-indigo-600 text-white font-extrabold rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 text-lg tracking-tight flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        >
+                            <ParkingCircle size={20} />
+                            {Data ? "Update Slot" : "Register Parking Slot"}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     )

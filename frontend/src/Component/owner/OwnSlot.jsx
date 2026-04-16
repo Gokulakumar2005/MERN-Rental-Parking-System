@@ -1,10 +1,9 @@
-
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FetchSlots } from "../../slices/parkingSlot";
+import { FetchSlots, deleteSlot } from "../../slices/parkingSlot";
 import { useNavigate } from "react-router-dom";
-import { deleteSlot } from "../../slices/parkingSlot";
 import Pagination from "../../config/pagination";
+import { MapPin, Car, LayoutGrid, Pencil, Trash2, ParkingCircle, Plus } from "lucide-react";
 
 export default function MySlot() {
     const dispatch = useDispatch();
@@ -12,23 +11,26 @@ export default function MySlot() {
 
     const { Slot, pagination } = useSelector((state) => state.slot);
     const { user } = useSelector((state) => state.auth);
-    const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
-    // console.log({ " Data Inside the own Slot ": Slot });
+    const { currentPage = 1, totalPages = 1 } = pagination || {};
+
     if (!user) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <p>Loading user...</p>
+            <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] bg-slate-50">
+                <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 animate-spin">
+                    <ParkingCircle size={32} />
+                </div>
             </div>
         );
     }
+
     const handlePageChange = (page) => {
         dispatch(FetchSlots({ page, limit: 24 }));
     };
+
     useEffect(() => {
         dispatch(FetchSlots({ page: 1, limit: 24 }));
     }, [dispatch]);
 
-    // const CommonId = user ? Slot.filter((ele) => ele.vendorId === user._id) : [];
     const CommonId = user
         ? Slot.filter((ele) => String(ele.vendorId) === String(user._id))
         : [];
@@ -36,122 +38,102 @@ export default function MySlot() {
 
     const handleDelete = (id) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
-
         if (confirmDelete) {
             dispatch(deleteSlot(id));
         }
     };
 
-
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-8">
             <div className="max-w-5xl mx-auto">
-
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-                    My Slots
-                </h2>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+                            <div className="p-2.5 bg-indigo-100 rounded-2xl text-indigo-600">
+                                <ParkingCircle size={24} />
+                            </div>
+                            My Parking Slots
+                        </h1>
+                        <p className="text-slate-500 font-medium mt-2 ml-14">Manage your registered parking facilities</p>
+                    </div>
+                    <button
+                        onClick={() => navigate("/addparkingslot")}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition shadow-sm text-sm cursor-pointer flex-shrink-0"
+                    >
+                        <Plus size={16} /> Add New Slot
+                    </button>
+                </div>
 
                 {CommonId.length !== 0 ? (
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-5 md:grid-cols-2">
                         {[...CommonId]
                             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                            .map((ele) => {
-                                return (
-                                    <div
-                                        key={ele._id}
-                                        className="bg-white rounded-2xl shadow-md p-5 hover:shadow-lg transition duration-300"
-                                    >
-                                        <h2 className="text-xl font-semibold text-indigo-600 mb-3">
-                                            {ele.name}
-                                        </h2>
-
-                                        <div className="space-y-2 text-gray-700">
-                                            <p>
-                                                <span className="font-medium text-gray-900">Address:</span>{" "}
-                                                {ele.address}
-                                            </p>
-                                            <p>
-                                                <span className="font-medium text-gray-900">Vehicles:</span>{" "}
-                                                {ele.vehicles}
-                                            </p>
-                                            <p>
-                                                <span className="font-medium text-gray-900">Total Slots:</span>{" "}
-                                                {ele.totalSlot}
-                                            </p>
+                            .map((ele) => (
+                                <div
+                                    key={ele._id}
+                                    className="bg-white rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 p-6 hover:shadow-xl transition-all duration-300"
+                                >
+                                    <div className="flex items-start gap-4 mb-5">
+                                        <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 border border-indigo-100 flex-shrink-0">
+                                            <MapPin size={22} />
                                         </div>
-                                        <div className="flex flex-col sm:flex-row w-full sm:space-x-4 space-y-3 sm:space-y-0 mt-6 px-4">
-                                            <div >
-                                                <button onClick={() => navigate("/addparkingslot", { state: ele })}
-                                                    className="flex-1 bg-green-400 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-500 transition duration-300 shadow-md transform hover:-translate-y-0.5">
-                                                    Update Slot
-                                                </button>
-                                            </div>
-                                            <div>
-                                                <button onClick={() => handleDelete(ele._id)}
-                                                    className="flex-1 bg-red-400 text-white font-semibold py-3 px-4 rounded-xl hover:bg-red-600 transition duration-300 shadow-md transform hover:-translate-y-0.5">
-                                                    delete Slot
-                                                </button>
-                                            </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h2 className="text-xl font-extrabold text-slate-800 truncate">{ele.name}</h2>
+                                            <p className="text-sm text-slate-500 font-medium mt-1 truncate">{ele.address}</p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
+                                    <div className="grid grid-cols-2 gap-3 mb-5">
+                                        <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                                <Car size={12} /> Vehicles
+                                            </p>
+                                            <p className="font-bold text-slate-700 capitalize">{ele.vehicles}</p>
+                                        </div>
+                                        <div className="bg-emerald-50 rounded-2xl p-3 border border-emerald-100">
+                                            <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                                <LayoutGrid size={12} /> Total Slots
+                                            </p>
+                                            <p className="text-xl font-extrabold text-emerald-600">{ele.totalSlot}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => navigate("/addparkingslot", { state: ele })}
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition text-sm cursor-pointer"
+                                        >
+                                            <Pencil size={14} /> Update
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(ele._id)}
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 font-bold rounded-xl hover:bg-rose-100 transition text-sm cursor-pointer"
+                                        >
+                                            <Trash2 size={14} /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        <div className="col-span-full mt-4">
+                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                        </div>
                     </div>
                 ) : (
-                    <div className="flex justify-center items-center h-40">
-                        <p className="text-red-500 text-lg bg-white px-6 py-4 rounded-xl shadow">
-                            No Slot Registered Yet.. Please register a slot.
-                        </p>
+                    <div className="bg-white rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 p-16 text-center flex flex-col items-center">
+                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-5 text-slate-300">
+                            <ParkingCircle size={40} />
+                        </div>
+                        <h3 className="text-xl font-extrabold text-slate-800">No slots registered yet</h3>
+                        <p className="text-slate-500 font-medium mt-2 mb-6">Register your first parking slot to start managing bookings.</p>
+                        <button
+                            onClick={() => navigate("/addparkingslot")}
+                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition shadow-sm cursor-pointer"
+                        >
+                            <Plus size={18} /> Register a Slot
+                        </button>
                     </div>
                 )}
             </div>
-
         </div>
     );
 }
-
-
-
-// address
-// :
-// "Basavangudi ,bangalore"
-// createdAt
-// :
-// "2026-04-03T10:12:19.638Z"
-// facilities
-// :
-// (3) ['CCTV', 'Security', 'Ev charging portal']
-// location
-// :
-// {geo: {…}, type: 'Point'}
-// name
-// :
-// "Rani Apartment"
-// parkingImages
-// :
-// (5) ['https://res.cloudinary.com/dfkdmwudp/image/upload/…slots/1775211133299-WIN_20260308_15_04_26_Pro.jpg', 'https://res.cloudinary.com/dfkdmwudp/image/upload/…slots/1775211133314-WIN_20260308_15_04_30_Pro.jpg', 'https://res.cloudinary.com/dfkdmwudp/image/upload/…slots/1775211133335-WIN_20260309_19_31_15_Pro.jpg', 'https://res.cloudinary.com/dfkdmwudp/image/upload/…211135745-WIN_20260309_19_31_16_Pro%20%282%29.jpg', 'https://res.cloudinary.com/dfkdmwudp/image/upload/…211135752-WIN_20260309_19_31_16_Pro%20%283%29.jpg']
-// pricing
-// :
-// {hourly: 20, daily: 100, monthly: 1000}
-// propertyDocument
-// :
-// {documentType: 'registration-document', proof: Array(5)}
-// totalSlot
-// :
-// 4
-// updatedAt
-// :
-// "2026-04-03T10:12:19.638Z"
-// vehicles
-// :
-// "bike"
-// vendorId
-// :
-// "69cf9153f7e186fb9a8f562d"
-// __v
-// :
-// 0
-// _id
-// :
-// "69cf9283f7e186fb9a8f5640"

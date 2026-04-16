@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchAllUser } from "../../slices/authSlices";
 import Pagination from "../../config/pagination";
-import { User, Phone, Mail, Wallet, Shield } from "lucide-react";
+import { User, Phone, Mail, Wallet, Users, ArrowRight, Activity, CalendarDays } from "lucide-react";
 
 export default function AllUser() {
     const dispatch = useDispatch();
@@ -15,87 +15,97 @@ export default function AllUser() {
 
     useEffect(() => {
         dispatch(FetchAllUser({ page: 1, limit: 24 }));
-    }, [dispatch])
+    }, [dispatch]);
 
     return (
-        <div className="min-h-screen bg-gray-50/50 p-8">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
-                    <div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tight">System Users</h1>
-                        <p className="text-gray-500 mt-2 font-medium">Manage and monitor all platform accounts</p>
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-5">
+                        <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
+                            <Users strokeWidth={2.5} size={28} />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">System Users</h1>
+                            <p className="text-slate-500 mt-1 font-medium text-sm sm:text-base">Manage and monitor all platform accounts</p>
+                        </div>
                     </div>
-                    <div className="bg-white px-6 py-3 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="font-bold text-gray-700">{Alluser?.length || 0} Total Members</span>
+                    <div className="bg-slate-50 px-5 py-3.5 rounded-2xl border border-slate-100 flex items-center gap-3 w-fit">
+                        <Activity className="text-emerald-500 animate-pulse" size={20} />
+                        <span className="font-bold text-slate-700">{Alluser?.length || 0} Members</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {(Alluser || [])?.slice()?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((ele, i) => {
-                            const isVendor = ele.role === 'vendor';
-                            const isAdmin = ele.role === 'admin';
+                        const isVendor = ele.role === 'vendor';
+                        const isAdmin = ele.role === 'admin';
 
-                            return (
-                                <div
-                                    key={i}
-                                    className="group bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
-                                >
-                                    <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-[0.03] group-hover:opacity-[0.08] transition-opacity ${isAdmin ? 'bg-purple-600' : isVendor ? 'bg-green-600' : 'bg-blue-600'}`}></div>
+                        return (
+                            <div
+                                key={i}
+                                className="group bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden flex flex-col h-full"
+                            >
+                                <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-500 ${isAdmin ? 'bg-purple-600' : isVendor ? 'bg-emerald-600' : 'bg-indigo-600'}`}></div>
 
-                                    <div className="flex items-start justify-between mb-8">
-                                        <div className={`p-4 rounded-2xl shadow-inner ${isAdmin ? 'bg-purple-50 text-purple-600' : isVendor ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
-                                            <User size={28} />
+                                <div className="flex items-center justify-between mb-6 z-10">
+                                    <div className={`p-3.5 rounded-2xl shadow-sm ${isAdmin ? 'bg-purple-50 text-purple-600' : isVendor ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                                        <User strokeWidth={2.5} size={24} />
+                                    </div>
+                                    <span className={`px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${isAdmin ? 'bg-purple-50 text-purple-700 border-purple-200' : isVendor ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}>
+                                        {ele.role}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-5 flex-grow z-10">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-800 truncate" title={ele.userName}>{ele.userName}</h3>
+                                        <div className="flex items-center gap-2 text-slate-500 mt-1.5">
+                                            <Mail size={14} className="shrink-0" />
+                                            <span className="text-sm font-medium truncate">{ele.email}</span>
                                         </div>
-                                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${isAdmin ? 'bg-purple-50 text-purple-700 border-purple-100' : isVendor ? 'bg-green-50 text-green-700 border-green-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
-                                            {ele.role}
-                                        </span>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-gray-800 break-words line-clamp-1">{ele.userName}</h3>
-                                            <div className="flex items-center gap-2 text-gray-400 mt-1">
-                                                <Mail size={14} />
-                                                <span className="text-sm font-medium">{ele.email}</span>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-100 transition-colors group-hover:bg-slate-50">
+                                            <div className="flex items-center gap-1.5 text-slate-400 mb-1.5">
+                                                <Phone size={14} />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider">Phone</span>
                                             </div>
+                                            <p className="text-sm font-semibold text-slate-700 truncate">{ele.phoneNumber || 'N/A'}</p>
                                         </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-gray-50/80 p-4 rounded-2xl border border-gray-100/50">
-                                                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                    <Phone size={14} />
-                                                    <span className="text-[10px] font-bold uppercase tracking-tighter">Phone</span>
-                                                </div>
-                                                <p className="text-sm font-bold text-gray-700">{ele.phoneNumber || 'N/A'}</p>
+                                        <div className="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-100 transition-colors group-hover:bg-slate-50">
+                                            <div className="flex items-center gap-1.5 text-slate-400 mb-1.5">
+                                                <Wallet size={14} />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider">Wallet</span>
                                             </div>
-                                            <div className="bg-gray-50/80 p-4 rounded-2xl border border-gray-100/50">
-                                                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                    <Wallet size={14} />
-                                                    <span className="text-[10px] font-bold uppercase tracking-tighter">Wallet</span>
-                                                </div>
-                                                <p className="text-sm font-black text-gray-900">₹{ele.wallet.toLocaleString()}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
-                                            <p className="text-[10px] font-medium text-gray-400">Joined {new Date(ele.createdAt).toLocaleDateString()}</p>
-                                            <button className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 group/btn">
-                                                View Details
-                                                <span className="group-hover/btn:translate-x-0.5 transition-transform">→</span>
-                                            </button>
+                                            <p className="text-sm font-bold text-slate-900 truncate">₹{ele.wallet?.toLocaleString() || 0}</p>
                                         </div>
                                     </div>
                                 </div>
-                            )
-                        })}
+
+                                <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between z-10">
+                                    <div className="flex items-center gap-1.5 text-slate-400">
+                                        <CalendarDays size={14} />
+                                        <p className="text-xs font-medium">{new Date(ele.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                    <button className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg px-2 py-1 -mr-2">
+                                        Details
+                                        <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                    </button>
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
+                <div className="flex justify-center mt-8 w-fit mx-auto">
+                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                </div>
             </div>
         </div>
-    )
+    );
 }
-
 
 // createdAt
 // :

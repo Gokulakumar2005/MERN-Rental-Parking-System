@@ -3,7 +3,7 @@ import { BookingModel } from "../../app/models/BookingModel.js";
 import { SlotModel } from "../../app/models/ParkingSlot.js";
 
 
-cron.schedule("55 23 * * *", async () => {
+cron.schedule("55 19 * * *", async () => {
 
   try {
 

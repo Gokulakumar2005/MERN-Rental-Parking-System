@@ -1,28 +1,26 @@
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBookings } from "../slices/BookingSlices";
+import { fetchBookings, CancelBooking } from "../slices/BookingSlices";
 import { useNavigate } from "react-router-dom";
-import { CancelBooking } from "../slices/BookingSlices";
 import Pagination from "../config/pagination";
-export default function Mybookings() {
+import { CalendarDays, Car, Clock, MessageCircle, XCircle, AlertTriangle, CalendarCheck, IndianRupee } from "lucide-react";
 
+export default function Mybookings() {
     const { myBooking, error, pagination } = useSelector((state) => state.booking);
     const { user } = useSelector((state) => state.auth);
-    // console.log({ "booking Inside Mybooking Component": myBooking });
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [serverError, setServerError] = useState(null);
-    const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
+    const { currentPage = 1, totalPages = 1 } = pagination || {};
+
     const handlePageChange = (page) => {
-        dispatch(FetchSlots({ page, limit: 24 }));
+        dispatch(fetchBookings({ page, limit: 24 }));
     };
 
     useEffect(() => {
         dispatch(fetchBookings({ page: 1, limit: 24 }));
     }, [dispatch]);
 
-    // const CommonId_Bookings = myBooking.filter((ele) => (ele.userId === user._id || ele.vendorId === user._id));
     const CommonId_Bookings = Array.isArray(myBooking) && user?._id
         ? myBooking.filter((ele) => ele.userId === user._id || ele.vendorId === user._id)
         : [];
@@ -41,124 +39,116 @@ export default function Mybookings() {
         }
     }
 
+    const statusConfig = {
+        Booked: { color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: <CalendarCheck size={12} /> },
+        completed: { color: "bg-blue-100 text-blue-700 border-blue-200", icon: <CalendarCheck size={12} /> },
+        Cancelled: { color: "bg-rose-100 text-rose-700 border-rose-200", icon: <XCircle size={12} /> },
+    };
+
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-            <div className="w-full max-w-3xl">
-                <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
-                    My Bookings
-                </h1>
-                <p className="text-center text-gray-500 mb-6">
-                    Here you can view all your parking slot bookings.
-                </p>
+        <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-8 animate-in fade-in duration-500">
+            <div className="max-w-4xl mx-auto">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+                        <div className="p-2.5 bg-indigo-100 rounded-2xl text-indigo-600">
+                            <CalendarDays size={24} />
+                        </div>
+                        My Bookings
+                    </h1>
+                    <p className="text-slate-500 font-medium mt-2 ml-14">View and manage all your parking slot reservations.</p>
+                </div>
+
                 {serverError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        {typeof serverError === "string"
-                            ? serverError
-                            : serverError?.message || "Something went wrong"}
+                    <div className="bg-rose-50 border border-rose-200 text-rose-700 px-5 py-4 rounded-2xl mb-6 flex items-center gap-3">
+                        <AlertTriangle size={20} className="flex-shrink-0" />
+                        <span className="font-semibold">
+                            {typeof serverError === "string" ? serverError : serverError?.message || "Something went wrong"}
+                        </span>
                     </div>
                 )}
 
                 <div className="space-y-4">
                     {CommonId_Bookings.length === 0 ? (
-                        <p className="text-center text-gray-500 font-medium">
-                            🚫 No bookings found. Start booking a slot!
-                        </p>
+                        <div className="bg-white rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 p-16 text-center flex flex-col items-center">
+                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-5 text-slate-300">
+                                <CalendarDays size={40} />
+                            </div>
+                            <h3 className="text-xl font-extrabold text-slate-800">No bookings yet</h3>
+                            <p className="text-slate-500 font-medium mt-2">Book a parking slot to see your reservations here.</p>
+                        </div>
                     ) : (
                         <div className="space-y-4">
                             {[...CommonId_Bookings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((ele, index) => {
+                                const cfg = statusConfig[ele.status] || { color: "bg-slate-100 text-slate-600 border-slate-200", icon: <Clock size={12} /> };
                                 return (
-                                    <div key={index} className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200 hover:shadow-xl transition" >
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700">
-                                            <h4 className="font-medium"> Vehicle Type:<span className="ml-2 font-normal">{ele.vehicletype}</span> </h4>
-                                            <h4 className="font-medium">Vehicle Number: <span className="ml-2 font-normal">{ele.vehiclesNumber}</span> </h4>
-                                            <h4 className="font-medium">  Amount: <span className="ml-2 font-normal text-green-600">{ele.Amount}</span> </h4>
-                                            <h4 className="font-medium">  Slot Status:<span className="ml-2 font-normal text-blue-600">{ele.status}</span> </h4>
-                                            <h4 className="font-medium">Start Time: <span className="ml-2 font-normal"> {new Date(ele.startTime).toLocaleString()} </span> </h4>
-                                            <h4 className="font-medium"> End Time:<span className="ml-2 font-normal">{new Date(ele.endTime).toLocaleString()}</span></h4>
-                                            {ele.status === "Booked" && (
-                                                <h6 className="font-medium text-red-400 w-full" > Note * :Cancle the Booking will Availble Before 8 Hours of Booking</h6>
-                                            )}
-                                        </div>
-                                        <div className="flex space-x-4 pt-4 justify-end" >
-                                            <div>
-                                                {ele.status === "Booked" && (
-                                                    <button
-                                                        onClick={() => navigate("/chatPage", { state: ele })}
-                                                        className="bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
-                                                    >
-                                                        💬
-                                                    </button>
-                                                )}
+                                    <div key={index} className="bg-white shadow-lg shadow-slate-200/40 rounded-3xl p-6 border border-slate-100 hover:shadow-xl transition-all duration-300">
+                                        <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 border border-indigo-100">
+                                                    <Car size={22} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-extrabold text-slate-800 text-lg">{ele.vehicletype} — {ele.vehiclesNumber}</h3>
+                                                    <p className="text-xs text-slate-400 font-medium mt-0.5">Booking #{index + 1}</p>
+                                                </div>
                                             </div>
-                                            <div className="mt-4">
-                                            </div>
-
-                                            <div>
-                                                {ele.status === "Booked" && (
-                                                    <button onClick={() => handleCancle(ele)}
-                                                        className="w-full bg-red-400 text-white font-semibold py-3 rounded-xl hover:bg-red-500 transition duration-300">
-                                                        Cancel Booking
-                                                    </button>
-                                                )}
-                                            </div>
+                                            <span className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full font-bold uppercase tracking-wider border ${cfg.color}`}>
+                                                {cfg.icon}
+                                                {ele.status}
+                                            </span>
                                         </div>
 
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Amount</p>
+                                                <p className="font-extrabold text-emerald-600 flex items-center gap-0.5"><IndianRupee size={14} />{ele.Amount}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Vehicle</p>
+                                                <p className="font-bold text-slate-700 text-sm">{ele.vehicletype}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Start</p>
+                                                <p className="font-bold text-slate-700 text-sm">{new Date(ele.startTime).toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">End</p>
+                                                <p className="font-bold text-slate-700 text-sm">{new Date(ele.endTime).toLocaleString()}</p>
+                                            </div>
+                                        </div>
 
+                                        {ele.status === "Booked" && (
+                                            <p className="text-xs text-amber-600 font-bold flex items-center gap-2 mb-4 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl">
+                                                <AlertTriangle size={14} /> Cancellation available up to 8 hours before booking start.
+                                            </p>
+                                        )}
+
+                                        {ele.status === "Booked" && (
+                                            <div className="flex items-center gap-3 justify-end">
+                                                <button
+                                                    onClick={() => navigate("/chatPage", { state: ele })}
+                                                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition shadow-sm text-sm cursor-pointer"
+                                                >
+                                                    <MessageCircle size={16} /> Chat
+                                                </button>
+                                                <button
+                                                    onClick={() => handleCancle(ele)}
+                                                    className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 font-bold rounded-xl hover:bg-rose-100 transition text-sm cursor-pointer"
+                                                >
+                                                    <XCircle size={16} /> Cancel Booking
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 );
-
                             })}
-                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                            <div className="mt-6">
+                                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                            </div>
                         </div>
                     )}
                 </div>
-
-
             </div>
         </div>
     );
 }
-
-
-// Amount
-// :
-// 40
-// Based
-// :
-// "Hourly"
-// SlotCount
-// :
-// 1
-// createdAt
-// :
-// "2026-03-30T10:39:29.770Z"
-// endTime
-// :
-// "2026-03-31T17:37:00.000Z"
-// slotId
-// :
-// "69c7a43c0cca22fc650e13bc"
-// startTime
-// :
-// "2026-03-31T14:30:00.000Z"
-// status
-// :
-// "completed"
-// updatedAt
-// :
-// "2026-03-30T10:39:29.770Z"
-// userId
-// :
-// "69c75c6afd7691eb8580b499"
-// vehiclesNumber
-// :
-// "TN 09 AZ 5902"
-// vehicletype
-// :
-// "Bike"
-// __v
-// :
-// 0
-// _id
-// :
-// "69ca52e163898605df66d3df"

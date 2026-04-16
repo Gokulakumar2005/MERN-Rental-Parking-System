@@ -1,10 +1,10 @@
-
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { LoginUser, GoogleLoginUser } from "../slices/authSlices.jsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { MapPin, ShieldCheck, MessageCircle, Briefcase, Mail, Lock, ChevronLeft, Car } from "lucide-react";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -43,161 +43,162 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-950 text-slate-100 overflow-x-hidden font-['Outfit',_sans-serif]">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-8">
+        <div className="w-full max-w-5xl bg-white shadow-2xl shadow-indigo-100/50 rounded-[2rem] overflow-hidden flex flex-col md:flex-row border border-slate-100">
+            
+            {/* Left Side: Information Panel */}
+            <div className="hidden md:flex flex-col justify-between w-5/12 bg-indigo-600 text-white p-12 relative overflow-hidden order-2 md:order-1">
+                <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-indigo-500 rounded-full opacity-50 blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 -mb-16 -ml-16 w-64 h-64 bg-indigo-700 rounded-full opacity-50 blur-3xl"></div>
+                
+                <div className="relative z-10 space-y-8">
+                    <div>
+                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/20">
+                            <Car size={32} className="text-indigo-100" />
+                        </div>
+                        <h2 className="text-4xl font-extrabold tracking-tight mb-4 text-white">Seamless Parking</h2>
+                        <p className="text-indigo-100 text-lg leading-relaxed">
+                            Revolutionizing urban movement. Secure, affordable, and instant reservations.
+                        </p>
+                    </div>
 
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none -z-10 animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-green-600/20 blur-[120px] rounded-full pointer-events-none -z-10 animate-pulse delay-700" />
-
-      <div className="flex-1 flex flex-col justify-center px-8 lg:px-20 py-12 lg:py-0">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-400 text-sm font-medium mb-6">
-            <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-            Park with Confidence
-          </div>
-          <h1 className="text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-blue-200 to-green-300 bg-clip-text text-transparent leading-tight">
-            Seamless Parking <br /> 
-            <span className="text-slate-100">for Modern Cities.</span>
-          </h1>
-          <p className="text-lg lg:text-xl text-slate-400 mb-10 leading-relaxed max-w-xl">
-            We're revolutionizing urban movement. Our platform connects parking space owners with drivers for secure, affordable, and instant reservations.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="group p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Geo-Discovery</h3>
-              <p className="text-sm text-slate-400">Discover spaces exactly where you need them with our smart location mapping.</p>
+                    <div className="space-y-6 pt-6 grid grid-cols-1 gap-6">
+                        <div className="flex items-start gap-4">
+                            <div className="p-2 bg-indigo-500/30 rounded-xl mt-1">
+                                <MapPin size={20} className="text-indigo-100" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-lg">Geo-Discovery</h4>
+                                <p className="text-indigo-200 text-sm mt-1">Discover spaces exactly where you need them.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-4">
+                            <div className="p-2 bg-indigo-500/30 rounded-xl mt-1">
+                                <ShieldCheck size={20} className="text-indigo-100" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-lg">Secure Transactions</h4>
+                                <p className="text-indigo-200 text-sm mt-1">Integrated payments ensure money is safe.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-4">
+                            <div className="p-2 bg-indigo-500/30 rounded-xl mt-1">
+                                <MessageCircle size={20} className="text-indigo-100" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-lg">Instant Connect</h4>
+                                <p className="text-indigo-200 text-sm mt-1">Chat directly with space owners in real-time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="group p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition">
-              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Secure Transactions</h3>
-              <p className="text-sm text-slate-400">Integrated Razorpay payments ensure your money is safe and bookings are guaranteed.</p>
-            </div>
+            {/* Right Side: Form Panel */}
+            <div className="w-full md:w-7/12 p-8 sm:p-12 lg:p-16 relative order-1 md:order-2">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute top-6 left-6 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors flex items-center group cursor-pointer"
+                >
+                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="sr-only">Back</span>
+                </button>
 
-            <div className="group p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Instant Connect</h3>
-              <p className="text-sm text-slate-400">Directly chat with space owners within the platform to resolve queries in real-time.</p>
-            </div>
+                <div className="max-w-sm mx-auto">
+                    <div className="text-center md:text-left mb-10 mt-4 md:mt-0">
+                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h1>
+                        <p className="text-slate-500 mt-2 font-medium">Login to manage your bookings and spaces.</p>
+                    </div>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <Mail size={18} />
+                                </div>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
+                                    placeholder="john@example.com"
+                                    onBlur={() => {
+                                        if (formData.email.trim().length === 0) {
+                                            setError((prev) => ({ ...prev, email: "Email is Required" }));
+                                        }
+                                    }}
+                                />
+                            </div>
+                            {error.email && <span className="text-red-500 text-xs font-bold pl-1">{error.email}</span>}
+                        </div>
 
-            <div className="group p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition">
-              <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Vendor Power</h3>
-              <p className="text-sm text-slate-400">Scale your passive income by listing spaces and managing them via an intuitive dashboard.</p>
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center px-1">
+                                <label className="text-sm font-bold text-slate-700">Password</label>
+                                <Link to="/forgotpassword" data-id="forgot-password-link" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">Forgot Password?</Link>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <Lock size={18} />
+                                </div>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
+                                    placeholder="••••••••"
+                                    onBlur={() => {
+                                        if (formData.password.trim().length === 0) {
+                                            setError((prev) => ({ ...prev, password: "Password is Required" }));
+                                        }
+                                    }}
+                                />
+                            </div>
+                            {error.password && <span className="text-red-500 text-xs font-bold pl-1">{error.password}</span>}
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-sm shadow-indigo-200 hover:shadow-indigo-300 transition-all hover:-translate-y-0.5 cursor-pointer"
+                            >
+                                Access Account
+                            </button>
+                        </div>
+
+                        <div className="relative my-6 flex items-center justify-center">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-slate-200"></div>
+                            </div>
+                            <span className="relative bg-white px-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Or continue with</span>
+                        </div>
+
+                        <div className="flex justify-center w-full">
+                            <GoogleLogin
+                                onSuccess={(credentialResponse) => {
+                                    dispatch(GoogleLoginUser({ credential: credentialResponse.credential, redirect }));
+                                }}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                }}
+                                theme="outline"
+                                width="100%"
+                                size="large"
+                            />
+                        </div>
+                        
+                        <p className="text-center text-sm font-medium text-slate-500 mt-8">
+                            Don't have an account? <Link to="/register" className="text-indigo-600 hover:text-indigo-800 transition-colors font-bold ml-1">Create Account</Link>
+                        </p>
+                        
+                    </form>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-
-      <div className="lg:w-[450px] flex items-center justify-center px-8 py-12 lg:py-0 bg-slate-900/50 backdrop-blur-3xl border-l border-white/5">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Welcome Back</h2>
-            <p className="text-slate-400">Login to manage your bookings and spaces.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
-              <div className="relative">
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  placeholder="name@example.com"
-                  onChange={handleChange}
-                  onBlur={() => {
-                    if (formData.email.trim().length === 0) {
-                      setError((prev) => ({ ...prev, email: "Email is Required" }));
-                    }
-                  }}
-                  className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all outline-none"
-                />
-              </div>
-              {error.email && <p className="text-red-400 text-xs mt-1 ml-1 font-medium">{error.email}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-sm font-medium text-slate-300">Password</label>
-                <Link to="/forgotpassword" data-id="forgot-password-link" className="text-xs font-medium text-blue-400 hover:text-blue-300 transition">Forgot Password?</Link>
-              </div>
-              <div className="relative">
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  placeholder="••••••••"
-                  onChange={handleChange}
-                  onBlur={() => {
-                    if (formData.password.trim().length === 0) {
-                      setError((prev) => ({ ...prev, password: "Password is Required" }));
-                    }
-                  }}
-                  className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all outline-none"
-                />
-              </div>
-              {error.password && <p className="text-red-400 text-xs mt-1 ml-1 font-medium">{error.password}</p>}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98]"
-            >
-              Access Account
-            </button>
-
-            <div className="relative my-4 flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-800"></div>
-              </div>
-              <span className="relative bg-slate-900 px-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Or continue with</span>
-            </div>
-
-            <div className="flex justify-center w-full">
-              <GoogleLogin
-                onSuccess={(credentialResponse) => {
-                  dispatch(GoogleLoginUser({ credential: credentialResponse.credential, redirect }));
-                }}
-                onError={() => {
-                  console.log('Login Failed');
-                }}
-                theme="filled_black"
-                width="100%"
-              />
-            </div>
-          </form>
-
-          <div className="mt-8 pt-8 border-t border-slate-800/50 text-center">
-            <p className="text-slate-400 text-sm">
-              Don't have an account?
-              <Link to="/register" className="font-bold text-blue-400 hover:text-blue-300 transition">
-                Create Account
-              </Link>
-            </p>
-          </div>
-
-          
-        </div>
-      </div>
     </div>
   );
 }

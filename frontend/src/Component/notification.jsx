@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import axios from "../config/axiosInstance";
 import { useSelector } from "react-redux";
-import { Bell, Check, Trash2, X } from "lucide-react";
+import { Bell, Check, X, BellRing } from "lucide-react";
 
 export default function NotificationDropdown() {
     const { user, isLoggedIn } = useSelector((state) => state.auth);
@@ -19,62 +19,33 @@ export default function NotificationDropdown() {
         }
     };
 
-    // useEffect(() => {
-    //     if (isLoggedIn && user) {
-    //         fetchNotifications();
-
-    //         socketRef.current = io(axios.defaults.baseURL);
-
-    //         // Join personal room for private notifications
-    //         socketRef.current.emit("joinUserRoom", user._id);
-
-    //         // Listen for user-specific notifications
-    //         socketRef.current.on("notification", (notification) => {
-    //             setNotifications((prev) => [notification, ...prev]);
-    //             // Optional: Show a toast or play a sound
-    //         });
-
-
-    //         return () => {
-    //             if (socketRef.current) {
-    //                 socketRef.current.disconnect();
-    //             }
-    //         };
-    //     }
-    // }, [isLoggedIn, user]);
     useEffect(() => {
+        if (isLoggedIn && user) {
+            fetchNotifications();
 
-    if (isLoggedIn && user) {
+            socketRef.current = io(axios.defaults.baseURL);
 
-        fetchNotifications();
+            socketRef.current.emit("joinUserRoom", user._id);
 
-        socketRef.current = io(axios.defaults.baseURL);
+            socketRef.current.on("connect", () => {
+                console.log("Socket connected");
+            });
 
-        socketRef.current.emit("joinUserRoom", user._id);
+            socketRef.current.on("notification", (notification) => {
+                setNotifications((prev) => [notification, ...prev]);
 
-        socketRef.current.on("connect", () => {
-            console.log("Socket connected");
-        });
+                if (notification.type === "peakHours") {
+                    alert(notification.message);
+                }
+            });
 
-        socketRef.current.on("notification", (notification) => {
-
-            setNotifications((prev) => [notification, ...prev]);
-
-            if (notification.type === "peakHours") {
-                alert(notification.message);
-            }
-
-        });
-
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-            }
-        };
-
-    }
-
-}, [isLoggedIn, user]);
+            return () => {
+                if (socketRef.current) {
+                    socketRef.current.disconnect();
+                }
+            };
+        }
+    }, [isLoggedIn, user]);
 
     const markAsRead = async (id) => {
         try {
@@ -104,11 +75,15 @@ export default function NotificationDropdown() {
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                className={`relative p-2.5 rounded-xl transition-all duration-200 cursor-pointer ${isOpen ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-100'}`}
             >
-               <span> <Bell size={24} /></span>
+                {unreadCount > 0 && !isOpen ? (
+                    <BellRing size={20} className="animate-pulse text-indigo-500" />
+                ) : (
+                    <Bell size={20} />
+                )}
                 {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
                         {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                 )}
@@ -120,69 +95,84 @@ export default function NotificationDropdown() {
                         className="fixed inset-0 z-40" 
                         onClick={() => setIsOpen(false)}
                     ></div>
-                    <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden transform origin-top-right transition-all duration-300">
-                        <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-800">Notifications</h3>
+                    <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-[1.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 z-50 overflow-hidden transform origin-top-right transition-all duration-300 animate-in fade-in slide-in-from-top-2">
+                        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
+                                    <Bell size={16} />
+                                </div>
+                                <h3 className="font-extrabold text-slate-800 tracking-tight">Notifications</h3>
+                            </div>
                             {unreadCount > 0 && (
                                 <button
                                     onClick={markAllAsRead}
-                                    className="text-xs text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded-lg hover:bg-blue-50 transition"
+                                    className="text-[11px] uppercase tracking-wider text-indigo-600 hover:text-indigo-700 font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition cursor-pointer"
                                 >
-                                    Mark all as read
+                                    Mark all read
                                 </button>
                             )}
                         </div>
 
-                        <div className="max-h-[400px] overflow-y-auto">
+                        <div className="max-h-[400px] overflow-y-auto no-scrollbar bg-slate-50/50">
                             {notifications.length === 0 ? (
-                                <div className="p-8 text-center">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <Bell className="text-gray-400" size={20} />
+                                <div className="px-8 py-12 text-center flex flex-col items-center">
+                                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                                        <Bell size={28} />
                                     </div>
-                                    <p className="text-gray-500 text-sm">No notifications yet</p>
+                                    <p className="text-slate-800 font-bold text-lg">You're all caught up!</p>
+                                    <p className="text-slate-500 text-sm mt-1">No new notifications right now.</p>
                                 </div>
                             ) : (
-                                notifications.map((n) => (
-                                    <div
-                                        key={n._id}
-                                        onClick={() => !n.isRead && markAsRead(n._id)}
-                                        className={`p-4 border-b border-gray-50 last:border-0 cursor-pointer transition-colors ${
-                                            !n.isRead ? "bg-blue-50/30 hover:bg-blue-50/50" : "hover:bg-gray-50"
-                                        }`}
-                                    >
-                                        <div className="flex gap-3">
-                                            <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!n.isRead ? "bg-blue-500" : "bg-transparent"}`}></div>
-                                            <div className="flex-1">
-                                                <p className={`text-sm ${!n.isRead ? "text-gray-900 font-medium" : "text-gray-600"}`}>
-                                                    {n.message}
-                                                </p>
-                                                <p className="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
-                                                    {new Date(n.createdAt).toLocaleString([], {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </p>
+                                <div className="divide-y divide-slate-100">
+                                    {notifications.map((n) => (
+                                        <div
+                                            key={n._id}
+                                            onClick={() => !n.isRead && markAsRead(n._id)}
+                                            className={`group p-4 transition-all duration-200 ${
+                                                !n.isRead ? "bg-indigo-50/40 hover:bg-indigo-50/80 cursor-pointer" : "bg-white hover:bg-slate-50"
+                                            }`}
+                                        >
+                                            <div className="flex gap-4">
+                                                <div className="flex-shrink-0 mt-1">
+                                                    {n.isRead ? (
+                                                        <div className="w-2 h-2 rounded-full bg-slate-200"></div>
+                                                    ) : (
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-indigo-100 animate-pulse"></div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className={`text-sm leading-snug ${!n.isRead ? "text-slate-800 font-bold" : "text-slate-600 font-medium"}`}>
+                                                        {n.message}
+                                                    </p>
+                                                    <p className="text-xs text-slate-400 mt-2 font-medium">
+                                                        {new Date(n.createdAt).toLocaleString([], {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </p>
+                                                </div>
+                                                {!n.isRead && (
+                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div className="p-1 rounded-full bg-white shadow-sm border border-slate-100 text-indigo-500">
+                                                            <Check size={12} strokeWidth={3} />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                            {!n.isRead && (
-                                                <Check 
-                                                    size={14} 
-                                                    className="text-blue-500 opacity-0 group-hover:opacity-100 transition" 
-                                                />
-                                            )}
                                         </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             )}
                         </div>
 
-                        <div className="p-3 border-t border-gray-50 text-center bg-gray-50/30">
+                        <div className="p-3 border-t border-slate-100 bg-white">
                             <button 
                                 onClick={() => setIsOpen(false)}
-                                className="text-xs text-gray-500 hover:text-gray-700 transition"
+                                className="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 rounded-xl transition cursor-pointer"
                             >
-                                Close
+                                Close Menu
                             </button>
                         </div>
                     </div>

@@ -1,12 +1,10 @@
-
-import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useState, useRef } from "react";
 import { UpdateProfile } from "../slices/authSlices";
-import { useDispatch } from "react-redux";
-import { useRef } from "react";
 import axios from "../config/axiosInstance.jsx";
+import { User, Mail, Phone, Edit3, Camera, KeyRound, Shield, CheckCircle2, AlertCircle, X } from "lucide-react";
 
-export default function () {
+export default function Profile() {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
     const [showUpdateForm, setShowUpdateForm] = useState(false);
@@ -119,213 +117,264 @@ export default function () {
         }
     }
 
-
     return (
-        <div className="max-w-lg mx-auto mt-10 p-8 bg-white shadow-xl rounded-2xl">
-            <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Profile Page</h2>
-            
-            {!showUpdateForm && !showPasswordForm ? (
-                <div className="flex flex-col items-center space-y-6">
-                    <img
-                        src={user?.profilePic || "https://via.placeholder.com/150"} 
-                        alt="Profile"
-                        className="w-32 h-32 object-cover rounded-full shadow-lg border-4 border-blue-50"
-                    />
-                    <div className="w-full space-y-4 px-4">
-                        <div className="flex flex-col">
-                            <span className="text-sm text-gray-500 font-medium">Name</span>
-                            <span className="text-lg text-gray-800 font-semibold">{user?.userName}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm text-gray-500 font-medium">Email</span>
-                            <span className="text-lg text-gray-800 font-semibold">{user?.email}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm text-gray-500 font-medium">Phone Number</span>
-                            <span className="text-lg text-gray-800 font-semibold">{user?.phoneNumber}</span>
+        <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 pt-12 sm:p-8">
+            <div className="max-w-2xl mx-auto bg-white shadow-2xl shadow-slate-200/50 rounded-[2rem] overflow-hidden border border-slate-100">
+                {/* Header Gradient Banner */}
+                <div className="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 relative">
+                    <div className="absolute inset-0 bg-white/20 backdrop-blur-sm opacity-50"></div>
+                </div>
+
+                <div className="px-8 sm:px-12 pb-12 relative -mt-16">
+                    <div className="flex justify-center relative mb-8">
+                        <div className="relative group">
+                            <div className="hidden">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    onChange={handleImageChange}
+                                />
+                            </div>
+                            <img
+                                src={(showUpdateForm ? preview : null) || user?.profilePic || "https://ui-avatars.com/api/?name=" + (user?.userName || "User") + "&background=c7d2fe&color=3730a3&size=150"} 
+                                alt="Profile"
+                                className="w-32 h-32 object-cover rounded-full shadow-lg border-4 border-white bg-white"
+                            />
+                            {showUpdateForm && (
+                                <button
+                                    type="button"
+                                    onClick={handleEditClick}
+                                    className="absolute bottom-0 right-0 p-2.5 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition cursor-pointer border-2 border-white"
+                                >
+                                    <Camera size={16} />
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row w-full sm:space-x-4 space-y-3 sm:space-y-0 mt-6 px-4">
-                        <button 
-                            onClick={() => setShowUpdateForm(true)}
-                            className="flex-1 bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition duration-300 shadow-md transform hover:-translate-y-0.5"
-                        >
-                            Update Profile
-                        </button>
-                        <button 
-                            onClick={() => setShowPasswordForm(true)}
-                            className="flex-1 bg-red-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-red-600 transition duration-300 shadow-md transform hover:-translate-y-0.5"
-                        >
-                            Reset Password
-                        </button>
-                    </div>
-                </div>
-            ) : showUpdateForm ? (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <div>
-                        <label>Profile Pic</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            ref={fileInputRef}
-                            onChange={handleImageChange}
-                            style={{ display: "none" }}
-                        />
-                    </div>
-                    <div className="flex flex-col items-center mb-4">
-                        <img
-                            src={preview || user?.profilePic || "https://via.placeholder.com/100"} 
-                            alt="Profile"
-                            className="w-20 h-20 object-cover rounded-full shadow-md border border-gray-200"
-                        />
-                        <button
-                            type="button"
-                            onClick={handleEditClick}
-                            className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
-                        >
-                            Edit
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label className="text-left block text-gray-700 font-medium mb-1">
-                        UserName :
-                    </label>
-                    <input
-                        type="text"
-                        value={updateForm.userName}
-                        name="userName"
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    />
-                    {Error.userName && (
-                        <span className="text-red-500 text-sm block mt-1 text-left">
-                            {Error.userName}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <label className=" text-left block text-gray-700 font-medium mb-1">
-                        Email :
-                    </label>
-                    <input
-                        type="email"
-                        value={updateForm.email}
-                        name="email"
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    />
-                    {Error.email && (
-                        <span className="text-red-500 text-sm block mt-1 text-left">
-                            {Error.email}
-                        </span>
-                    )}
-                </div>
-                <div>
-                    <label className="text-left block text-gray-700 font-medium mb-1">
-                        Phone Number :
-                    </label>
-                    <input
-                        type="text"
-                        value={updateForm.phoneNumber}
-                        name="phoneNumber"
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    />
-                    {Error.phoneNumber && (
-                        <span className="text-red-500 text-sm block mt-1 text-left">
-                            {Error.phoneNumber}
-                        </span>
-                    )}
-                </div>
-                <div className="flex space-x-4 pt-4">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setShowUpdateForm(false);
-                            setError({});
-                        }}
-                        className="w-full bg-gray-400 text-white font-semibold py-3 rounded-xl hover:bg-gray-500 transition duration-300"
-                    >
-                        Cancel
-                    </button>
-                    <input
-                        type="submit"
-                        value="Save Changes"
-                        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition duration-300 cursor-pointer shadow-md"
-                    />
-                </div>
-            </form>
-            ) : (
-                <form onSubmit={handlePasswordSubmit} className="space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800 text-center mb-4">Reset Password</h3>
-                    
-                    {passwordError && (
-                        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-center font-medium border border-red-200">
-                            {passwordError}
-                        </div>
-                    )}
-                    {passwordSuccess && (
-                        <div className="bg-green-50 text-green-600 p-3 rounded-lg text-center font-medium border border-green-200">
-                            {passwordSuccess}
-                        </div>
-                    )}
+                    {!showUpdateForm && !showPasswordForm ? (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="text-center">
+                                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">{user?.userName}</h2>
+                                <span className="inline-block mt-2 px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-widest rounded-full border border-indigo-100">
+                                    {user?.role || "Member"}
+                                </span>
+                            </div>
 
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-1">Old Password</label>
-                        <input
-                            type="password"
-                            name="oldPassword"
-                            value={passwordForm.oldPassword}
-                            onChange={handlePasswordChange}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-1">New Password</label>
-                        <input
-                            type="password"
-                            name="newPassword"
-                            value={passwordForm.newPassword}
-                            onChange={handlePasswordChange}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-1">Confirm New Password</label>
-                        <input
-                            type="password"
-                            name="confirmPassword"
-                            value={passwordForm.confirmPassword}
-                            onChange={handlePasswordChange}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                    </div>
-                    
-                    <div className="flex space-x-4 pt-4">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setShowPasswordForm(false);
-                                setPasswordError("");
-                                setPasswordSuccess("");
-                                setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
-                            }}
-                            className="w-full bg-gray-400 text-white font-semibold py-3 rounded-xl hover:bg-gray-500 transition duration-300"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="w-full bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition duration-300 cursor-pointer shadow-md"
-                        >
-                            Update Password
-                        </button>
-                    </div>
-                </form>
-            )}
+                            <div className="bg-slate-50/80 rounded-2xl p-6 border border-slate-100 space-y-5">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white rounded-xl shadow-sm text-slate-400 border border-slate-100">
+                                        <Mail size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-bold uppercase tracking-width text-slate-400 mb-0.5">Email Address</p>
+                                        <p className="text-sm font-semibold text-slate-800">{user?.email}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white rounded-xl shadow-sm text-slate-400 border border-slate-100">
+                                        <Phone size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-bold uppercase tracking-width text-slate-400 mb-0.5">Phone Number</p>
+                                        <p className="text-sm font-semibold text-slate-800">{user?.phoneNumber || "Not provided"}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                                <button 
+                                    onClick={() => setShowUpdateForm(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-slate-800 transition shadow-sm cursor-pointer"
+                                >
+                                    <Edit3 size={18} />
+                                    Edit Profile
+                                </button>
+                                <button 
+                                    onClick={() => setShowPasswordForm(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-rose-50 text-rose-600 font-bold py-3.5 px-4 rounded-xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer"
+                                >
+                                    <Shield size={18} />
+                                    Reset Password
+                                </button>
+                            </div>
+                        </div>
+                    ) : showUpdateForm ? (
+                        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="text-center mb-6">
+                                <h3 className="text-2xl font-bold text-slate-800">Update Profile</h3>
+                                <p className="text-slate-500 text-sm mt-1">Make changes to your personal information.</p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <User size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={updateForm.userName}
+                                        name="userName"
+                                        onChange={handleChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                                    />
+                                </div>
+                                {Error.userName && <span className="text-red-500 text-xs font-bold pl-1">{Error.userName}</span>}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <Mail size={18} />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        value={updateForm.email}
+                                        name="email"
+                                        onChange={handleChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                                    />
+                                </div>
+                                {Error.email && <span className="text-red-500 text-xs font-bold pl-1">{Error.email}</span>}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Phone Number</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <Phone size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={updateForm.phoneNumber}
+                                        name="phoneNumber"
+                                        onChange={handleChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                                    />
+                                </div>
+                                {Error.phoneNumber && <span className="text-red-500 text-xs font-bold pl-1">{Error.phoneNumber}</span>}
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowUpdateForm(false);
+                                        setError({});
+                                        setPreview(null);
+                                    }}
+                                    className="flex-1 bg-white border border-slate-200 text-slate-600 font-bold py-3.5 rounded-xl hover:bg-slate-50 transition flex justify-center items-center gap-2 cursor-pointer"
+                                >
+                                    <X size={18} />
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-sm hover:shadow-md flex justify-center items-center gap-2 cursor-pointer"
+                                >
+                                    <CheckCircle2 size={18} />
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <form onSubmit={handlePasswordSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="text-center mb-6">
+                                <h3 className="text-2xl font-bold text-slate-800">Security</h3>
+                                <p className="text-slate-500 text-sm mt-1">Update your password to keep your account secure.</p>
+                            </div>
+                            
+                            {passwordError && (
+                                <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold border border-red-100 flex items-center gap-2">
+                                    <AlertCircle size={16} />
+                                    {passwordError}
+                                </div>
+                            )}
+                            {passwordSuccess && (
+                                <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-sm font-bold border border-emerald-100 flex items-center gap-2">
+                                    <CheckCircle2 size={16} />
+                                    {passwordSuccess}
+                                </div>
+                            )}
+
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Current Password</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <KeyRound size={18} />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        name="oldPassword"
+                                        value={passwordForm.oldPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 ml-1">New Password</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <Shield size={18} />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        name="newPassword"
+                                        value={passwordForm.newPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Confirm New Password</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <Shield size={18} />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowPasswordForm(false);
+                                        setPasswordError("");
+                                        setPasswordSuccess("");
+                                        setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+                                    }}
+                                    className="flex-1 bg-white border border-slate-200 text-slate-600 font-bold py-3.5 rounded-xl hover:bg-slate-50 transition flex justify-center items-center gap-2 cursor-pointer"
+                                >
+                                    <X size={18} />
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-[2] bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition shadow-sm hover:shadow-md flex justify-center items-center gap-2 cursor-pointer"
+                                >
+                                    <CheckCircle2 size={18} />
+                                    Update Password
+                                </button>
+                            </div>
+                        </form>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

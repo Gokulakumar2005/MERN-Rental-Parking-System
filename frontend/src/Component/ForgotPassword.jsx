@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { KeyRound, Mail, ShieldCheck, ChevronLeft, Lock } from "lucide-react";
 
 export default function ForgotPassword() {
     const [detail, setDetail] = useState("");
@@ -83,101 +84,141 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-            <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                    {passwordPage ? "Update Password" : "Forgot Password"}
-                </h2>
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-8">
+            <div className="w-full max-w-lg bg-white shadow-2xl shadow-indigo-100/50 rounded-[2rem] p-8 sm:p-12 relative border border-slate-100">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute top-6 left-6 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors flex items-center group cursor-pointer"
+                >
+                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="sr-only">Back</span>
+                </button>
+
+                <div className="text-center mb-10 pt-4">
+                    <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600">
+                        {passwordPage ? <Lock size={32} /> : <KeyRound size={32} />}
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+                        {passwordPage ? "Update Password" : "Forgot Password"}
+                    </h2>
+                    <p className="text-slate-500 font-medium">
+                        {passwordPage ? "Enter your new password below." : "Enter your details to receive an OTP."}
+                    </p>
+                </div>
 
                 {ServerError.length > 0 && (
-                    <p className="text-red-600 text-center mb-3 font-medium">
-                        {String(ServerError)}
-                    </p>
+                    <div className="bg-red-50 text-red-600 border border-red-100 p-4 rounded-xl text-center mb-6 text-sm font-bold flex items-center justify-center gap-2">
+                        <span>{String(ServerError)}</span>
+                    </div>
                 )}
 
                 {!passwordPage ? (
-                    <form className="space-y-5" onSubmit={handleVerify}>
-                        <div>
-                            <label className="block text-gray-700 font-medium mb-2">
-                                Enter the Mobile Number / Email :
+                    <form className="space-y-6" onSubmit={handleVerify}>
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-700 ml-1">
+                                Mobile Number / Email
                             </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={detail}
-                                    onChange={(e) => setDetail(e.target.value)}
-                                    className="flex-1 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition text-black"
-                                    placeholder="Enter your Details"
-                                    required
-                                />
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="relative flex-1">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <Mail size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={detail}
+                                        onChange={(e) => setDetail(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
+                                        placeholder="Enter your Details"
+                                        required
+                                    />
+                                </div>
                                 <button
                                     type="button"
                                     onClick={handleGenerateOtp}
-                                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 rounded-lg transition shadow-md"
+                                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap"
                                 >
                                     Send OTP
                                 </button>
                             </div>
-                            {Error.detail && <p className="text-red-500 text-sm mt-1">{Error.detail}</p>}
+                            {Error.detail && <p className="text-red-500 text-xs font-bold pl-1">{Error.detail}</p>}
                         </div>
 
-                        <div>
-                            <label className="block text-gray-700 font-medium mb-2">
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-700 ml-1">
                                 Verify OTP
                             </label>
-                            <input
-                                type="text"
-                                value={enteropt}
-                                onChange={(e) => setenteropt(e.target.value)}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition text-black"
-                                placeholder="Enter OTP"
-                                required
-                            />
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <ShieldCheck size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={enteropt}
+                                    onChange={(e) => setenteropt(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
+                                    placeholder="Enter OTP"
+                                    required
+                                />
+                            </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-green-400 to-emerald-500 hover:from-emerald-500 hover:to-green-400 text-white font-bold py-3 rounded-lg shadow-lg transition duration-300"
-                        >
-                            Verify OTP
-                        </button>
+                        <div className="pt-4">
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-sm shadow-indigo-200 hover:shadow-indigo-300 transition-all hover:-translate-y-0.5 cursor-pointer"
+                            >
+                                Verify OTP
+                            </button>
+                        </div>
                     </form>
                 ) : (
-                    <form className="space-y-5" onSubmit={handleResetPassword}>
-                        <div>
-                            <label className="block text-gray-700 font-medium mb-2">
+                    <form className="space-y-6" onSubmit={handleResetPassword}>
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-700 ml-1">
                                 New Password
                             </label>
-                            <input
-                                type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition text-black"
-                                placeholder="Enter new password"
-                                required
-                            />
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <Lock size={18} />
+                                </div>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
+                                    placeholder="Enter new password"
+                                    required
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-gray-700 font-medium mb-2">
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-700 ml-1">
                                 Confirm Password
                             </label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition text-black"
-                                placeholder="Confirm new password"
-                                required
-                            />
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <Lock size={18} />
+                                </div>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
+                                    placeholder="Confirm new password"
+                                    required
+                                />
+                            </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transition duration-300"
-                        >
-                            Update Password
-                        </button>
+                        <div className="pt-4">
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-sm shadow-indigo-200 hover:shadow-indigo-300 transition-all hover:-translate-y-0.5 cursor-pointer"
+                            >
+                                Update Password
+                            </button>
+                        </div>
                     </form>
                 )}
             </div>

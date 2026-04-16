@@ -186,3 +186,12 @@ function App() {
 }
 
 export default App;
+
+
+
+// hourly
+// 28.799999999999997
+// daily
+// 288
+// monthly
+// 2880
