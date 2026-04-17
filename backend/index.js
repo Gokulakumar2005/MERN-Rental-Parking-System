@@ -34,7 +34,13 @@ const app = express();
 const port = process.env.PORT || 3030;
 ConfigureDb();
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin:"https://rental-parking.vercel.app",
+  credentials:true
+}))
+
+
 const accessLogStream = fs.createWriteStream(path.join(process.cwd(), 'access.log'), { flags: 'a' });
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(morgan("dev"));
