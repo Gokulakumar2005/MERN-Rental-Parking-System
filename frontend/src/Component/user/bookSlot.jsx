@@ -6,7 +6,8 @@ import { fetchBookings } from "../../slices/BookingSlices.jsx";
 import MyMap from "../../config/mapComponent.jsx";
 import Pagination from "../../config/pagination.jsx";
 import SearchBar from "../SearchBar";
-import { MapPin, Car, Tag, Map, Info, Image, BookOpen, ChevronDown, ChevronUp, AlertTriangle, RefreshCcw } from "lucide-react";
+import { MapPin, Car, Tag, Map, Info, Image, BookOpen, ChevronDown, ChevronUp, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
+
 
 import debounce from "lodash/debounce";
 
@@ -38,8 +39,9 @@ export default function BookSlot() {
     const [showDetails, setDetails] = useState(null);
     const [showImages, setShowImages] = useState(null);
     const [showMap, setShowMap] = useState(null);
+    const [activeImage, setActiveImage] = useState({});
+    const [vehicleType, setVehicleType] = useState("all");
 
-    // Debounced search function
     const debouncedFetch = useCallback(
         debounce((searchQuery) => {
             dispatch(FetchSlots({ page: 1, limit: 12, search: searchQuery }));
@@ -48,14 +50,25 @@ export default function BookSlot() {
     );
 
     const handleSearchChange = (value) => {
-        setSearch(value);
-        debouncedFetch(value);
-    };
+            setSearch(value);
+            debouncedFetch(value, vehicleType);
+        };
+    
+        const handleVehicleChange = (value) => {
+            setVehicleType(value);
+            dispatch(FetchSlots({ page: 1, limit: 12, search, vehicleType: value }));
+        };
 
     const handlePageChange = (page) => {
         dispatch(FetchSlots({ page, limit: 24, search }));
         dispatch(fetchBookings({ page, limit: 24 }));
     };
+
+    const filters = [
+        { label: "All Vehicles", value: "all" },
+        { label: "Cars Only", value: "car" },
+        { label: "Bikes Only", value: "bike" }
+    ];
 
     useEffect(() => {
         dispatch(FetchSlots({ page: 1, limit: 24, search: initialSearch }));
@@ -89,12 +102,14 @@ export default function BookSlot() {
                         <Map size={16} /> View on Map
                     </button>
                 </div>
-
-                <div className="mb-8 max-w-xl">
-                    <SearchBar 
-                        placeholder="Search for a location, address or area..."
+                <div className="max-w-xl">
+                    <SearchBar
+                        placeholder="Search by name, address or area..."
                         value={search}
                         onChange={handleSearchChange}
+                        filters={filters}
+                        activeFilter={vehicleType}
+                        onFilterChange={handleVehicleChange}
                     />
                 </div>
 
@@ -109,7 +124,7 @@ export default function BookSlot() {
                                 <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "Unable to retrieve real-time parking data."}</p>
                             </div>
                         </div>
-                        <button 
+                        <button
                             onClick={() => {
                                 setServerError(null);
                                 dispatch(FetchSlots({ page: 1, limit: 24, search }));
@@ -221,12 +236,63 @@ export default function BookSlot() {
                                                 <Image size={14} /> {isImagesOpen ? "Hide Images" : "Show Images"}
                                             </button>
                                             {isImagesOpen && (
-                                                <div className="flex gap-3 overflow-x-auto mt-4 pb-2">
-                                                    {ele.parkingImages.map((img, i) => (
-                                                        <img key={i} src={img} alt={`parking-${i}`} className="w-40 h-28 object-cover rounded-2xl flex-shrink-0 border border-slate-200 shadow-sm" />
-                                                    ))}
+                                                <div className="border-t border-slate-100 bg-slate-50 p-6">
+                                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Space Gallery</p>
+
+                                                    <div className="relative group overflow-hidden rounded-3xl bg-slate-200">
+                                                        <img
+                                                            src={ele.parkingImages[activeImage[ele._id] || 0]}
+                                                            alt="featured-parking"
+                                                            className="w-full h-80 object-cover transition-all duration-700 hover:scale-105"
+                                                        />
+
+                    
+                                                        {ele.parkingImages.length > 1 && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const curr = activeImage[ele._id] || 0;
+                                                                        const prev = (curr - 1 + ele.parkingImages.length) % ele.parkingImages.length;
+                                                                        setActiveImage({ ...activeImage, [ele._id]: prev });
+                                                                    }}
+                                                                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 text-slate-800 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 hover:bg-white transition-all active:scale-95 cursor-pointer"
+                                                                >
+                                                                    <ChevronLeft size={20} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const curr = activeImage[ele._id] || 0;
+                                                                        const next = (curr + 1) % ele.parkingImages.length;
+                                                                        setActiveImage({ ...activeImage, [ele._id]: next });
+                                                                    }}
+                                                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-indigo-600 text-white rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 hover:bg-indigo-700 transition-all active:scale-95 cursor-pointer"
+                                                                >
+                                                                    <ChevronRight size={20} />
+                                                                </button>
+
+                                                            </>
+                                                        )}
+
+                                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest">
+                                                            Image {(activeImage[ele._id] || 0) + 1} of {ele.parkingImages.length}
+                                                        </div>
+                                                    </div>
+
+                                           
+                                                    <div className="flex gap-3 overflow-x-auto mt-4 pb-2 scrollbar-thin scrollbar-thumb-slate-200">
+                                                        {ele.parkingImages.map((img, i) => (
+                                                            <div
+                                                                key={i}
+                                                                onClick={() => setActiveImage({ ...activeImage, [ele._id]: i })}
+                                                                className={`relative flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden cursor-pointer transition-all ${(activeImage[ele._id] || 0) === i ? "ring-2 ring-indigo-600 ring-offset-2 scale-95" : "opacity-60 hover:opacity-100"}`}
+                                                            >
+                                                                <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
+
                                         </div>
                                     )}
 

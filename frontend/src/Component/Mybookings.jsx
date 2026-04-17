@@ -4,7 +4,7 @@ import { fetchBookings, CancelBooking } from "../slices/BookingSlices";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../config/pagination";
 import { CalendarDays, Car, Clock, MessageCircle, XCircle, AlertTriangle, CalendarCheck, IndianRupee, RefreshCcw } from "lucide-react";
-
+import { toast } from "react-toastify";
 
 export default function Mybookings() {
     const { myBooking, error, pagination } = useSelector((state) => state.booking);
@@ -33,12 +33,28 @@ export default function Mybookings() {
         }
     }, [error]);
 
+
     const handleCancle = (ele) => {
-        console.log({ "ele": ele });
-        if (window.confirm("Are you sure. You Want to Cancle the Booking")) {
-            dispatch(CancelBooking(ele._id))
-        }
-    }
+        toast(({ closeToast }) => (
+            <div className="p-2">
+                <p className="mb-2 text-sm">
+                    Are you sure you want to cancel the booking?
+                </p>
+
+                <div className="flex gap-2">
+                    <button className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => {
+                        dispatch(CancelBooking(ele._id));
+                        closeToast();
+                    }}> OK
+                    </button>
+
+                    <button className="bg-gray-400 text-white px-3 py-1 rounded" onClick={closeToast} >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        ), { autoClose: false });
+    };
 
     const statusConfig = {
         Booked: { color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: <CalendarCheck size={12} /> },
@@ -70,7 +86,7 @@ export default function Mybookings() {
                                 <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : serverError?.message || "There was an error loading your bookings."}</p>
                             </div>
                         </div>
-                        <button 
+                        <button
                             onClick={() => {
                                 setServerError(null);
                                 dispatch(fetchBookings({ page: 1, limit: 24 }));

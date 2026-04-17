@@ -1,14 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../config/axiosInstance.jsx";
-
+import { toast } from "react-toastify";
 
 export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormData, redirect }, { rejectWithValue }) => {
     try {
         console.log({ "FormData": FormData })
         const response = await axios.post('/user/register', FormData);
-        alert("successfully registered");
         console.log(response.data)
         redirect();
+        toast.success("successfully registered");
         return response.data;
     } catch (err) {
         const msg = err.response?.data?.error || err.message || "Something went wrong";
@@ -19,10 +19,10 @@ export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormD
 export const GoogleLoginUser = createAsyncThunk("auth/GoogleLoginUser", async ({ credential, redirect }, { rejectWithValue }) => {
     try {
         const response = await axios.post("/user/google-login", { token: credential });
-        alert("successfully logged in with google");
         localStorage.setItem("token", response.data.token);
         const userResponse = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
         redirect();
+        toast.success("successfully logged in with google");
         return userResponse.data;
     } catch (err) {
         const msg = err.response?.data?.error || err.message || "Something went wrong";
@@ -37,15 +37,12 @@ export const LoginUser = createAsyncThunk("auth/LoginUser", async ({ formData, r
         localStorage.setItem("token", response.data.token);
         const userResponse = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
         redirect();
-        alert("successfully logged in");
+       toast.success("successfully logged in"); 
         return userResponse.data;
 
     } catch (err) {
-
-      const msg = err.response?.data?.error || err.message || "Something went wrong";
-
-      alert(msg);
-
+      const msg =  err.message|| err.response?.data?.error || "Something went wrong";
+    //   alert(msg);
       if (loginRedirect) {
         loginRedirect();
       }
@@ -140,6 +137,7 @@ const authSlices = createSlice({
         user: null,
         Alluser: [],
         isLoggedIn: false,
+        loading:false,
         Error: null,
         pagination: {
             currentPage: 1,
@@ -163,78 +161,108 @@ const authSlices = createSlice({
 
         builder.addCase(RegisterUser.pending, (state) => {
             state.Error = null;
+            state.loading=  true;
         })
         builder.addCase(RegisterUser.fulfilled, (state, action) => {
             state.user = action.payload;
+            state.loading=false;
 
         })
         builder.addCase(RegisterUser.rejected, (state, action) => {
-            state.Error = action.payload
+            state.Error = action.payload;
+            state.loading=false;
         })
 
         builder.addCase(LoginUser.fulfilled, (state, action) => {
             state.user = action.payload;
-            state.isLoggedIn = true;
+            state.isLoggedIn = true;    
+            state.loading=false;
             state.Error = null;
 
         })
         builder.addCase(LoginUser.pending, (state) => {
-            state.Error = null
+            state.Error = null;
+            state.loading=true;
         })
 
         builder.addCase(LoginUser.rejected, (state, action) => {
             state.Error = action.payload;
             state.isLoggedIn = false;
+            state.loading=false;
         })
 
         builder.addCase(GoogleLoginUser.fulfilled, (state, action) => {
             state.user = action.payload;
             state.isLoggedIn = true;
             state.Error = null;
+            state.loading=false;    
+        })
+        builder.addCase(GoogleLoginUser.pending, (state) => {
+            state.Error = null;
+            state.loading=true;
+        })
+        builder.addCase(GoogleLoginUser.rejected, (state, action) => {
+            state.Error = action.payload;
+            state.isLoggedIn = false;
+            state.loading=false;    
         })
 
         builder.addCase(UserAccount.fulfilled, (state, action) => {
             state.user = action.payload;
             state.isLoggedIn = true;
+            state.loading   =false;
             state.Error = null;
 
         })
         builder.addCase(UserAccount.pending, (state) => {
-            state.Error = null
+            state.Error = null;
+            state.loading=true;
         })
         builder.addCase(UserAccount.rejected, (state, action) => {
             state.Error = action.payload;
-            state.isLoggedIn = false
+            state.isLoggedIn = false;
+            state.loading=false;
         })
         builder.addCase(UpdateProfile.fulfilled, (state, action) => {
             state.user = action.payload;
-            //  state.Error = null;
+            state.loading=false;    
+            state.Error = null;
+        })
+        builder.addCase(UpdateProfile.pending, (state) => {
+            state.Error = null;
+            state.loading=true;
         })
         builder.addCase(UpdateProfile.rejected, (state, action) => {
             state.Error = action.payload;
-            // state.isLoggedIn = false;
+            state.loading=false;
         })
         builder.addCase(switchRole.fulfilled, (state, action) => {
             state.user = action.payload.user
             state.isLoggedIn = true
+            state.loading=false;
             state.Error = null
         })
         builder.addCase(switchRole.rejected, (state, action) => {
             state.Error = action.payload;
+            state.loading=false;
         })
         builder.addCase(switchRole.pending, (state) => {
-            state.Error = null
+            state.Error = null;
+            state.loading=true;
         })
         builder.addCase(FetchAllUser.fulfilled, (state, action) => {
             state.Alluser = action?.payload?.data || [];
             state.Error = null;
+            state.loading=false;
             state.pagination = action.payload?.pagination || {};
         })
         builder.addCase(FetchAllUser.pending, (state) => {
             state.Error = null;
+            state.loading=true;
         })
         builder.addCase(FetchAllUser.rejected, (state, action) => {
-            state.Error = action.payload
+            state.Error = action.payload;
+            state.loading=false;
         })
 
 

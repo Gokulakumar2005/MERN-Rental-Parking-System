@@ -87,7 +87,7 @@ UserCtrl.register = async (req, res) => {
 }
 
 UserCtrl.login = async (req, res) => {
-    // const body = req.body;
+    const body = req.body;
     const { error, value } = LoginValidation.validate(body, { abortEarly: false });
     if (error) {
         return res.status(400).json({ error: error.details.map(err => err.message) });
@@ -106,7 +106,7 @@ UserCtrl.login = async (req, res) => {
         res.json({ token });
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ error: "Server Error" });
+        res.status(500).json({ error: error.message });
     }
 };
 

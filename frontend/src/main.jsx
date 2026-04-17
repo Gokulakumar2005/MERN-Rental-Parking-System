@@ -8,7 +8,7 @@ import store from './store/configStore.jsx';
 
 
 store.subscribe(()=>{
-  console.log(store.getState());  
+  // console.log(store.getState());  
 }
 )
 

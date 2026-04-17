@@ -91,7 +91,9 @@ app.delete("/vendor/delete/slot/:id", authenticateUser, authorizeUser(["vendor"]
 // User
 app.get("/user/fetchSlots", authenticateUser, authorizeUser(["admin", "user", "vendor"]), ParkingController.fetchSlots)
 app.get("/user/myBookings", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchBookings);
-app.put("/user/cancelBooking/:id", authenticateUser, authorizeUser(["user"]), BookingCtrl.CancelBooking)
+app.put("/user/cancelBooking/:id", authenticateUser, authorizeUser(["user"]), BookingCtrl.CancelBooking);
+app.get("/fetch/allSlot/maps", authenticateUser, authorizeUser(["user", "admin"]), ParkingController.fetchAllSlotWithoutPagination);
+app.get("/fetch/allBooking/maps", authenticateUser, authorizeUser(["user", "admin"]), BookingCtrl.fetchAllBookingWithoutPagination);
 
 //admin
 app.get("/admin/fetch/allUser",authenticateUser,authorizeUser(["admin"]),UserCtrl.fetchAllUser)

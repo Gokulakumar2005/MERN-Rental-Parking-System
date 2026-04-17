@@ -3,7 +3,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../config/axiosInstance.jsx";
 
-// 🧾 1. Create Order
+
 export const createOrder = createAsyncThunk(
   "booking/createOrder",
   async (amount, { rejectWithValue }) => {
@@ -24,7 +24,7 @@ export const createOrder = createAsyncThunk(
   }
 );
 
-// 🔐 2. Verify Payment
+
 export const verifyPayment = createAsyncThunk(
   "booking/verifyPayment",
   async (payload, { rejectWithValue }) => {
@@ -45,20 +45,6 @@ export const verifyPayment = createAsyncThunk(
   }
 );
 
-
-// export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (_, { rejectWithValue }) => {
-//   try {
-//     const response = await axios.get("/user/myBookings", { headers: { Authorization: localStorage.getItem("token") } });
-//     // console.log(response.data);
-//     return response.data;
-
-
-
-//   } catch (error) {
-//     console.log(error.response.data);
-//     return rejectWithValue(error.response.data);
-//   }
-// })
 export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (
   { page = 1, limit = 24, search = "", status = "all" },
   { rejectWithValue }
@@ -116,29 +102,25 @@ const BookingSlices = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder
-      // 🧾 Create Order
-      .addCase(createOrder.pending, (state) => {
+    builder.addCase(createOrder.pending, (state) => {
         state.loading = true;
       })
-      .addCase(createOrder.fulfilled, (state, action) => {
+     builder.addCase(createOrder.fulfilled, (state, action) => {
         state.loading = false;
         state.order = action.payload;
       })
-      .addCase(createOrder.rejected, (state, action) => {
+      builder.addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
-      // 🔐 Verify Payment
-      .addCase(verifyPayment.pending, (state) => {
+      builder.addCase(verifyPayment.pending, (state) => {
         state.loading = true;
       })
-      .addCase(verifyPayment.fulfilled, (state) => {
+      builder.addCase(verifyPayment.fulfilled, (state) => {
         state.loading = false;
         state.success = true;
       })
-      .addCase(verifyPayment.rejected, (state, action) => {
+      builder.addCase(verifyPayment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
@@ -150,18 +132,13 @@ const BookingSlices = createSlice({
     });
     builder.addCase(fetchBookings.rejected, (state, action) => {
       state.error = action.payload;
+      state.loading = false;  
     });
     builder.addCase(fetchBookings.pending, (state) => {
       state.loading = true;
       state.error = null;
     })
-    // builder.addCase(CancelBooking.fulfilled, (state, action) => {
-    //   const id = action.payload._id;
-    //   const index = state.myBooking.findIndex(b => b._id === id);
-    //   if (index !== -1) {
-    //     state.myBooking[index].status = "Cancelled";
-    //   }
-    // });
+
     builder.addCase(CancelBooking.fulfilled, (state, action) => {
       const updatedBooking = action.payload.booking;
 
@@ -175,6 +152,7 @@ const BookingSlices = createSlice({
     });
     builder.addCase(CancelBooking.rejected, (state, action) => {
       state.error = action.payload;
+      state.loading=false;
     });
 
     builder.addCase(CancelBooking.pending, (state) => {

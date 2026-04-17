@@ -1,7 +1,7 @@
 
-import { Link, Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 // component 
@@ -12,7 +12,7 @@ import MyMap from "./config/mapComponent.jsx";
 import AddParkingSlot from "./Component/owner/AddParkingSlot.jsx";
 import Mybookings from "./Component/Mybookings.jsx";
 import BookSlot from "./Component/user/bookSlot.jsx";
-import { UserAccount, logoutUser } from "./slices/authSlices.jsx";
+import { UserAccount } from "./slices/authSlices.jsx";
 import Payments from "./Component/user/payments.jsx";
 import SlotBookingPage from "./Component/user/SlotBookingPage.jsx";
 import ChatPage from "./Component/chatPage.jsx";
@@ -22,10 +22,12 @@ import ForgotPassword from "./Component/ForgotPassword.jsx";
 import AllUserInMap from "./Component/user/AllUserInMap.jsx";
 
 import Notification from "./Component/notification.jsx";
-import SwitchRole from "./Component/SwitchRole.jsx";
 import AllBookings from "./Component/admin/AllBookings.jsx";
 import AllUser from "./Component/admin/AllUsers.jsx";
 import AllParkingSlots from "./Component/admin/AllParkingSlot.jsx";
+import Navbar from "./Component/Navbar.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -34,7 +36,7 @@ function App() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, isLoggedIn } = useSelector((state) => {
+  const { isLoggedIn } = useSelector((state) => {
     return state.auth;
   });
 
@@ -52,10 +54,13 @@ function App() {
 
   if (localStorage.getItem("token") && isLoggedIn == false) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <p className="text-xl font-semibold text-gray-700 animate-pulse">
-          Loading...
-        </p>
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xl font-black text-slate-400 tracking-widest uppercase animate-pulse">
+            Syncing Session...
+          </p>
+        </div>
       </div>
     );
   }
@@ -64,97 +69,10 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <div className=" bg-gray-100">
-        <nav className="bg-white shadow-md px-6 py-4 flex justify-end items-center">
-          <div>
-            {isLoggedIn == true && user.role == "admin" && (
-              <>
-                <ul className="flex gap-6 items-center">
-                  <li><Link to="/dashboard" className="text-gray-700 font-medium hover:text-blue-600 transition" > DashBoard </Link></li>
-                  <li><Link to="/Allusers" className="text-gray-700 font-medium hover:text-blue-600 transition">Users</Link></li>
-                  <li><Link to="/AllParkingSlot" className="text-gray-700 font-medium hover:text-blue-600 transition">Parking Slots</Link></li>
-                  <li><Link to="/AllBookings" className="text-gray-700 font-medium hover:text-blue-600 transition">Bookings</Link></li>
-                  <li><Link to="/profile" className="text-gray-700 font-medium hover:text-blue-600 transition">Profile</Link></li>
-                  <li><Notification /></li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        dispatch(logoutUser());
-                        navigate("/login");
-                      }}
-                      className="text-red-500 font-medium hover:text-red-700 transition"
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-
-              </>
-            )}
-
-          </div>
-
-
-          <div>
-            {isLoggedIn == true && user.role == "vendor" && (
-              <>
-                <ul className="flex gap-6 items-center">
-                  <li><Link to="/dashboard" className="text-gray-700 font-medium hover:text-blue-600 transition" > DashBoard </Link></li>
-                  <li><Link to="/addparkingslot" className="text-gray-700 font-medium hover:text-blue-600 transition"> Add Slot</Link></li>
-                  <li><Link to="/mybookings" className="text-gray-700 font-medium hover:text-blue-600 transition">Recently Booked Slot</Link></li>
-                  <li><Link to="/mySlot" className="text-gray-700 font-medium hover:text-blue-600 transition">My Slot</Link></li>
-                  <li><Link to="/profile" className="text-gray-700 font-medium hover:text-blue-600 transition">Profile</Link></li>
-                  <li><Notification /></li>
-                  <li><SwitchRole /></li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        dispatch(logoutUser());
-                        navigate("/login");
-                      }}
-                      className="text-red-500 font-medium hover:text-red-700 transition"
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-
-              </>
-            )}
-
-          </div>
-          <div>
-            {isLoggedIn == true && user.role == "user" && (
-              <>
-                <ul className="flex gap-6 items-center">
-                  <li><Link to="/dashboard" className="text-gray-700 font-medium hover:text-blue-600 transition" > DashBoard </Link></li>
-                  <li><Link to="/bookSlot" className="text-gray-700 font-medium hover:text-blue-600 transition"> BookSlot</Link></li>
-                  <li><Link to="/mybookings" className="text-gray-700 font-medium hover:text-blue-600 transition">MyBookings</Link></li>
-                  <li><Link to="/mypayments" className="text-gray-700 font-medium hover:text-blue-600 transition">Payments Histroy</Link></li>
-                  <li><Link to="/profile" className="text-gray-700 font-medium hover:text-blue-600 transition">Profile</Link></li>
-                  <li><Notification /></li>
-                  <li><SwitchRole /></li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        dispatch(logoutUser());
-                        navigate("/login");
-                      }}
-                      className="text-red-500 font-medium hover:text-red-700 transition"
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-
-              </>
-            )}
-
-          </div>
-        </nav >
-
-
-        <div className="p-6">
+      <div className="min-h-screen bg-slate-50/50">
+        <Navbar />
+        <ToastContainer />
+        <div className="max-w-[1600px] mx-auto">
           <Routes>
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="/dashboard" element={<DashBoard />} />
@@ -176,22 +94,10 @@ function App() {
             <Route path="/AllParkingSlot" element={<AllParkingSlots />} />
             <Route path="/AllBookings" element={<AllBookings />} />
           </Routes>
-
         </div>
-
-
-      </div >
+      </div>
     </GoogleOAuthProvider>
   )
 }
 
 export default App;
-
-
-
-// hourly
-// 28.799999999999997
-// daily
-// 288
-// monthly
-// 2880

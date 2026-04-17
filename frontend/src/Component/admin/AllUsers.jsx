@@ -22,7 +22,7 @@ export default function AllUser() {
     const [search, setSearch] = useState(initialSearch);
     const [role, setRole] = useState("all");
 
-    // Debounced search function
+
     const debouncedFetch = useCallback(
         debounce((searchQuery, roleFilter) => {
             dispatch(FetchAllUser({ page: 1, limit: 12, search: searchQuery, role: roleFilter }));

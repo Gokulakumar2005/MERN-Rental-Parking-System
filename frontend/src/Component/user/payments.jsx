@@ -17,7 +17,6 @@ export default function Payments() {
 
     const { currentPage = 1, totalPages = 1, totalItems = 0 } = pagination || {};
     const handlePageChange = (page) => {
-        // Assuming FetchSlots was a placeholder or intended to be fetchPayment
         fetchPayment(page);
     };
 

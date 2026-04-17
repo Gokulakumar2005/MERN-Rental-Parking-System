@@ -2,18 +2,18 @@ import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AddSlot, updateSlot } from "../../slices/parkingSlot";
-import { ArrowLeft, MapPin, Car, LayoutGrid, IndianRupee, Shield, Image, FileText, AlertCircle, ParkingCircle, AlertTriangle, RefreshCcw } from "lucide-react";
+import { ArrowLeft, MapPin, Car, LayoutGrid, IndianRupee, Shield, Image, FileText, AlertCircle, ParkingCircle, AlertTriangle, RefreshCcw,Loader2 } from "lucide-react";
 
 
 export default function AddParkingSlot() {
     const { user: user, Error: reduxAuthError } = useSelector((state) => state.auth);
-    const { error: reduxSlotError } = useSelector((state) => state.slot);
+    const { error: reduxSlotError,loading } = useSelector((state) => state.slot);
     const [serverError, setServerError] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const Data = location.state;
-    console.log({ "inside add Slot ,data is coming from the own Slot ": Data })
+    // console.log({ "inside add Slot ,data is coming from the own Slot ": Data })
 
     useEffect(() => {
         if (reduxAuthError || reduxSlotError) {
@@ -464,10 +464,19 @@ export default function AddParkingSlot() {
 
                         <button
                             type="submit"
+                            disabled={loading}  
                             className="w-full py-4 bg-indigo-600 text-white font-extrabold rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 text-lg tracking-tight flex items-center justify-center gap-2 cursor-pointer mt-4"
                         >
                             <ParkingCircle size={20} />
-                            {Data ? "Update Slot" : "Register Parking Slot"}
+                            {/* {loading ? "Adding..." : Data ? "Update Slot" : "Register Parking Slot"} */}
+                            {loading ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    {Data ? "Processing..." : "Processing..."}
+                                </>
+                            ) : (
+                                Data ? "Update Slot" : "Register Slot"
+                            )}  
                         </button>
                     </form>
                 </div>

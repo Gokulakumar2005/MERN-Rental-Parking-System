@@ -85,7 +85,7 @@ BookingCtrl.verifyPayment = async (req, res) => {
         }
 
         const findArea = await SlotModel.findById(bookingData.slotId)
-          if (!findArea) {
+        if (!findArea) {
             return res.status(400).json({
                 message: "Something Went Wrong"
             });
@@ -133,7 +133,7 @@ BookingCtrl.verifyPayment = async (req, res) => {
                 startTime: bookingData.startTime,
                 endTime: bookingData.endTime,
                 Amount: Number(bookingData.Amount),
-                Area:findArea.Area,
+                Area: findArea.Area,
                 BookedSlots: slotArray,
                 paymentId: razorpay_payment_id,
                 status: "Booked"
@@ -195,7 +195,7 @@ BookingCtrl.fetchBookings = async (req, res) => {
     const { search, status } = req.query;
     try {
         const query = {};
-        
+
         if (search) {
             query.$or = [
                 { vehiclesNumber: { $regex: search, $options: "i" } },
@@ -298,4 +298,14 @@ BookingCtrl.CancelBooking = async (req, res) => {
         });
     }
 };
+
+BookingCtrl.fetchAllBookingWithoutPagination = async (req, res)=> {
+    try {
+        const result = await BookingModel.find()
+        res.status(200).json(result);
+    } catch (error) {
+        console.log(error);
+        res.json(error.message);
+    }
+}
 export default BookingCtrl;

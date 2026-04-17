@@ -5,7 +5,8 @@ import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchBookings } from "../../slices/BookingSlices.jsx";
-import { ArrowLeft, MapPin, Car, CreditCard, Hash, Clock, CalendarDays, AlertCircle, AlertTriangle, RefreshCcw } from "lucide-react";
+import { ArrowLeft, MapPin, Car, CreditCard, Hash, Clock, CalendarDays, AlertCircle, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight, Image as ImageIcon, Bold, Bolt } from "lucide-react";
+import {toast} from "react-toastify"
 
 
 export default function SlotBookingPage() {
@@ -16,8 +17,9 @@ export default function SlotBookingPage() {
     const Data = location.state;
     console.log({ "Data in Slot Booking Page": Data });
     const userId = useSelector((state) => state.auth.user._id);
-    const { myBooking, error: reduxError } = useSelector((state) => state.booking);
+    const { myBooking, error: reduxError ,loading} = useSelector((state) => state.booking);
     const [serverError, setServerError] = useState(null);
+    const [activeImage, setActiveImage] = useState(0);
 
     useEffect(() => {
         if (reduxError) {
@@ -47,7 +49,7 @@ export default function SlotBookingPage() {
     const [Error, setError] = useState({});
 
     const [formData, setFormData] = useState({
-        vehicletype: "",
+        vehicletype: Data?.vehicles,
         vehiclesNumber: "",
         slotcount: [],
         Amount: "",
@@ -90,20 +92,21 @@ export default function SlotBookingPage() {
         }
 
         if (formData.slotcount.length === 0) {
-            alert("Please select at least one slot");
+            toast.error("Please select at least one slot");
             return;
         }
 
         if (formData.slotcount.length > Data.totalSlot) {
-            alert("Not enough slots available");
+            toast.error("Not enough Slots Are Available");
             return;
         }
         if (!amount) {
-            return alert("Invalid amount");
+            toast.error("Invalid amount");
+            return;
         }
         const availableSlotsCount = getAvailableSlots(Data._id, Data.totalSlot);
         if (formData.slotcount.length > availableSlotsCount) {
-            alert("Not enough slots available");
+            toast.error("Not enough slots available");
             return;
         }
         const finalData = {
@@ -119,13 +122,13 @@ export default function SlotBookingPage() {
             const result = await dispatch(createOrder(Number(amount)));
 
             if (result.meta.requestStatus !== "fulfilled") {
-                return alert("Order creation failed");
+                return toast.error("Order creation failed");    
             }
 
             const order = result.payload;
 
             if (!window.Razorpay) {
-                alert("Razorpay SDK not loaded");
+                toast.error("Razorpay SDK not loaded");
                 return;
             }
 
@@ -147,11 +150,13 @@ export default function SlotBookingPage() {
                     }));
 
                     if (verifyRes.meta.requestStatus === "fulfilled") {
-                        alert("✅ Booking Confirmed!");
+                        // alert("✅ Booking Confirmed!");
+                        toast.success("✅ Booking Confirmed!")
                         dispatch(resetPaymentState());
                         navigate("/mybookings");
                     } else {
-                        alert("❌ Payment verification failed");
+                        // alert("❌ Payment verification failed");
+                        toast.error("❌ Payment verification failed")
                     }
                 },
 
@@ -170,7 +175,8 @@ export default function SlotBookingPage() {
 
         } catch (error) {
             console.log(error);
-            alert("Something went wrong");
+            // alert("Something went wrong");
+            toast.error("Something Went Wrong");
         }
     };
 
@@ -231,6 +237,57 @@ export default function SlotBookingPage() {
                     <ArrowLeft size={18} /> Back to Slots
                 </button>
 
+                {Data.parkingImages?.length > 0 && (
+                    <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden p-2">
+                        <div className="relative group overflow-hidden rounded-[1.75rem] bg-slate-100">
+                            <img 
+                                src={Data.parkingImages[activeImage]} 
+                                alt="slot-view" 
+                                className="w-full h-[400px] object-cover transition-all duration-700 hover:scale-105"
+                            />
+                            
+                            {Data.parkingImages.length > 1 && (
+                                <>
+                                    <button 
+                                        onClick={() => setActiveImage((prev) => (prev - 1 + Data.parkingImages.length) % Data.parkingImages.length)}
+                                        className="absolute left-6 top-1/2 -translate-y-1/2 p-4 bg-white/90 text-slate-800 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 hover:bg-white transition-all active:scale-95 cursor-pointer"
+                                    >
+                                        <ChevronLeft size={24} />
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveImage((prev) => (prev + 1) % Data.parkingImages.length)}
+                                        className="absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-indigo-600 text-white rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 hover:bg-indigo-700 transition-all active:scale-95 cursor-pointer"
+                                    >
+                                        <ChevronRight size={24} />
+                                    </button>
+                                </>
+                            )}
+                            
+                            <div className="absolute bottom-6 left-6 flex gap-2">
+                                {Data.parkingImages.map((_, i) => (
+                                    <div 
+                                        key={i} 
+                                        className={`h-1.5 transition-all duration-300 rounded-full ${activeImage === i ? "w-8 bg-indigo-500" : "w-1.5 bg-white/60"}`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3 overflow-x-auto p-4 pt-4 scrollbar-hide">
+                            {Data.parkingImages.map((img, i) => (
+                                <div 
+                                    key={i} 
+                                    onClick={() => setActiveImage(i)}
+                                    className={`relative flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden cursor-pointer transition-all ${ activeImage === i ? "ring-2 ring-indigo-600 ring-offset-2 scale-95" : "opacity-50 hover:opacity-100" }`}
+                                >
+                                    <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+
                 <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6">
                     <h2 className="text-xl font-extrabold text-slate-800 mb-5 flex items-center gap-3">
                         <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600"><MapPin size={20} /></div>
@@ -244,6 +301,10 @@ export default function SlotBookingPage() {
                         <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Address</p>
                             <p className="font-bold text-slate-700 text-sm">{Data.address}</p>
+                        </div>
+                        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Vehicles</p>
+                            <p className="font-bold text-slate-700 text-sm"><strong>{Data.vehicles.toUpperCase()}</strong></p>
                         </div>
                         <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
                             <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Available Slots</p>
@@ -278,20 +339,6 @@ export default function SlotBookingPage() {
                     <form className="space-y-6" onSubmit={handleSubmit}>
 
                         <div>
-                            <p className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><Car size={16} /> Select Vehicle Type</p>
-                            <div className="flex gap-3">
-                                {["Car", "Bike"].map((type) => (
-                                    <button
-                                        key={type}
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, vehicletype: type })}
-                                        onBlur={() => { if (formData.vehicletype.trim().length === 0) setError({ ...Error, vehicletype: "Vehicle Type is Required *" }) }}
-                                        className={`px-6 py-2.5 rounded-xl font-bold text-sm transition cursor-pointer border ${formData.vehicletype === type ? "bg-indigo-600 text-white border-indigo-600 shadow-sm" : "bg-slate-50 text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"}`}
-                                    >
-                                        {type}
-                                    </button>
-                                ))}
-                            </div>
                             {Error.vehicletype && <p className={errorClass}><AlertCircle size={14} />{Error.vehicletype}</p>}
                         </div>
 
@@ -424,9 +471,10 @@ export default function SlotBookingPage() {
 
                         <button
                             type="submit"
+                            disabled={loading}
                             className="w-full py-4 bg-indigo-600 text-white font-extrabold rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 text-lg tracking-tight flex items-center justify-center gap-2 cursor-pointer"
                         >
-                            <CreditCard size={20} /> Pay & Book Now
+                            <CreditCard size={20} /> {loading ? "Processing..." : "Pay & Book Now"}  
                         </button>
                     </form>
                 </div>

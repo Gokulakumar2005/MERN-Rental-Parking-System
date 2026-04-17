@@ -31,7 +31,7 @@ export default function ChatPage() {
     }, [messages]);
 
     useEffect(() => {
-        dispatch(fetchBookings());
+        dispatch(fetchBookings({page:1,limit:10,search:"",status:"all"}));
     }, [dispatch]);
 
     useEffect(() => {
@@ -235,4 +235,4 @@ export default function ChatPage() {
             </div>
         </div>
     );
-}
+}

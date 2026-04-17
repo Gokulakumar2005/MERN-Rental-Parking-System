@@ -12,7 +12,7 @@ export default function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { Error: reduxError } = useSelector((state) => state.auth);
+    const { Error: reduxError ,loading} = useSelector((state) => state.auth);
     const [serverError, setServerError] = useState(null);
     const [error, setError] = useState({});
     const [formData, setFormData] = useState({
@@ -58,7 +58,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-8">
+        <div className="h-screen flex items-center justify-center bg-slate-50 overflow-hidden">
             <div className="w-full max-w-5xl bg-white shadow-2xl shadow-indigo-100/50 rounded-[2rem] overflow-hidden flex flex-col md:flex-row border border-slate-100">
 
                 {/* Left Side: Information Panel */}
@@ -109,7 +109,7 @@ export default function Login() {
                     </div>
                 </div>
 
-                {/* Right Side: Form Panel */}
+             
                 <div className="w-full md:w-7/12 p-8 sm:p-12 lg:p-16 relative order-1 md:order-2">
                     <button
                         onClick={() => navigate(-1)}
@@ -195,9 +195,10 @@ export default function Login() {
                             <div className="pt-2">
                                 <button
                                     type="submit"
+                                    disabled={loading}
                                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-sm shadow-indigo-200 hover:shadow-indigo-300 transition-all hover:-translate-y-0.5 cursor-pointer"
                                 >
-                                    Access Account
+                                    {loading ? "Processing..." : "Access Account"}  
                                 </button>
                             </div>
 

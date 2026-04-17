@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   BarChart,
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
               <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "There was an error loading administrative analytics."}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => {
               setServerError(null);
               dispatch(FetchAllUser({ page: 1, limit: 24 }));
@@ -132,146 +132,146 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
-      <StatsCard
-        title="Total Revenue"
-        value={`₹${totalRevenue.toLocaleString()}`}
-        icon="💰"
-        trend={12}
-        color="green"
-      />
-      <StatsCard
-        title="Active Users"
-        value={pagination?.totalItems || 0}
-        icon="👥"
-        trend={5}
-        color="blue"
-      />
-      <StatsCard
-        title="Parking Slots"
-        value={slotPagination?.totalItems || 0}
-        icon="🅿️"
-        color="purple"
-      />
-      <StatsCard
-        title="Total Bookings"
-        value={bookingPagination?.totalItems || 0}
-        icon="📅"
-        trend={8}
-        color="orange"
-      />
+        <StatsCard
+          title="Total Revenue"
+          value={`₹${totalRevenue.toLocaleString()}`}
+          icon="💰"
+          trend={12}
+          color="green"
+        />
+        <StatsCard
+          title="Active Users"
+          value={pagination?.totalItems || 0}
+          icon="👥"
+          trend={5}
+          color="blue"
+        />
+        <StatsCard
+          title="Parking Slots"
+          value={slotPagination?.totalItems || 0}
+          icon="🅿️"
+          color="purple"
+        />
+        <StatsCard
+          title="Total Bookings"
+          value={bookingPagination?.totalItems || 0}
+          icon="📅"
+          trend={8}
+          color="orange"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+        <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+            <span className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">📈</span>
+            Monthly Revenue Flow
+          </h3>
+
+          <div className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyRevenueData}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
+                <Tooltip contentStyle={{ borderRadius: "12px", border: "none" }} />
+                <Area type="monotone" dataKey="revenue" stroke="#6366F1" fill="url(#colorRev)" strokeWidth={2.5} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+            <span className="p-2 bg-teal-100 text-teal-600 rounded-lg">📊</span>
+            User Distribution
+          </h3>
+
+          <div className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={userRoleData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={65}
+                  outerRadius={100}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {userRoleData.map((entry, index) => (
+                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: "12px", border: "none" }} />
+                <Legend layout="vertical" align="right" verticalAlign="middle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+        <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+            <span className="p-2 bg-orange-100 text-orange-600 rounded-lg">🚗</span>
+            Vehicle Type Statistics
+          </h3>
+
+          <div className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={vehicleTypeData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
+                <Tooltip cursor={{ fill: "#F3F4F6" }} contentStyle={{ borderRadius: "12px", border: "none" }} />
+                <Bar dataKey="value" fill="#6366F1" radius={[10, 10, 0, 0]} barSize={45} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
+          <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+            <span className="p-2 bg-red-100 text-red-600 rounded-lg">📄</span>
+            Platform Reports
+          </h3>
+
+          <div className="space-y-4">
+            <ReportGenerator
+              data={bookingReportData}
+              filename="all_bookings_report.csv"
+              label="Full Booking History"
+            />
+            <ReportGenerator
+              data={paymentReportData}
+              filename="transaction_report.csv"
+              label="Transaction Summary"
+            />
+            <ReportGenerator
+              data={Alluser || []}
+              filename="users_report.csv"
+              label="User Directory"
+            />
+          </div>
+
+          <div className="mt-6 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-300">
+            <p className="text-sm text-gray-500 text-center">
+              Export reports for analytics and auditing
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-
-      <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
-          <span className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">📈</span>
-          Monthly Revenue Flow
-        </h3>
-
-        <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={monthlyRevenueData}>
-              <defs>
-                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-              <XAxis dataKey="name" stroke="#6B7280" />
-              <YAxis stroke="#6B7280" />
-              <Tooltip contentStyle={{ borderRadius: "12px", border: "none" }} />
-              <Area type="monotone" dataKey="revenue" stroke="#6366F1" fill="url(#colorRev)" strokeWidth={2.5} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
-          <span className="p-2 bg-teal-100 text-teal-600 rounded-lg">📊</span>
-          User Distribution
-        </h3>
-
-        <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={userRoleData}
-                cx="50%"
-                cy="50%"
-                innerRadius={65}
-                outerRadius={100}
-                paddingAngle={4}
-                dataKey="value"
-              >
-                {userRoleData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ borderRadius: "12px", border: "none" }} />
-              <Legend layout="vertical" align="right" verticalAlign="middle" />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-
-      <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
-          <span className="p-2 bg-orange-100 text-orange-600 rounded-lg">🚗</span>
-          Vehicle Type Statistics
-        </h3>
-
-        <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={vehicleTypeData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-              <XAxis dataKey="name" stroke="#6B7280" />
-              <YAxis stroke="#6B7280" />
-              <Tooltip cursor={{ fill: "#F3F4F6" }} contentStyle={{ borderRadius: "12px", border: "none" }} />
-              <Bar dataKey="value" fill="#6366F1" radius={[10, 10, 0, 0]} barSize={45} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
-          <span className="p-2 bg-red-100 text-red-600 rounded-lg">📄</span>
-          Platform Reports
-        </h3>
-
-        <div className="space-y-4">
-          <ReportGenerator 
-            data={bookingReportData} 
-            filename="all_bookings_report.csv" 
-            label="Full Booking History" 
-          />
-          <ReportGenerator 
-            data={paymentReportData} 
-            filename="transaction_report.csv" 
-            label="Transaction Summary" 
-          />
-          <ReportGenerator 
-            data={Alluser || []} 
-            filename="users_report.csv" 
-            label="User Directory" 
-          />
-        </div>
-
-        <div className="mt-6 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-300">
-          <p className="text-sm text-gray-500 text-center">
-            Export reports for analytics and auditing
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+  );
 };
 
 export default AdminDashboard;

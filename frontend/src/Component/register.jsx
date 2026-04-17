@@ -21,7 +21,7 @@ export default function Register() {
         wallet:0
     })
 
-    const { Error: reduxError } = useSelector((state) => state.auth);
+    const { Error: reduxError,loading } = useSelector((state) => state.auth);
     const [serverError, setServerError] = useState(null);
     const [Error, setError] = useState({});
     const [isLoading, setIsLoading] = useState(null);
@@ -77,10 +77,10 @@ export default function Register() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-8">
-            <div className="w-full max-w-5xl bg-white shadow-2xl shadow-indigo-100/50 rounded-[2rem] overflow-hidden flex flex-col md:flex-row border border-slate-100">
+        <div className="h-screen flex items-center justify-center bg-slate-50 overflow-hidden">
+            <div className="w-full max-w-5xl h-[90vh] bg-white shadow-2xl shadow-indigo-100/50 rounded-[2rem] overflow-hidden flex flex-col md:flex-row border border-slate-100">
                 
-                {/* Left Side: Information Panel */}
+          
                 <div className="hidden md:flex flex-col justify-between w-5/12 bg-indigo-600 text-white p-12 relative overflow-hidden">
                     <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-indigo-500 rounded-full opacity-50 blur-3xl"></div>
                     <div className="absolute bottom-0 left-0 -mb-16 -ml-16 w-64 h-64 bg-indigo-700 rounded-full opacity-50 blur-3xl"></div>
@@ -128,8 +128,8 @@ export default function Register() {
                     </div>
                 </div>
 
-                {/* Right Side: Form Panel */}
-                <div className="w-full md:w-7/12 p-8 sm:p-12 lg:p-16 relative">
+             
+                <div className="w-full md:w-7/12 p-8 sm:p-12 lg:p-16 relative overflow-y-auto">
                     <button
                         onClick={() => navigate(-1)}
                         className="absolute top-6 left-6 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors flex items-center group cursor-pointer"
@@ -302,9 +302,10 @@ export default function Register() {
                             <div className="pt-4">
                                 <button
                                     type="submit"
+                                    disabled={loading}
                                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-sm shadow-indigo-200 hover:shadow-indigo-300 transition-all hover:-translate-y-0.5 cursor-pointer"
                                 >
-                                    Create Account
+                                    {loading ? "Processing..." : "Create Account"}
                                 </button>
                             </div>
                             

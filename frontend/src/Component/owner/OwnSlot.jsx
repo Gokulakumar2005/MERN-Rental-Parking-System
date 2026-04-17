@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Pagination from "../../config/pagination";
 import SearchBar from "../SearchBar";
 import { MapPin, Car, LayoutGrid, Pencil, Trash2, ParkingCircle, Plus, AlertTriangle, RefreshCcw } from "lucide-react";
+import { toast } from "react-toastify";
 
 
 export default function MySlot() {
@@ -12,7 +13,7 @@ export default function MySlot() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { Slot, pagination, error: reduxError } = useSelector((state) => state.slot);
+    const { Slot, pagination, error: reduxError,loading } = useSelector((state) => state.slot);
     const { user } = useSelector((state) => state.auth);
     const [serverError, setServerError] = useState(null);
     const { currentPage = 1, totalPages = 1 } = pagination || {};
@@ -48,12 +49,23 @@ export default function MySlot() {
     console.log({ "Common ID ": CommonId });
 
     const handleDelete = (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
-        if (confirmDelete) {
-            dispatch(deleteSlot(id));
-        }
-    };
+        toast(({ closeToast }) => (
+            <div className="p-2">
+                <p className="mb-3 text-sm">Are you sure you want to delete this slot?</p>
+                <div className="flex gap-2">
+                    <button className="bg-red-400 text-white px-3 py-1 rounded" onClick={() => {
+                            dispatch(deleteSlot(id));
+                            closeToast();
+                        }}>  OK
+                    </button>
 
+                    <button  className="bg-gray-300 px-3 py-1 rounded" onClick={closeToast} >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        ), { autoClose: false });
+    };
     if (!user) {
         return (
             <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] bg-slate-50">
@@ -104,7 +116,7 @@ export default function MySlot() {
                                 <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "Unable to reach the service. Please check your connection."}</p>
                             </div>
                         </div>
-                        <button 
+                        <button
                             onClick={() => {
                                 setServerError(null);
                                 dispatch(FetchSlots({ page: 1, limit: 24 }));
@@ -155,15 +167,17 @@ export default function MySlot() {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => navigate("/addparkingslot", { state: ele })}
+                                            disabled={loading}
                                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition text-sm cursor-pointer"
                                         >
-                                            <Pencil size={14} /> Update
+                                            <Pencil size={14} /> {loading ? "Processing..." : "Update"}
                                         </button>
-                                        <button
+                                        <button 
                                             onClick={() => handleDelete(ele._id)}
+                                            disabled={loading}
                                             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 font-bold rounded-xl hover:bg-rose-100 transition text-sm cursor-pointer"
                                         >
-                                            <Trash2 size={14} /> Delete
+                                            <Trash2 size={14} /> {loading ? "Processing..." : "Delete"}
                                         </button>
                                     </div>
                                 </div>

@@ -237,7 +237,15 @@ ParkingController.fetchSlots = async (req, res) => {
     }
 };
 
-
+ParkingController.fetchAllSlotWithoutPagination=async(req,res)=>{
+    try {
+        const response = await SlotModel.find();
+        res.json(response);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+}
 
 
 

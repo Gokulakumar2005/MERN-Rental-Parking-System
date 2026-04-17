@@ -173,11 +173,11 @@ export default function AllParkingSlots() {
                                     <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
                                         <div className="max-w-[70%]">
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Vendor</p>
-                                            <p className="text-xs font-medium text-gray-600 truncate" title={ele.vendorId}>{ele.vendorId}</p>
+                                            {/* <p className="text-xs font-medium text-gray-600 truncate" title={ele.vendorId}>{ele.vendorId}</p> */}
                                         </div>
-                                        <button className="p-3 bg-gray-50 text-gray-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm">
+                                        {/* <button className="p-3 bg-gray-50 text-gray-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm">
                                             <Info size={18} />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
