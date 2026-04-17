@@ -1,6 +1,7 @@
 
 import UserModel from "../models/UserModel.js";
-import { UserValidation, LoginValidation } from "../validations/userValidation.js";
+// import { UserValidation, LoginValidation } from "../validations/userValidation.js";
+import {UserValidation,LoginValidation} from "../validations/UserValidation.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 // import otp-generator from "otp-generator";
