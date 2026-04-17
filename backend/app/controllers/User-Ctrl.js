@@ -85,25 +85,30 @@ UserCtrl.register = async (req, res) => {
     }
 
 }
+
 UserCtrl.login = async (req, res) => {
-    const body = req.body;
-    const { error, value } = LoginValidation.validate(body, { abortEarly: false })
+    // const body = req.body;
+    const { error, value } = LoginValidation.validate(body, { abortEarly: false });
     if (error) {
-        return res.status(400).json({ error: error.details.map(err => err.message) })
+        return res.status(400).json({ error: error.details.map(err => err.message) });
     }
-    const userPresent = await UserModel.findOne({ email: value.email })
-    if (!userPresent) {
-        return res.json({ error: "invalid Email" })
+    try {
+        const userPresent = await UserModel.findOne({ email: value.email });
+        if (!userPresent) {
+            return res.status(400).json({ error: "Invalid Email" });
+        }
+        const password = await bcryptjs.compare(value.password, userPresent.password);
+        if (!password) {
+            return res.status(400).json({ error: "Invalid Password" });
+        }
+        const tokenData = { userId: userPresent._id, role: userPresent.role };
+        const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
+        res.json({ token });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: "Server Error" });
     }
-    const password = await bcryptjs.compare(value.password, userPresent.password);
-    if (!password) {
-        return res.json({ error: "Invalid Password" })
-    }
-    // generate JWT Token 
-    const tokenData = { userId: userPresent._id, role: userPresent.role };
-    const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
-    res.json({ token: token })
-}
+};
 
 
 UserCtrl.account = async (req, res) => {
@@ -255,9 +260,15 @@ UserCtrl.switchRole = async (req, res) => {
     try {
         const user = await UserModel.findById(req.userId);
         if (!user) return res.status(404).json({ error: "User not found" });
-        user.role = user.role == "user" ? "vendor" : "user";
+        
+        user.role = user.role === "user" ? "vendor" : "user";
         await user.save();
-        res.json({ message: "Role updated successfully", user });
+
+        // Generate a new token with the updated role
+        const tokenData = { userId: user._id, role: user.role };
+        const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
+
+        res.json({ message: "Role updated successfully", user, token });
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: error.message });
@@ -265,29 +276,31 @@ UserCtrl.switchRole = async (req, res) => {
 }
 
 UserCtrl.fetchAllUser = async (req, res) => {
+    const { search, role } = req.query;
     try {
-        const response = await paginate(UserModel,req.query,{
-            query:{},
-            sort:{createdAt:-1}
-        })
+        const query = {};
+        
+        if (search) {
+            query.$or = [
+                { userName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                { phoneNumber: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        if (role && role !== "all") {
+            query.role = role;
+        }
+
+        const response = await paginate(UserModel, req.query, {
+            query: query,
+            sort: { createdAt: -1 }
+        });
         res.json(response);
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: error.message });
     }
 }
-// BookingCtrl.fetchBookings = async (req, res) => {
-//   try {
-//     console.log("USER ID:", req.userId);
 
-//     const result = await paginate(BookingModel, req.query, {
-//       query: {},
-//       sort: { createdAt: -1 },
-//     });
-
-//     res.status(200).json(result);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 export default UserCtrl;

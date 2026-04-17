@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "../../config/axiosInstance";
 import { fetchBookings } from "../../slices/BookingSlices";
 import Pagination from "../../config/pagination.jsx";
-import { useDispatch } from "react-redux";
-import { CreditCard, Calendar, CheckCircle2, Clock, IndianRupee } from "lucide-react";
+import { CreditCard, Calendar, CheckCircle2, Clock, IndianRupee, AlertTriangle, RefreshCcw } from "lucide-react";
+
+
 
 export default function Payments() {
     const [payment, setpayment] = useState([]);
     const [pagination, setPagination] = useState({});
+    const [serverError, setServerError] = useState(null);
+
     const dispatch = useDispatch();
     const { myBooking } = useSelector((state) => state.booking);
 
@@ -24,10 +27,13 @@ export default function Payments() {
             const data = response.data;
             setpayment(data);
             setPagination(response.data?.pagination || {});
+            setServerError(null);
         } catch (error) {
             console.log(error.response?.data);
+            setServerError(error.response?.data?.error || "Unable to sync with payment gateway.");
         }
     }
+
 
     useEffect(() => {
         fetchPayment(1);
@@ -41,6 +47,31 @@ export default function Payments() {
                     <h1 className="text-3xl font-bold text-slate-900">Payment History</h1>
                     <p className="text-slate-500 mt-1">Manage and view your transaction records</p>
                 </div>
+
+                {serverError && (
+                    <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                <AlertTriangle size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Payment Service Issue</h3>
+                                <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "There was an error loading your payment history."}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setServerError(null);
+                                fetchPayment(currentPage);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
+                        >
+                            <RefreshCcw size={16} />
+                            <span className="hidden sm:inline">Retry</span>
+                        </button>
+                    </div>
+                )}
+
 
                 {payment.length > 0 ? (
                     <div className="space-y-4">

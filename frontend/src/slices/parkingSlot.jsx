@@ -18,12 +18,18 @@ export const AddSlot = createAsyncThunk("VendorSlot/AddSlot", async ({ form }, {
 
 
 
-export const FetchSlots = createAsyncThunk("VendorSlots/FetchSlots", async ({ page = 1, limit = 24 }, { rejectWithValue }) => {
+export const FetchSlots = createAsyncThunk("VendorSlots/FetchSlots", async (
+    { page = 1, limit = 24, search = "", vehicleType = "all" }, 
+    { rejectWithValue }
+) => {
     try {
         const response = await axios.get("/user/fetchSlots", {
-            headers: { Authorization: localStorage.getItem("token") }, params: {
+            headers: { Authorization: localStorage.getItem("token") }, 
+            params: {
                 page,
                 limit,
+                search,
+                vehicleType
             },
         });
         console.log({ "response inside the slices": response.data });
@@ -72,9 +78,7 @@ const ParkingSlices = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(AddSlot.fulfilled, (state, action) => {
-            // state.Slot = action.payload;
-            state.Slot.push(action.payload);
-            // push(action.payload);
+            state.Slot.push(action.payload.newSlot);
         })
         builder.addCase(AddSlot.pending, (state) => {
             state.error = null

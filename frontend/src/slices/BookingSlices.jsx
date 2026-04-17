@@ -60,23 +60,25 @@ export const verifyPayment = createAsyncThunk(
 //   }
 // })
 export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (
-  { page = 1, limit = 24 },
+  { page = 1, limit = 24, search = "", status = "all" },
   { rejectWithValue }
 ) => {
   try {
     const response = await axios.get("/user/myBookings", {
-      headers: { Authorization: localStorage.getItem("token") }, params: {
+      headers: { Authorization: localStorage.getItem("token") }, 
+      params: {
         page,
         limit,
-
+        search,
+        status
       },
     });
     console.log(response.data);
     return response.data;
 
   } catch (error) {
-    console.log(error.response.data);
-    return rejectWithValue(error.response.data);
+    console.log(error.response?.data);
+    return rejectWithValue(error.response?.data);
   }
 })
 

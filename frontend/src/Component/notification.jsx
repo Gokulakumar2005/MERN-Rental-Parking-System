@@ -2,22 +2,29 @@ import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import axios from "../config/axiosInstance";
 import { useSelector } from "react-redux";
-import { Bell, Check, X, BellRing } from "lucide-react";
+import { Bell, Check, X, BellRing, AlertTriangle, RefreshCcw } from "lucide-react";
+
+
 
 export default function NotificationDropdown() {
     const { user, isLoggedIn } = useSelector((state) => state.auth);
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [serverError, setServerError] = useState(null);
     const socketRef = useRef(null);
+
 
     const fetchNotifications = async () => {
         try {
             const res = await axios.get("/api/notifications", { headers: { Authorization: localStorage.getItem("token") } });
             setNotifications(res.data);
+            setServerError(null);
         } catch (err) {
             console.error("Failed to fetch notifications", err);
+            setServerError("Failed to sync alerts.");
         }
     };
+
 
     useEffect(() => {
         if (isLoggedIn && user) {
@@ -113,7 +120,20 @@ export default function NotificationDropdown() {
                             )}
                         </div>
 
+                        {serverError && (
+                            <div className="bg-rose-50 border-b border-rose-100 p-3 flex items-center justify-between gap-3 animate-in fade-in duration-300">
+                                <div className="flex items-center gap-2">
+                                    <AlertTriangle className="text-rose-500" size={14} />
+                                    <p className="text-[10px] text-rose-600 font-bold uppercase tracking-wider">{serverError}</p>
+                                </div>
+                                <button onClick={fetchNotifications} className="p-1 bg-white border border-rose-100 rounded-md text-rose-500 hover:bg-rose-50">
+                                    <RefreshCcw size={10} />
+                                </button>
+                            </div>
+                        )}
+
                         <div className="max-h-[400px] overflow-y-auto no-scrollbar bg-slate-50/50">
+
                             {notifications.length === 0 ? (
                                 <div className="px-8 py-12 text-center flex flex-col items-center">
                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">

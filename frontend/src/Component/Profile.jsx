@@ -1,8 +1,9 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useRef } from "react";
+import { useState, useRef,useEffect } from "react";
 import { UpdateProfile } from "../slices/authSlices";
 import axios from "../config/axiosInstance.jsx";
-import { User, Mail, Phone, Edit3, Camera, KeyRound, Shield, CheckCircle2, AlertCircle, X } from "lucide-react";
+import { User, Mail, Phone, Edit3, Camera, KeyRound, Shield, CheckCircle2, AlertCircle, X, AlertTriangle, RefreshCcw } from "lucide-react";
+
 
 export default function Profile() {
     const [image, setImage] = useState(null);
@@ -12,7 +13,15 @@ export default function Profile() {
 
     const fileInputRef = useRef();
     const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.auth);
+    const { user, Error: reduxError } = useSelector((state) => state.auth);
+    const [serverError, setServerError] = useState(null);
+
+    useEffect(() => {
+        if (reduxError) {
+            setServerError(reduxError);
+        }
+    }, [reduxError]);
+
 
     const [updateForm, setUpdateForm] = useState({
         id: user?._id,
@@ -124,6 +133,29 @@ export default function Profile() {
                 <div className="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 relative">
                     <div className="absolute inset-0 bg-white/20 backdrop-blur-sm opacity-50"></div>
                 </div>
+
+                {serverError && (
+                    <div className="mx-8 mt-6 bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-0 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                <AlertTriangle size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Profile Update Alert</h3>
+                                <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "There was an error updating your profile data."}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setServerError(null);
+                            }}
+                            className="p-2.5 bg-rose-100 text-rose-600 font-bold rounded-xl hover:bg-rose-200 transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                )}
+
 
                 <div className="px-8 sm:px-12 pb-12 relative -mt-16">
                     <div className="flex justify-center relative mb-8">

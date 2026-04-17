@@ -1,17 +1,58 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchSlots, deleteSlot } from "../../slices/parkingSlot";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Pagination from "../../config/pagination";
-import { MapPin, Car, LayoutGrid, Pencil, Trash2, ParkingCircle, Plus } from "lucide-react";
+import SearchBar from "../SearchBar";
+import { MapPin, Car, LayoutGrid, Pencil, Trash2, ParkingCircle, Plus, AlertTriangle, RefreshCcw } from "lucide-react";
+
 
 export default function MySlot() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const { Slot, pagination } = useSelector((state) => state.slot);
+    const { Slot, pagination, error: reduxError } = useSelector((state) => state.slot);
     const { user } = useSelector((state) => state.auth);
+    const [serverError, setServerError] = useState(null);
     const { currentPage = 1, totalPages = 1 } = pagination || {};
+
+
+    const queryParams = new URLSearchParams(location.search);
+    const initialSearch = queryParams.get("search") || "";
+
+    const [search, setSearch] = useState(initialSearch);
+
+    const handlePageChange = (page) => {
+        dispatch(FetchSlots({ page, limit: 24 }));
+    };
+
+    useEffect(() => {
+        dispatch(FetchSlots({ page: 1, limit: 24 }));
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (reduxError) {
+            setServerError(reduxError);
+        }
+    }, [reduxError]);
+
+
+    const CommonId = user
+        ? Slot.filter((ele) =>
+            String(ele.vendorId) === String(user._id) &&
+            (ele.name.toLowerCase().includes(search.toLowerCase()) ||
+                ele.address.toLowerCase().includes(search.toLowerCase()))
+        )
+        : [];
+    console.log({ "Common ID ": CommonId });
+
+    const handleDelete = (id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
+        if (confirmDelete) {
+            dispatch(deleteSlot(id));
+        }
+    };
 
     if (!user) {
         return (
@@ -22,26 +63,6 @@ export default function MySlot() {
             </div>
         );
     }
-
-    const handlePageChange = (page) => {
-        dispatch(FetchSlots({ page, limit: 24 }));
-    };
-
-    useEffect(() => {
-        dispatch(FetchSlots({ page: 1, limit: 24 }));
-    }, [dispatch]);
-
-    const CommonId = user
-        ? Slot.filter((ele) => String(ele.vendorId) === String(user._id))
-        : [];
-    console.log({ "Common ID ": CommonId });
-
-    const handleDelete = (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this slot?");
-        if (confirmDelete) {
-            dispatch(deleteSlot(id));
-        }
-    };
 
     return (
         <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-8">
@@ -63,6 +84,39 @@ export default function MySlot() {
                         <Plus size={16} /> Add New Slot
                     </button>
                 </div>
+
+                <div className="mb-8 max-w-xl">
+                    <SearchBar
+                        placeholder="Search your slots by name or address..."
+                        value={search}
+                        onChange={setSearch}
+                    />
+                </div>
+
+                {serverError && (
+                    <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                <AlertTriangle size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Server Connection Issue</h3>
+                                <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "Unable to reach the service. Please check your connection."}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setServerError(null);
+                                dispatch(FetchSlots({ page: 1, limit: 24 }));
+                            }}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
+                        >
+                            <RefreshCcw size={16} />
+                            <span>Retry</span>
+                        </button>
+                    </div>
+                )}
+
 
                 {CommonId.length !== 0 ? (
                     <div className="grid gap-5 md:grid-cols-2">

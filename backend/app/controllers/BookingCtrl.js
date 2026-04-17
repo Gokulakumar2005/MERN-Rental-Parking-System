@@ -192,11 +192,23 @@ BookingCtrl.verifyPayment = async (req, res) => {
 
 
 BookingCtrl.fetchBookings = async (req, res) => {
+    const { search, status } = req.query;
     try {
-        // console.log("USER ID:", req.userId);
+        const query = {};
+        
+        if (search) {
+            query.$or = [
+                { vehiclesNumber: { $regex: search, $options: "i" } },
+                { Area: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        if (status && status !== "all") {
+            query.status = status;
+        }
 
         const result = await paginate(BookingModel, req.query, {
-            query: {},
+            query: query,
             sort: { createdAt: -1 },
         });
 

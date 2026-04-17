@@ -5,7 +5,8 @@ import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchBookings } from "../../slices/BookingSlices.jsx";
-import { ArrowLeft, MapPin, Car, CreditCard, Hash, Clock, CalendarDays, AlertCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Car, CreditCard, Hash, Clock, CalendarDays, AlertCircle, AlertTriangle, RefreshCcw } from "lucide-react";
+
 
 export default function SlotBookingPage() {
     const dispatch = useDispatch();
@@ -15,7 +16,15 @@ export default function SlotBookingPage() {
     const Data = location.state;
     console.log({ "Data in Slot Booking Page": Data });
     const userId = useSelector((state) => state.auth.user._id);
-    const { myBooking } = useSelector((state) => state.booking);
+    const { myBooking, error: reduxError } = useSelector((state) => state.booking);
+    const [serverError, setServerError] = useState(null);
+
+    useEffect(() => {
+        if (reduxError) {
+            setServerError(reduxError);
+        }
+    }, [reduxError]);
+
     console.log({ "mybooking inside slot booking page": myBooking });
 
     const bookedSlots = myBooking
@@ -249,7 +258,25 @@ export default function SlotBookingPage() {
                         Book Your Parking Slot
                     </h2>
 
+                    {serverError && (
+                        <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                    <AlertTriangle size={24} strokeWidth={2.5} />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Booking Alert</h3>
+                                    <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "There was an issue processing your booking request."}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setServerError(null)} className="p-2.5 bg-rose-100 text-rose-600 rounded-xl hover:bg-rose-200 transition-colors">
+                                <RefreshCcw size={18} />
+                            </button>
+                        </div>
+                    )}
+
                     <form className="space-y-6" onSubmit={handleSubmit}>
+
                         <div>
                             <p className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><Car size={16} /> Select Vehicle Type</p>
                             <div className="flex gap-3">

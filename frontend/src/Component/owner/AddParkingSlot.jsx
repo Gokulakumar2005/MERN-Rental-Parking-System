@@ -2,15 +2,25 @@ import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AddSlot, updateSlot } from "../../slices/parkingSlot";
-import { ArrowLeft, MapPin, Car, LayoutGrid, IndianRupee, Shield, Image, FileText, AlertCircle, ParkingCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Car, LayoutGrid, IndianRupee, Shield, Image, FileText, AlertCircle, ParkingCircle, AlertTriangle, RefreshCcw } from "lucide-react";
+
 
 export default function AddParkingSlot() {
-    const userDetails = useSelector((state) => state.auth);
+    const { user: user, Error: reduxAuthError } = useSelector((state) => state.auth);
+    const { error: reduxSlotError } = useSelector((state) => state.slot);
+    const [serverError, setServerError] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const Data = location.state;
     console.log({ "inside add Slot ,data is coming from the own Slot ": Data })
+
+    useEffect(() => {
+        if (reduxAuthError || reduxSlotError) {
+            setServerError(reduxAuthError || reduxSlotError);
+        }
+    }, [reduxAuthError, reduxSlotError]);
+
 
     const [Error, setError] = useState({})
     const [form, setForm] = useState({
@@ -110,13 +120,13 @@ export default function AddParkingSlot() {
         if (form.totalSlot.length === 0) {
             error.totalSlot = "Total Slot is Required *"
         }
-        if (form.pricing.hourly.length === 0) {
+        if (form.pricing.hourly.toString().trim().length === 0) {
             error.hourly = "Hour's is Required *"
         }
-        if (form.pricing.daily.length === 0) {
+        if (form.pricing.daily.toString().trim().length === 0) {
             error.daily = "Daily is Required *"
         }
-        if (form.pricing.monthly.length === 0) {
+        if (form.pricing.monthly.toString().trim().length === 0) {
             error.monthly = "Monthly is Required *"
         }
         if (form.facilities.length === 0) {
@@ -142,8 +152,9 @@ export default function AddParkingSlot() {
         formData.append("Area", form.Area);
         formData.append("vehicles", form.vehicles);
         formData.append("totalSlot", form.totalSlot);
-        formData.append("vendorId", userDetails.user._id);
+        formData.append("vendorId", user?._id);
         formData.append("pricing", JSON.stringify(form.pricing));
+
         formData.append("facilities", JSON.stringify(form.facilities));
         formData.append("propertyDocument", JSON.stringify({ documentType: form.propertyDocument.documentType, }));
         form.parkingImages.forEach((file) => {
@@ -156,12 +167,21 @@ export default function AddParkingSlot() {
 
         if (!Data) {
             dispatch(AddSlot({ form: formData }))
-                .then(() => navigate("/mySlot"));
+                .then((res) => {
+                    if (res.meta.requestStatus === "fulfilled") {
+                        navigate("/mySlot");
+                    }
+                });
         } else {
             formData.append("slotId", Data._id);
             dispatch(updateSlot({ formData }))
-                .then(() => navigate("/mySlot"));
+                .then((res) => {
+                    if (res.meta.requestStatus === "fulfilled") {
+                        navigate("/mySlot");
+                    }
+                });
         }
+
     };
 
     const inputClass = "w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition placeholder-slate-400";
@@ -188,7 +208,36 @@ export default function AddParkingSlot() {
                         </h2>
                     </div>
 
+                    {serverError && (
+                        <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                    <AlertTriangle size={24} strokeWidth={2.5} />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Configuration Alert</h3>
+                                    <div className="text-sm text-rose-600 font-bold">
+                                        {Array.isArray(serverError) ? (
+                                            <ul className="list-disc list-inside">
+                                                {serverError.map((err, idx) => <li key={idx}>{err}</li>)}
+                                            </ul>
+                                        ) : typeof serverError === "string" ? (
+                                            serverError
+                                        ) : (
+                                            "There was an error saving your slot configuration."
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => setServerError(null)} className="p-2.5 bg-rose-100 text-rose-600 rounded-xl hover:bg-rose-200 transition-colors">
+                                <RefreshCcw size={20} />
+                            </button>
+
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-6">
+
                         <div>
                             <label className={labelClass}>
                                 <span className="flex items-center gap-2"><MapPin size={14} /> Slot Name</span>

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { RegisterUser } from "../slices/authSlices.jsx";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Phone, Lock, Tag, ShieldCheck, Car, LayoutDashboard, ChevronLeft } from "lucide-react";
+import { User, Mail, Phone, Lock, Tag, ShieldCheck, Car, LayoutDashboard, ChevronLeft, AlertTriangle } from "lucide-react";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+
 
 export default function Register() {
     const dispatch = useDispatch();
@@ -18,8 +21,17 @@ export default function Register() {
         wallet:0
     })
 
+    const { Error: reduxError } = useSelector((state) => state.auth);
+    const [serverError, setServerError] = useState(null);
     const [Error, setError] = useState({});
     const [isLoading, setIsLoading] = useState(null);
+
+    useEffect(() => {
+        if (reduxError) {
+            setServerError(reduxError);
+        }
+    }, [reduxError]);
+
 
     const handleChange = (e) => {
         setFormData({ ...FormData, [e.target.name]: e.target.value })
@@ -131,8 +143,22 @@ export default function Register() {
                             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create Account</h1>
                             <p className="text-slate-500 mt-2 font-medium">Please fill in your details to get started.</p>
                         </div>
+
+                        {serverError && (
+                            <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl mb-6 flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <AlertTriangle className="text-rose-500 shrink-0 mt-0.5" size={18} />
+                                <div className="flex-1">
+                                    <h4 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Registration Issue</h4>
+                                    <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "There was an error creating your account."}</p>
+                                </div>
+                                <button onClick={() => setServerError(null)} className="text-rose-400 hover:text-rose-600 transition-colors">
+                                    <Lock size={14} className="rotate-45" />
+                                </button>
+                            </div>
+                        )}
                         
                         <form onSubmit={handleSubmit} className="space-y-5">
+
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div className="space-y-1.5">

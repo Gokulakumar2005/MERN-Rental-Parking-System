@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchBookings, CancelBooking } from "../slices/BookingSlices";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../config/pagination";
-import { CalendarDays, Car, Clock, MessageCircle, XCircle, AlertTriangle, CalendarCheck, IndianRupee } from "lucide-react";
+import { CalendarDays, Car, Clock, MessageCircle, XCircle, AlertTriangle, CalendarCheck, IndianRupee, RefreshCcw } from "lucide-react";
+
 
 export default function Mybookings() {
     const { myBooking, error, pagination } = useSelector((state) => state.booking);
@@ -59,11 +60,26 @@ export default function Mybookings() {
                 </div>
 
                 {serverError && (
-                    <div className="bg-rose-50 border border-rose-200 text-rose-700 px-5 py-4 rounded-2xl mb-6 flex items-center gap-3">
-                        <AlertTriangle size={20} className="flex-shrink-0" />
-                        <span className="font-semibold">
-                            {typeof serverError === "string" ? serverError : serverError?.message || "Something went wrong"}
-                        </span>
+                    <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                <AlertTriangle size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Booking Service Connection</h3>
+                                <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : serverError?.message || "There was an error loading your bookings."}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setServerError(null);
+                                dispatch(fetchBookings({ page: 1, limit: 24 }));
+                            }}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
+                        >
+                            <RefreshCcw size={16} />
+                            <span className="hidden sm:inline">Retry</span>
+                        </button>
                     </div>
                 )}
 

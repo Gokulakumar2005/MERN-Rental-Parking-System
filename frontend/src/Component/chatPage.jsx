@@ -4,7 +4,8 @@ import { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchBookings } from "../slices/BookingSlices";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Send, ArrowLeft, MessageSquare } from "lucide-react";
+import { Send, ArrowLeft, MessageSquare, AlertTriangle, RefreshCcw } from "lucide-react";
+
 
 export default function ChatPage() {
     const { user } = useSelector((state) => state.auth);
@@ -17,6 +18,8 @@ export default function ChatPage() {
     const socketRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
+    const [serverError, setServerError] = useState(null);
+
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -73,12 +76,16 @@ export default function ChatPage() {
 
         axios
             .get(`/api/chat/${roomId}`)
+
             .then((res) => {
                 setMessages(res.data);
+                setServerError(null);
             })
             .catch((err) => {
                 console.error("Failed to fetch messages", err);
+                setServerError("Unable to connect to chat service.");
             });
+
 
         const handleReceiveMessage = (data) => {
             setMessages((prev) => [...prev, data]);
@@ -136,7 +143,26 @@ export default function ChatPage() {
                         </div>
                     </div>
 
+                    {serverError && (
+                        <div className="bg-rose-50 border-b border-rose-100 p-4 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                            <div className="flex items-center gap-3">
+                                <AlertTriangle className="text-rose-500" size={18} />
+                                <p className="text-xs text-rose-600 font-bold">{serverError}</p>
+                            </div>
+                            <button 
+                                onClick={() => {
+                                    setServerError(null);
+                                    axios.get(`/api/chat/${roomId}`).then(res => setMessages(res.data));
+                                }}
+                                className="p-1.5 bg-white text-rose-600 rounded-lg hover:bg-rose-50 transition-colors border border-rose-100 shadow-sm"
+                            >
+                                <RefreshCcw size={14} />
+                            </button>
+                        </div>
+                    )}
+
                     <div className="flex-1 p-6 bg-slate-50/50 flex flex-col overflow-hidden">
+
                         <div className="flex-1 overflow-y-auto mb-6 flex flex-col gap-4 pr-2 no-scrollbar">
                             {messages.length === 0 ? (
                                 <div className="text-center flex flex-col items-center justify-center h-full m-auto">
@@ -209,4 +235,4 @@ export default function ChatPage() {
             </div>
         </div>
     );
-}
+}

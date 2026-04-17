@@ -1,20 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FetchSlots } from "../../slices/parkingSlot.jsx";
 import { fetchBookings } from "../../slices/BookingSlices.jsx";
 import MyMap from "../../config/mapComponent.jsx";
 import Pagination from "../../config/pagination.jsx";
-import { MapPin, Car, Tag, Map, Info, Image, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import SearchBar from "../SearchBar";
+import { MapPin, Car, Tag, Map, Info, Image, BookOpen, ChevronDown, ChevronUp, AlertTriangle, RefreshCcw } from "lucide-react";
+
+import debounce from "lodash/debounce";
 
 export default function BookSlot() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const { Slot: SlotInfo, pagination: slotPagination } = useSelector((state) => state.slot);
+    const { Slot: SlotInfo, pagination: slotPagination, error: reduxError } = useSelector((state) => state.slot);
     const { myBooking } = useSelector((state) => state.booking);
+    const [serverError, setServerError] = useState(null);
 
     const { currentPage = 1, totalPages = 1 } = slotPagination || {};
+
+    const queryParams = new URLSearchParams(location.search);
+    const initialSearch = queryParams.get("search") || "";
+
+    const [search, setSearch] = useState(initialSearch);
 
     const getAvailableSlots = (slotId, totalSlots) => {
         const bookedCount = myBooking
@@ -29,14 +39,35 @@ export default function BookSlot() {
     const [showImages, setShowImages] = useState(null);
     const [showMap, setShowMap] = useState(null);
 
+    // Debounced search function
+    const debouncedFetch = useCallback(
+        debounce((searchQuery) => {
+            dispatch(FetchSlots({ page: 1, limit: 12, search: searchQuery }));
+        }, 500),
+        [dispatch]
+    );
+
+    const handleSearchChange = (value) => {
+        setSearch(value);
+        debouncedFetch(value);
+    };
+
     const handlePageChange = (page) => {
-        dispatch(FetchSlots({ page, limit: 24 }));
+        dispatch(FetchSlots({ page, limit: 24, search }));
         dispatch(fetchBookings({ page, limit: 24 }));
     };
 
     useEffect(() => {
-        handlePageChange(1);
-    }, []);
+        dispatch(FetchSlots({ page: 1, limit: 24, search: initialSearch }));
+        dispatch(fetchBookings({ page: 1, limit: 24 }));
+    }, [dispatch, initialSearch]);
+
+    useEffect(() => {
+        if (reduxError) {
+            setServerError(reduxError);
+        }
+    }, [reduxError]);
+
 
     return (
         <div className="min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-8 animate-in fade-in duration-500">
@@ -58,6 +89,40 @@ export default function BookSlot() {
                         <Map size={16} /> View on Map
                     </button>
                 </div>
+
+                <div className="mb-8 max-w-xl">
+                    <SearchBar 
+                        placeholder="Search for a location, address or area..."
+                        value={search}
+                        onChange={handleSearchChange}
+                    />
+                </div>
+
+                {serverError && (
+                    <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+                                <AlertTriangle size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Availability Service Alert</h3>
+                                <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "Unable to retrieve real-time parking data."}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setServerError(null);
+                                dispatch(FetchSlots({ page: 1, limit: 24, search }));
+                                dispatch(fetchBookings({ page: 1, limit: 24 }));
+                            }}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
+                        >
+                            <RefreshCcw size={16} />
+                            <span>Retry</span>
+                        </button>
+                    </div>
+                )}
+
 
                 {SlotInfo.length !== 0 ? (
                     <div className="grid gap-5">

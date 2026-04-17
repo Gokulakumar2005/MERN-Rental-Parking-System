@@ -8,7 +8,7 @@ const ParkingController = {};
 
 ParkingController.addSlot = async (req, res) => {
     const body = req.body;
-    // console.log({ "body inside Ctlr": body })
+    console.log({ "body inside Ctlr": body })
     body.pricing = JSON.parse(body.pricing);
     body.facilities = JSON.parse(body.facilities);
     body.propertyDocument = JSON.parse(body.propertyDocument);
@@ -22,14 +22,14 @@ ParkingController.addSlot = async (req, res) => {
     if (!req.files?.proof || req.files.proof.length === 0) {
         return res.status(400).json({ error: "propertyDocument proof is required" });
     }
-    // console.log({ "body": body });
+    console.log({ "body": body });
 
     const { error, value } = PslotValidation.validate(body, { abortEarly: false })
     if (error) {
         return res.status(400).json({ error: error.details.map(err => err.message) })
     }
-    // console.log({ "value": value });
-    // console.log("FILES:", req.files);
+    console.log({ "value": value });
+    console.log("FILES:", req.files);
     try {
         const exsistLoaction = await SlotModel.findOne({ address: value.address, location: { geo: { lat: value.lat, lng: value.lng } } });
         if (exsistLoaction) {
@@ -87,8 +87,7 @@ ParkingController.addSlot = async (req, res) => {
         });
 
         await newSlot.save();
-
-        res.status(201).json({ message: "Slot added successfully" });
+        res.status(201).json({ message: "Slot added successfully", newSlot });
 
     } catch (err) {
         console.log(err);
@@ -210,19 +209,30 @@ ParkingController.deleteSlot = async (req, res) => {
 //     }
 // }
 ParkingController.fetchSlots = async (req, res) => {
+    const { search, vehicleType } = req.query;
     try {
-        // console.log({"req":req});
         const query = {};
+        
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { address: { $regex: search, $options: "i" } },
+                { Area: { $regex: search, $options: "i" } }
+            ];
+        }
 
+        if (vehicleType && vehicleType !== "all") {
+            query.vehicles = vehicleType;
+        }
 
         const response = await paginate(SlotModel, req.query, {
             query,
             sort: { createdAt: -1 },
         });
-   
+
         res.json(response);
     } catch (error) {
-        console.log(error); // also fix this (see below)
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 };

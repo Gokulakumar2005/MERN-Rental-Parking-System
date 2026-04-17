@@ -173,7 +173,7 @@ function App() {
             <Route path="/notification" element={<Notification />} />
             <Route path="/AllUserInMap" element={<AllUserInMap />} />
             <Route path="/Allusers" element={<AllUser />} />
-            <Route path="/AllParkingSlot" element={<AllParkingSlots/>} />
+            <Route path="/AllParkingSlot" element={<AllParkingSlots />} />
             <Route path="/AllBookings" element={<AllBookings />} />
           </Routes>
 

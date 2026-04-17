@@ -33,19 +33,24 @@ export const GoogleLoginUser = createAsyncThunk("auth/GoogleLoginUser", async ({
 export const LoginUser = createAsyncThunk("auth/LoginUser", async ({ formData, redirect, loginRedirect }, { rejectWithValue }) => {
     try {
         const response = await axios.post("/user/login", formData);
-        alert("successfully logged in");
         console.log(response.data);
         localStorage.setItem("token", response.data.token);
         const userResponse = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
         redirect();
+        alert("successfully logged in");
         return userResponse.data;
 
     } catch (err) {
-        const msg = err.response?.data?.error || err.message || "Something went wrong";
-        if (msg === "invalid user" || msg === "invalid Email") {
-            alert(msg);
-        }
-        return rejectWithValue(msg);
+
+      const msg = err.response?.data?.error || err.message || "Something went wrong";
+
+      alert(msg);
+
+      if (loginRedirect) {
+        loginRedirect();
+      }
+
+      return rejectWithValue(msg);
     }
 
 })
@@ -84,27 +89,41 @@ export const UpdateProfile = createAsyncThunk("auth/UpdateProfile", async ({ for
     }
 })
 
-export const switchRole = createAsyncThunk("auth/switchRole", async (id, { rejectWithValue }) => {
+export const switchRole = createAsyncThunk(
+  "auth/switchRole",
+  async (id, { rejectWithValue }) => {
     try {
-        const response = await axios.put(`/user/switchRole/${id}`, { id }, { headers: { Authorization: localStorage.getItem("token") } });
-        console.log(response.data);
 
-        return response.data;
+      const response = await axios.put(
+        `/user/switchRole/${id}`,
+        {},
+        { headers: { Authorization: localStorage.getItem("token") } }
+      );
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token)
+      }
+
+      return response.data
+
     } catch (error) {
-        const msg = error.response?.data?.error || error.message || "Something went wrong";
-        console.log(msg);
-        return rejectWithValue(msg);
+      const msg = error.response?.data?.error || error.message
+      return rejectWithValue(msg)
     }
-})
+  }
+)
 export const FetchAllUser = createAsyncThunk("auth/FetchAllUser", async (
-    { page = 1, limit = 24 },
+    { page = 1, limit = 12, search = "", role = "all" },
     { rejectWithValue }
 ) => {
     try {
         const response = await axios.get("/admin/fetch/allUser", {
-            headers: { Authorization: localStorage.getItem("token") }, params: {
+            headers: { Authorization: localStorage.getItem("token") },
+            params: {
                 page,
                 limit,
+                search,
+                role
             },
         });
         console.log({ "response": response.data });
@@ -196,9 +215,9 @@ const authSlices = createSlice({
             // state.isLoggedIn = false;
         })
         builder.addCase(switchRole.fulfilled, (state, action) => {
-            state.user.role = action.payload.user.role;
-            state.Error = null;
-
+            state.user = action.payload.user
+            state.isLoggedIn = true
+            state.Error = null
         })
         builder.addCase(switchRole.rejected, (state, action) => {
             state.Error = action.payload;

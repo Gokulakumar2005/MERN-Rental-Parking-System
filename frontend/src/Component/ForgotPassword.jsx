@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import { KeyRound, Mail, ShieldCheck, ChevronLeft, Lock } from "lucide-react";
+import { KeyRound, Mail, ShieldCheck, ChevronLeft, Lock, AlertTriangle, RefreshCcw } from "lucide-react";
+
 
 export default function ForgotPassword() {
     const [detail, setDetail] = useState("");
@@ -107,10 +108,18 @@ export default function ForgotPassword() {
                 </div>
 
                 {ServerError.length > 0 && (
-                    <div className="bg-red-50 text-red-600 border border-red-100 p-4 rounded-xl text-center mb-6 text-sm font-bold flex items-center justify-center gap-2">
-                        <span>{String(ServerError)}</span>
+                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl mb-8 flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <AlertTriangle className="text-rose-500 shrink-0 mt-0.5" size={18} />
+                        <div className="flex-1">
+                            <h4 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Verification Error</h4>
+                            <p className="text-sm text-rose-600 font-bold">{String(ServerError)}</p>
+                        </div>
+                        <button onClick={() => setSeverError("")} className="text-rose-400 hover:text-rose-600 transition-colors">
+                            <ChevronLeft size={16} className="rotate-90" />
+                        </button>
                     </div>
                 )}
+
 
                 {!passwordPage ? (
                     <form className="space-y-6" onSubmit={handleVerify}>

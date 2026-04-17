@@ -15,6 +15,8 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { AlertTriangle, RefreshCcw } from "lucide-react";
+
 import { FetchAllUser } from "../../slices/authSlices";
 import { fetchBookings } from "../../slices/BookingSlices";
 import { FetchSlots } from "../../slices/parkingSlot";
@@ -25,14 +27,24 @@ const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { Alluser } = useSelector((state) => state.auth);
-  const { myBooking } = useSelector((state) => state.booking);
-  const { Slot } = useSelector((state) => state.slot);
+  const { Alluser, pagination, Error: authError } = useSelector((state) => state.auth);
+  const { myBooking, error: bookingError } = useSelector((state) => state.booking);
+  const { Slot, error: slotError } = useSelector((state) => state.slot);
+  const { pagination: bookingPagination } = useSelector((state) => state.booking);
+  const { pagination: slotPagination } = useSelector((state) => state.slot)
+  const [serverError, setServerError] = useState(null);
 
   useEffect(() => {
-    dispatch(FetchAllUser());
-    dispatch(fetchBookings());
-    dispatch(FetchSlots());
+    if (authError || bookingError || slotError) {
+      setServerError(authError || bookingError || slotError);
+    }
+  }, [authError, bookingError, slotError]);
+
+
+  useEffect(() => {
+    dispatch(FetchAllUser({ page: 1, limit: 24 }));
+    dispatch(fetchBookings({ page: 1, limit: 24 }));
+    dispatch(FetchSlots({ page: 1, limit: 24 }));
   }, [dispatch]);
 
   // Transform Data for Charts
@@ -91,9 +103,35 @@ const AdminDashboard = () => {
   }, [myBooking]);
 
   return (
-  <div className="space-y-12 py-8 px-4 md:px-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="space-y-12 py-8 px-4 md:px-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      {serverError && (
+        <div className="bg-rose-50 border border-rose-100 p-5 rounded-3xl mb-8 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm shadow-rose-100/50">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white text-rose-500 rounded-2xl shadow-sm border border-rose-100">
+              <AlertTriangle size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider mb-0.5">Dashboard Sync Error</h3>
+              <p className="text-sm text-rose-600 font-bold">{typeof serverError === "string" ? serverError : "There was an error loading administrative analytics."}</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => {
+              setServerError(null);
+              dispatch(FetchAllUser({ page: 1, limit: 24 }));
+              dispatch(fetchBookings({ page: 1, limit: 24 }));
+              dispatch(FetchSlots({ page: 1, limit: 24 }));
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
+          >
+            <RefreshCcw size={16} />
+            <span className="hidden sm:inline">Refresh Data</span>
+          </button>
+        </div>
+      )}
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
       <StatsCard
         title="Total Revenue"
         value={`₹${totalRevenue.toLocaleString()}`}
@@ -103,20 +141,20 @@ const AdminDashboard = () => {
       />
       <StatsCard
         title="Active Users"
-        value={Alluser?.length || 0}
+        value={pagination?.totalItems || 0}
         icon="👥"
         trend={5}
         color="blue"
       />
       <StatsCard
         title="Parking Slots"
-        value={Slot?.length || 0}
+        value={slotPagination?.totalItems || 0}
         icon="🅿️"
         color="purple"
       />
       <StatsCard
         title="Total Bookings"
-        value={myBooking?.length || 0}
+        value={bookingPagination?.totalItems || 0}
         icon="📅"
         trend={8}
         color="orange"
