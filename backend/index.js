@@ -26,8 +26,7 @@ import { upload } from './config/multer.js';
 // import socketHandler from './app/sockets/sockets.js';
 import socketHandler from "./app/Sockets/sockets.js";
 import NotificationCtrl from './app/controllers/Notification-Ctrl.js';
-import axios from "./config/axiosinstance.js";
-import axiosInstance from "./config/axiosinstance.js";
+
 
 const app = express();
 const port = process.env.PORT || 3030;
@@ -62,51 +61,51 @@ socketHandler(io);
 
 //Routes...
 
-axiosInstance.post("/user/register", UserCtrl.register)
-axiosInstance.post("/user/google-login", UserCtrl.googleLogin)
-axiosInstance.post("/user/login", UserCtrl.login)
-axiosInstance.get("/user/account", authenticateUser, UserCtrl.account)
-axiosInstance.put("/update/profile/:id", authenticateUser, authorizeUser(["vendor", "user", "admin"]), upload.single("profilePic"), UserCtrl.updateProfile)
-axiosInstance.put("/update/password", authenticateUser, authorizeUser(["vendor", "user", "admin"]), UserCtrl.updatePassword);
-axiosInstance.post("/forgot/password", UserCtrl.forgotPassword)
-axiosInstance.post("/reset/password", UserCtrl.resetPassword)
-axiosInstance.put("/user/switchRole/:id", authenticateUser, authorizeUser(["vendor", "user", "admin"]), UserCtrl.switchRole)
+app.post("/user/register", UserCtrl.register)
+app.post("/user/google-login", UserCtrl.googleLogin)
+app.post("/user/login", UserCtrl.login)
+app.get("/user/account", authenticateUser, UserCtrl.account)
+app.put("/update/profile/:id", authenticateUser, authorizeUser(["vendor", "user", "admin"]), upload.single("profilePic"), UserCtrl.updateProfile)
+app.put("/update/password", authenticateUser, authorizeUser(["vendor", "user", "admin"]), UserCtrl.updatePassword);
+app.post("/forgot/password", UserCtrl.forgotPassword)
+app.post("/reset/password", UserCtrl.resetPassword)
+app.put("/user/switchRole/:id", authenticateUser, authorizeUser(["vendor", "user", "admin"]), UserCtrl.switchRole)
 
 // vendor
-axiosInstance.post(
+app.post(
   "/vendor/addSlot", upload.fields([
     { name: "parkingImages", maxCount: 10 },
     { name: "proof", maxCount: 5 },
   ]), authenticateUser, authorizeUser(["admin", "vendor"]),
   ParkingController.addSlot
 );
-axiosInstance.put("/update/vendor/slot", upload.fields([
+app.put("/update/vendor/slot", upload.fields([
   { name: "parkingImages", maxCount: 10 },
   { name: "proof", maxCount: 5 },
 ]), authenticateUser, authorizeUser(["admin", "vendor"]), ParkingController.updateSlot)
-axiosInstance.delete("/vendor/delete/slot/:id", authenticateUser, authorizeUser(["vendor"]), ParkingController.deleteSlot)
+app.delete("/vendor/delete/slot/:id", authenticateUser, authorizeUser(["vendor"]), ParkingController.deleteSlot)
 // User
-axiosInstance.get("/user/fetchSlots", authenticateUser, authorizeUser(["admin", "user", "vendor"]), ParkingController.fetchSlots)
-axiosInstance.get("/user/myBookings", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchBookings);
-axiosInstance.put("/user/cancelBooking/:id", authenticateUser, authorizeUser(["user"]), BookingCtrl.CancelBooking);
-axiosInstance.get("/fetch/allSlot/maps", authenticateUser, authorizeUser(["user", "admin"]), ParkingController.fetchAllSlotWithoutPagination);
-axiosInstance.get("/fetch/allBooking/maps", authenticateUser, authorizeUser(["user", "admin"]), BookingCtrl.fetchAllBookingWithoutPagination);
+app.get("/user/fetchSlots", authenticateUser, authorizeUser(["admin", "user", "vendor"]), ParkingController.fetchSlots)
+app.get("/user/myBookings", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchBookings);
+app.put("/user/cancelBooking/:id", authenticateUser, authorizeUser(["user"]), BookingCtrl.CancelBooking);
+app.get("/fetch/allSlot/maps", authenticateUser, authorizeUser(["user", "admin"]), ParkingController.fetchAllSlotWithoutPagination);
+app.get("/fetch/allBooking/maps", authenticateUser, authorizeUser(["user", "admin"]), BookingCtrl.fetchAllBookingWithoutPagination);
 
 //admin
-axiosInstance.get("/admin/fetch/allUser",authenticateUser,authorizeUser(["admin"]),UserCtrl.fetchAllUser)
+app.get("/admin/fetch/allUser",authenticateUser,authorizeUser(["admin"]),UserCtrl.fetchAllUser)
 
 //payment
-axiosInstance.post("/payment/create-order", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.createOrder);
-axiosInstance.post("/payment/verify", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.verifyPayment);
-axiosInstance.get("/user/fetch/payments", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchPayments);
+app.post("/payment/create-order", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.createOrder);
+app.post("/payment/verify", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.verifyPayment);
+app.get("/user/fetch/payments", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchPayments);
 
 // notification
-axiosInstance.get("/api/notifications", authenticateUser, NotificationCtrl.fetchNotifications);
-axiosInstance.put("/api/notifications/:id/read", authenticateUser, NotificationCtrl.markAsRead);
-axiosInstance.put("/api/notifications/read-all", authenticateUser, NotificationCtrl.markAllAsRead);
+app.get("/api/notifications", authenticateUser, NotificationCtrl.fetchNotifications);
+app.put("/api/notifications/:id/read", authenticateUser, NotificationCtrl.markAsRead);
+app.put("/api/notifications/read-all", authenticateUser, NotificationCtrl.markAllAsRead);
 
 // chat 
-axiosInstance.get("/api/chat/:roomId", ChatController.getMessages);
+app.get("/api/chat/:roomId", ChatController.getMessages);
 server.listen(port, () => {
   console.log(`server is running on ${port}`)
 });
