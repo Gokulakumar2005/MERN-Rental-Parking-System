@@ -56,7 +56,7 @@ UserCtrl.googleLogin = async (req, res) => {
 
 UserCtrl.register = async (req, res) => {
     const body = req.body;
-    // console.log(body);
+    console.log(body);
     const { error, value } = UserValidation.validate(body, { abortEarly: false })
     if (error) {
         return res.status(400).json({ error: error.details.map(err => err.message) })
