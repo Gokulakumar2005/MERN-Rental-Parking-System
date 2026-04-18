@@ -5,7 +5,7 @@
 // export default axiosInstance;
 
 
-import axios from "axios";
+import axios from "axios"
 const apiUrl = mern-rental-parking-system.onrender.com || "";
 const axiosInstance = axios.create({
   baseURL: apiUrl.startsWith("http") ? apiUrl : `https://${apiUrl}`
