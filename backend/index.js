@@ -46,10 +46,9 @@ app.use(cors({
 }));
 
 app.options('*', cors());
-const accessLogStream = fs.createWriteStream(path.join(process.cwd(), 'access.log'), { flags: 'a' });
-app.use(morgan("combined", { stream: accessLogStream }));
 app.use(morgan("dev"));
-// chat
+app.get("/ping", (req, res) => res.send("pong"));
+
 const server = http.createServer(app);
 // Socket setup
 const io = new Server(server, {
