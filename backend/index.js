@@ -42,7 +42,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('(.*)', cors());
+app.options(/.*/, cors());
 app.use(morgan("dev"));
 app.get("/ping", (req, res) => res.send("pong"));
 
