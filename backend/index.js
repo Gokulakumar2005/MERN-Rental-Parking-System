@@ -44,6 +44,8 @@ app.use(cors({
   ],
   credentials: true
 }));
+
+app.options('*', cors());
 const accessLogStream = fs.createWriteStream(path.join(process.cwd(), 'access.log'), { flags: 'a' });
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(morgan("dev"));
@@ -52,7 +54,9 @@ const server = http.createServer(app);
 // Socket setup
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://mern-rental-parking-system-frontend.onrender.com",
+    methods: ["GET", "POST"],
+    credentials: true
   },
 });
 global.io = io;
