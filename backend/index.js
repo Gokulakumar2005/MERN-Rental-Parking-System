@@ -34,7 +34,7 @@ ConfigureDb();
 app.use(express.json());
 // app.use(cors());
 app.use(cors({
-  origin:"https://rental-parking.vercel.app",
+  origin:"https://mern-rental-parking-system.onrender.com",
   credentials:true
 }))
 
