@@ -82,7 +82,8 @@ UserCtrl.register = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 
 }
@@ -124,7 +125,8 @@ UserCtrl.account = async (req, res) => {
         res.json(users);
 
     } catch (err) {
-        console.log(err.message)
+        console.log(err.message);
+        res.status(500).json({ error: err.message });
     }
 }
 
