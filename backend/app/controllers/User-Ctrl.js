@@ -105,7 +105,10 @@ UserCtrl.login = async (req, res) => {
         if (!passwordMatch) {
             return res.status(400).json({ error: "Invalid Password" });
         }
-        const tokenData = { userId: userPresent._id, role: userPresent.role };
+        if (!process.env.JWT_KEY) {
+            console.error("JWT_KEY is not defined in environment variables.");
+            return res.status(500).json({ error: "Server Configuration Error: JWT_KEY missing" });
+        }
         const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
         res.json({ token });
     } catch (error) {
