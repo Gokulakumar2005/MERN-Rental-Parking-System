@@ -110,11 +110,15 @@ UserCtrl.login = async (req, res) => {
             console.error("JWT_KEY is not defined in environment variables.");
             return res.status(500).json({ error: "Server Configuration Error: JWT_KEY missing" });
         }
+        const tokenData = {
+            userId: userPresent._id,
+            role: userPresent.role
+        };
         const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
         res.json({ token });
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ error: error.message });
+        console.error("LOGIN ERROR:", error);
+        res.status(500).json({ error: error.message || "Internal Server Error" });
     }
 };
 
