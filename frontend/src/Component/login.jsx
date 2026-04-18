@@ -218,7 +218,7 @@ export default function Login() {
                                         console.log('Login Failed');
                                     }}
                                     theme="outline"
-                                    width="100%"
+                                    width="350"
                                     size="large"
                                 />
                             </div>
