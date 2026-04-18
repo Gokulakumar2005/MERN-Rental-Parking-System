@@ -6,7 +6,7 @@
 
 
 import axios from "axios";
-const apiUrl = mern-rental-parking-system.onrender.com || "";
+const apiUrl = import.meta.env.VITE_API_URL || "";
 const axiosInstance = axios.create({
   baseURL: apiUrl.startsWith("http") ? apiUrl : `https://${apiUrl}`
 });
