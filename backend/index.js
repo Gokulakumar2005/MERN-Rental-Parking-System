@@ -33,11 +33,17 @@ const port = process.env.PORT || 3030;
 ConfigureDb();
 app.use(express.json());
 // app.use(cors());
+// app.use(cors({
+//   origin:"https://mern-rental-parking-system.onrender.com",
+//   credentials:true
+// }))
 app.use(cors({
-  origin:"https://mern-rental-parking-system.onrender.com",
-  credentials:true
-}))
-
+  origin: [
+    "https://mern-rental-parking-system-frontend.onrender.com",
+    "http://localhost:5173"
+  ],
+  credentials: true
+}));
 const accessLogStream = fs.createWriteStream(path.join(process.cwd(), 'access.log'), { flags: 'a' });
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(morgan("dev"));
