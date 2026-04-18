@@ -1,13 +1,6 @@
-import axios from "axios";
+import axios from "axios"
+const apiUrl = import.meta.env.VITE_API_URL || "";
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "" 
+  baseURL: apiUrl.startsWith("http") ? apiUrl : `https://${apiUrl}`
 });
 export default axiosInstance;
-
-
-// import axios from "axios";
-// const apiUrl = import.meta.env.VITE_API_URL || "";
-// const axiosInstance = axios.create({
-//   baseURL: apiUrl.startsWith("http") ? apiUrl : `https://${apiUrl}`
-// });
-// export default axiosInstance;
