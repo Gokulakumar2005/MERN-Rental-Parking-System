@@ -40,6 +40,8 @@ const SlotSchema = new mongoose.Schema({
     },
     facilities: { type: [String], required: true },
     parkingImages: [String],
+    fullImage: { type: String },
+    approvalStatus: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
     propertyDocument: {
         documentType: { type: String, enum: ["registration-document", "rental-document"], required: true }, proof: [String]
     }

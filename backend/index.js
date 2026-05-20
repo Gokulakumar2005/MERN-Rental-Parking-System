@@ -50,7 +50,10 @@ const server = http.createServer(app);
 // Socket setup
 const io = new Server(server, {
   cors: {
-    origin: "https://mern-rental-parking-system-frontend.onrender.com",
+    origin: [
+      "https://mern-rental-parking-system-frontend.onrender.com",
+      "http://localhost:5173"
+    ],
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -82,12 +85,14 @@ app.post(
   "/vendor/addSlot", upload.fields([
     { name: "parkingImages", maxCount: 10 },
     { name: "proof", maxCount: 5 },
+    { name: "fullImage", maxCount: 1 },
   ]), authenticateUser, authorizeUser(["admin", "vendor"]),
   ParkingController.addSlot
 );
 app.put("/update/vendor/slot", upload.fields([
   { name: "parkingImages", maxCount: 10 },
   { name: "proof", maxCount: 5 },
+  { name: "fullImage", maxCount: 1 },
 ]), authenticateUser, authorizeUser(["admin", "vendor"]), ParkingController.updateSlot)
 app.delete("/vendor/delete/slot/:id", authenticateUser, authorizeUser(["vendor"]), ParkingController.deleteSlot)
 // User
@@ -99,6 +104,8 @@ app.get("/fetch/allBooking/maps", authenticateUser, authorizeUser(["user", "admi
 
 //admin
 app.get("/admin/fetch/allUser",authenticateUser,authorizeUser(["admin"]),UserCtrl.fetchAllUser)
+app.put("/admin/approveSlot/:id", authenticateUser, authorizeUser(["admin"]), ParkingController.approveSlot);
+app.put("/admin/rejectSlot/:id", authenticateUser, authorizeUser(["admin"]), ParkingController.rejectSlot);
 
 //payment
 app.post("/payment/create-order", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.createOrder);

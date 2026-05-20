@@ -17,6 +17,8 @@ export const PslotValidation = joi.object({
 
     facilities: joi.array().items(joi.string().trim()).required(),
 
+    fullImage: joi.string().trim().allow("").optional(),
+    approvalStatus: joi.string().trim().valid("approved", "pending", "rejected").optional(),
 
     propertyDocument: joi.object({
         documentType: joi.string().trim().required(),

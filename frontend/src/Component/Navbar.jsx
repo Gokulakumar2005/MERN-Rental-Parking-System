@@ -13,7 +13,8 @@ import {
   PlusCircle, 
   History,
   Settings,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck
 } from "lucide-react";
 import Notification from "./notification.jsx";
 import SwitchRole from "./SwitchRole.jsx";
@@ -69,6 +70,9 @@ export default function Navbar() {
                         </Link>
                         <Link to="/AllBookings" className={navLinkClass("/AllBookings")}>
                             <BookOpen size={18} /> Bookings
+                        </Link>
+                        <Link to="/slotApproval" className={navLinkClass("/slotApproval")}>
+                            <ShieldCheck size={18} /> Slot Approvals
                         </Link>
                     </>
                 )}

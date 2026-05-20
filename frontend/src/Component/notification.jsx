@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import axios from "../config/axiosInstance";
 import { useSelector } from "react-redux";
 import { Bell, Check, X, BellRing, AlertTriangle, RefreshCcw } from "lucide-react";
+import { toast } from "react-toastify";
 
 
 
@@ -41,8 +42,18 @@ export default function NotificationDropdown() {
             socketRef.current.on("notification", (notification) => {
                 setNotifications((prev) => [notification, ...prev]);
 
-                if (notification.type === "peakHours") {
+                if (notification.type === "slotApproval") {
+                    if (notification.message.toLowerCase().includes("approved")) {
+                        toast.success(notification.message, { autoClose: 6000 });
+                    } else if (notification.message.toLowerCase().includes("rejected")) {
+                        toast.error(notification.message, { autoClose: 6000 });
+                    } else {
+                        toast.warning(notification.message, { autoClose: 6000 });
+                    }
+                } else if (notification.type === "peakHours") {
                     alert(notification.message);
+                } else {
+                    toast.info(notification.message);
                 }
             });
 

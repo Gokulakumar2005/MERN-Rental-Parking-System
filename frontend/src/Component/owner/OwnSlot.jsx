@@ -25,12 +25,16 @@ export default function MySlot() {
     const [search, setSearch] = useState(initialSearch);
 
     const handlePageChange = (page) => {
-        dispatch(FetchSlots({ page, limit: 24 }));
+        if (user?._id) {
+            dispatch(FetchSlots({ page, limit: 24, vendorId: user._id }));
+        }
     };
 
     useEffect(() => {
-        dispatch(FetchSlots({ page: 1, limit: 24 }));
-    }, [dispatch]);
+        if (user?._id) {
+            dispatch(FetchSlots({ page: 1, limit: 24, vendorId: user._id }));
+        }
+    }, [dispatch, user?._id]);
 
     useEffect(() => {
         if (reduxError) {
@@ -119,7 +123,9 @@ export default function MySlot() {
                         <button
                             onClick={() => {
                                 setServerError(null);
-                                dispatch(FetchSlots({ page: 1, limit: 24 }));
+                                if (user?._id) {
+                                    dispatch(FetchSlots({ page: 1, limit: 24, vendorId: user._id }));
+                                }
                             }}
                             className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
                         >
@@ -139,13 +145,32 @@ export default function MySlot() {
                                     key={ele._id}
                                     className="bg-white rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 p-6 hover:shadow-xl transition-all duration-300"
                                 >
-                                    <div className="flex items-start gap-4 mb-5">
-                                        <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 border border-indigo-100 flex-shrink-0">
-                                            <MapPin size={22} />
+                                    <div className="flex items-start justify-between gap-4 mb-5">
+                                        <div className="flex items-start gap-4 min-w-0">
+                                            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 border border-indigo-100 flex-shrink-0">
+                                                <MapPin size={22} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h2 className="text-xl font-extrabold text-slate-800 truncate" title={ele.name}>{ele.name}</h2>
+                                                <p className="text-sm text-slate-500 font-medium mt-1 truncate" title={ele.address}>{ele.address}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h2 className="text-xl font-extrabold text-slate-800 truncate">{ele.name}</h2>
-                                            <p className="text-sm text-slate-500 font-medium mt-1 truncate">{ele.address}</p>
+                                        <div className="flex-shrink-0 mt-1">
+                                            {ele.approvalStatus === "approved" && (
+                                                <span className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl">
+                                                    Approved
+                                                </span>
+                                            )}
+                                            {ele.approvalStatus === "pending" && (
+                                                <span className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-100 rounded-xl animate-pulse">
+                                                    Pending
+                                                </span>
+                                            )}
+                                            {ele.approvalStatus === "rejected" && (
+                                                <span className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-100 rounded-xl shadow-sm">
+                                                    Slot Rejected
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 

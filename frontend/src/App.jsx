@@ -25,6 +25,7 @@ import Notification from "./Component/notification.jsx";
 import AllBookings from "./Component/admin/AllBookings.jsx";
 import AllUser from "./Component/admin/AllUsers.jsx";
 import AllParkingSlots from "./Component/admin/AllParkingSlot.jsx";
+import SlotApproval from "./Component/admin/SlotApproval.jsx";
 import Navbar from "./Component/Navbar.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -94,6 +95,7 @@ function App() {
             <Route path="/Allusers" element={<AllUser />} />
             <Route path="/AllParkingSlot" element={<AllParkingSlots />} />
             <Route path="/AllBookings" element={<AllBookings />} />
+            <Route path="/slotApproval" element={<SlotApproval />} />
           </Routes>
         </div>
       </div>

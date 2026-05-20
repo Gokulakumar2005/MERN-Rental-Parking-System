@@ -2,6 +2,7 @@ import axios from "axios";
 import { SlotModel } from "../models/ParkingSlot.js";
 import { PslotValidation } from "../validations/ParkingSlotValidation.js";
 import { paginate } from "../utils/pagination.js";
+import NotificationModel from "../models/NotificationModel.js";
 
 
 const ParkingController = {};
@@ -15,6 +16,7 @@ ParkingController.addSlot = async (req, res) => {
 
     const parkingImages = req.files?.parkingImages?.map(file => file.path) || [];
     const proof = req.files?.proof?.map(file => file.path) || [];
+    const fullImage = req.files?.fullImage?.[0]?.path || "";
 
     if (!req.files?.parkingImages || req.files.parkingImages.length === 0) {
         return res.status(400).json({ error: "parkingImages is required" });
@@ -63,6 +65,16 @@ ParkingController.addSlot = async (req, res) => {
             });
         }
 
+        let approvalStatus = body.approvalStatus || "pending";
+        if (req.files?.fullImage?.[0]) {
+            const fileNameLower = req.files.fullImage[0].originalname.toLowerCase();
+            const blockedKeywords = ["fail", "block", "traffic", "jam", "crowd", "full", "busy", "occupied", "congested", "blocked"];
+            const hasBlockage = blockedKeywords.some(keyword => fileNameLower.includes(keyword));
+            if (hasBlockage) {
+                approvalStatus = "pending";
+            }
+        }
+
         const newSlot = new SlotModel({
             name: value.name,
             address: value.address,
@@ -78,6 +90,8 @@ ParkingController.addSlot = async (req, res) => {
             pricing: value.pricing,
             facilities: value.facilities,
             parkingImages,
+            fullImage,
+            approvalStatus,
             propertyDocument: {
                 ...value.propertyDocument,
                 proof
@@ -87,6 +101,23 @@ ParkingController.addSlot = async (req, res) => {
         });
 
         await newSlot.save();
+        if (newSlot.approvalStatus === "pending") {
+            try {
+                const notification = new NotificationModel({
+                    recipient: newSlot.vendorId,
+                    sender: newSlot.vendorId,
+                    message: `Your slot '${newSlot.name}' is pending admin verification. It will take up to 5 working days.`,
+                    type: "slotApproval",
+                    data: { slotId: newSlot._id }
+                });
+                await notification.save();
+                if (global.io) {
+                    global.io.to(`user_${newSlot.vendorId}`).emit("notification", notification);
+                }
+            } catch (notifErr) {
+                console.error("Failed to create pending slot notification:", notifErr);
+            }
+        }
         res.status(201).json({ message: "Slot added successfully", newSlot });
 
     } catch (err) {
@@ -115,6 +146,7 @@ ParkingController.updateSlot = async (req, res) => {
 
         const parkingImages = req.files?.parkingImages?.map(file => file.path) || [];
         const proof = req.files?.proof?.map(file => file.path) || [];
+        const fullImage = req.files?.fullImage?.[0]?.path || "";
 
         let updateData = {
             name: body.name || slot.name,
@@ -124,6 +156,17 @@ ParkingController.updateSlot = async (req, res) => {
 
         if (body.pricing) updateData.pricing = body.pricing;
         if (body.facilities) updateData.facilities = body.facilities;
+        
+        let approvalStatus = body.approvalStatus || slot.approvalStatus;
+        if (req.files?.fullImage?.[0]) {
+            const fileNameLower = req.files.fullImage[0].originalname.toLowerCase();
+            const blockedKeywords = ["fail", "block", "traffic", "jam", "crowd", "full", "busy", "occupied", "congested", "blocked"];
+            const hasBlockage = blockedKeywords.some(keyword => fileNameLower.includes(keyword));
+            if (hasBlockage) {
+                approvalStatus = "pending";
+            }
+        }
+        updateData.approvalStatus = approvalStatus;
         if (body.propertyDocument) {
             updateData.propertyDocument = {
                 ...slot.propertyDocument,
@@ -133,6 +176,9 @@ ParkingController.updateSlot = async (req, res) => {
 
         if (parkingImages.length > 0) {
             updateData.parkingImages = parkingImages;
+        }
+        if (fullImage) {
+            updateData.fullImage = fullImage;
         }
         if (proof.length > 0) {
             updateData.propertyDocument = updateData.propertyDocument || slot.propertyDocument;
@@ -177,6 +223,23 @@ ParkingController.updateSlot = async (req, res) => {
         }
 
         const updatedSlot = await SlotModel.findByIdAndUpdate(slotId, updateData, { new: true });
+        if (updatedSlot.approvalStatus === "pending") {
+            try {
+                const notification = new NotificationModel({
+                    recipient: updatedSlot.vendorId,
+                    sender: updatedSlot.vendorId,
+                    message: `Your slot '${updatedSlot.name}' is pending admin verification. It will take up to 5 working days.`,
+                    type: "slotApproval",
+                    data: { slotId: updatedSlot._id }
+                });
+                await notification.save();
+                if (global.io) {
+                    global.io.to(`user_${updatedSlot.vendorId}`).emit("notification", notification);
+                }
+            } catch (notifErr) {
+                console.error("Failed to create pending slot update notification:", notifErr);
+            }
+        }
         res.status(200).json({ message: "Slot updated successfully", updatedSlot });
 
     } catch (error) {
@@ -209,7 +272,7 @@ ParkingController.deleteSlot = async (req, res) => {
 //     }
 // }
 ParkingController.fetchSlots = async (req, res) => {
-    const { search, vehicleType } = req.query;
+    const { search, vehicleType, approvalStatus, vendorId } = req.query;
     try {
         const query = {};
         
@@ -223,6 +286,16 @@ ParkingController.fetchSlots = async (req, res) => {
 
         if (vehicleType && vehicleType !== "all") {
             query.vehicles = vehicleType;
+        }
+
+        if (approvalStatus) {
+            query.approvalStatus = approvalStatus;
+        } else if (req.role === "user") {
+            query.approvalStatus = { $in: ["approved", null, undefined] };
+        }
+
+        if (vendorId) {
+            query.vendorId = vendorId;
         }
 
         const response = await paginate(SlotModel, req.query, {
@@ -239,14 +312,80 @@ ParkingController.fetchSlots = async (req, res) => {
 
 ParkingController.fetchAllSlotWithoutPagination=async(req,res)=>{
     try {
-        const response = await SlotModel.find();
+        const query = {};
+        if (req.role === "user") {
+            query.approvalStatus = { $in: ["approved", null, undefined] };
+        }
+        const response = await SlotModel.find(query);
         res.json(response);
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
     }
-}
+};
 
+ParkingController.approveSlot = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedSlot = await SlotModel.findByIdAndUpdate(
+            id,
+            { approvalStatus: "approved" },
+            { new: true }
+        );
+        if (!updatedSlot) {
+            return res.status(404).json({ error: "Slot not found" });
+        }
+        try {
+            const notification = new NotificationModel({
+                recipient: updatedSlot.vendorId,
+                sender: req.userId,
+                message: `Your slot '${updatedSlot.name}' has been approved by the Admin. It is now active for booking.`,
+                type: "slotApproval",
+                data: { slotId: updatedSlot._id }
+            });
+            await notification.save();
+            if (global.io) {
+                global.io.to(`user_${updatedSlot.vendorId}`).emit("notification", notification);
+            }
+        } catch (notifErr) {
+            console.error("Failed to create approve slot notification:", notifErr);
+        }
+        res.status(200).json({ message: "Slot approved successfully", updatedSlot });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
+ParkingController.rejectSlot = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedSlot = await SlotModel.findByIdAndUpdate(
+            id,
+            { approvalStatus: "rejected" },
+            { new: true }
+        );
+        if (!updatedSlot) {
+            return res.status(404).json({ error: "Slot not found" });
+        }
+        try {
+            const notification = new NotificationModel({
+                recipient: updatedSlot.vendorId,
+                sender: req.userId,
+                message: `Your slot '${updatedSlot.name}' has been rejected by the Admin due to space verification checks.`,
+                type: "slotApproval",
+                data: { slotId: updatedSlot._id }
+            });
+            await notification.save();
+            if (global.io) {
+                global.io.to(`user_${updatedSlot.vendorId}`).emit("notification", notification);
+            }
+        } catch (notifErr) {
+            console.error("Failed to create reject slot notification:", notifErr);
+        }
+        res.status(200).json({ message: "Slot rejected successfully", updatedSlot });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 export default ParkingController;

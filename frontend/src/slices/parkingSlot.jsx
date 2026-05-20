@@ -19,7 +19,7 @@ export const AddSlot = createAsyncThunk("VendorSlot/AddSlot", async ({ form }, {
 
 
 export const FetchSlots = createAsyncThunk("VendorSlots/FetchSlots", async (
-    { page = 1, limit = 24, search = "", vehicleType = "all" }, 
+    { page = 1, limit = 24, search = "", vehicleType = "all", approvalStatus = undefined, vendorId = undefined }, 
     { rejectWithValue }
 ) => {
     try {
@@ -29,7 +29,9 @@ export const FetchSlots = createAsyncThunk("VendorSlots/FetchSlots", async (
                 page,
                 limit,
                 search,
-                vehicleType
+                vehicleType,
+                approvalStatus,
+                vendorId
             },
         });
         console.log({ "response inside the slices": response.data });
@@ -63,6 +65,31 @@ export const deleteSlot = createAsyncThunk("VendorSlots/deleteSlot", async (id, 
         return rejectWithValue(msg);
     }
 })
+
+export const approveSlot = createAsyncThunk("AdminSlots/approveSlot", async (id, { rejectWithValue }) => {
+    try {
+        const response = await axios.put(`/admin/approveSlot/${id}`, {}, { headers: { Authorization: localStorage.getItem("token") } });
+        toast.success("Slot Approved successfully..");
+        return response.data;
+    } catch (error) {
+        const msg = error?.response?.data?.error;
+        toast.error(msg || "Approval failed.");
+        return rejectWithValue(msg);
+    }
+});
+
+export const rejectSlot = createAsyncThunk("AdminSlots/rejectSlot", async (id, { rejectWithValue }) => {
+    try {
+        const response = await axios.put(`/admin/rejectSlot/${id}`, {}, { headers: { Authorization: localStorage.getItem("token") } });
+        toast.error("Slot Rejected successfully..");
+        return response.data;
+    } catch (error) {
+        const msg = error?.response?.data?.error;
+        toast.error(msg || "Rejection failed.");
+        return rejectWithValue(msg);
+    }
+});
+
 const ParkingSlices = createSlice({
     name: "VendorSlot",
     initialState: {
@@ -131,6 +158,30 @@ const ParkingSlices = createSlice({
         builder.addCase(deleteSlot.rejected, (state) => {
             state.error = null;
             state.loading=false;
+        })
+        builder.addCase(approveSlot.fulfilled, (state, action) => {
+            const updated = action.payload.updatedSlot;
+            state.Slot = state.Slot.filter(slot => slot._id !== updated._id);
+            state.loading = false;
+        })
+        builder.addCase(approveSlot.pending, (state) => {
+            state.loading = true;
+        })
+        builder.addCase(approveSlot.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        builder.addCase(rejectSlot.fulfilled, (state, action) => {
+            const updated = action.payload.updatedSlot;
+            state.Slot = state.Slot.filter(slot => slot._id !== updated._id);
+            state.loading = false;
+        })
+        builder.addCase(rejectSlot.pending, (state) => {
+            state.loading = true;
+        })
+        builder.addCase(rejectSlot.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
         })
 
     }

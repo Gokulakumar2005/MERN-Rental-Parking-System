@@ -21,7 +21,7 @@ const notificationSchema = new mongoose.Schema({
     // },
     type: {
         type: String,
-        enum: ["booking", "cancellation", "message", "peakHours"],
+        enum: ["booking", "cancellation", "message", "peakHours", "slotApproval"],
         required: true
     },
     data: {
