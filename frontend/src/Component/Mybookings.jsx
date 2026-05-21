@@ -16,6 +16,7 @@ export default function Mybookings() {
     const navigate = useNavigate();
     const [serverError, setServerError] = useState(null);
     const { currentPage = 1, totalPages = 1 } = pagination || {};
+    // console.log({Userdetails:user})
 
     const handlePageChange = (page) => {
         dispatch(fetchBookings({ page, limit: 24 }));
@@ -164,7 +165,7 @@ export default function Mybookings() {
                                             </div>
                                         </div>
 
-                                        {ele.status === "Booked" && new Date(ele.endTime) > new Date() && (ele.slotId || slotFromStore) && (
+                                        {ele.status === "Booked"&& user.role==="user" && new Date(ele.endTime) > new Date() && (ele.slotId || slotFromStore) && (
                                             <div className="mt-4 mb-5 p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl">
                                                 <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
                                                     <MapPin size={16} className="text-indigo-600" />
