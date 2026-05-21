@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBookings, CancelBooking } from "../slices/BookingSlices";
+import { FetchSlots } from "../slices/parkingSlot";
+import MyMap from "../config/mapComponent";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../config/pagination";
-import { CalendarDays, Car, Clock, MessageCircle, XCircle, AlertTriangle, CalendarCheck, IndianRupee, RefreshCcw } from "lucide-react";
+import { CalendarDays, Car, Clock, MessageCircle, XCircle, AlertTriangle, CalendarCheck, IndianRupee, RefreshCcw, MapPin } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function Mybookings() {
     const { myBooking, error, pagination } = useSelector((state) => state.booking);
     const { user } = useSelector((state) => state.auth);
+    const { Slot: slots } = useSelector((state) => state.slot);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [serverError, setServerError] = useState(null);
@@ -20,6 +23,7 @@ export default function Mybookings() {
 
     useEffect(() => {
         dispatch(fetchBookings({ page: 1, limit: 24 }));
+        dispatch(FetchSlots({ page: 1, limit: 100 }));
     }, [dispatch]);
 
     const CommonId_Bookings = Array.isArray(myBooking) && user?._id
@@ -112,6 +116,17 @@ export default function Mybookings() {
                         <div className="space-y-4">
                             {[...CommonId_Bookings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((ele, index) => {
                                 const cfg = statusConfig[ele.status] || { color: "bg-slate-100 text-slate-600 border-slate-200", icon: <Clock size={12} /> };
+                                
+                                // Retrieve slot details from Redux store using slotId
+                                const slotIdStr = ele.slotId?._id || ele.slotId;
+                                const slotFromStore = Array.isArray(slots) ? slots.find(s => s._id === slotIdStr) : null;
+                                const slotDetails = slotFromStore || ele.slotId || {};
+                                
+                                const destination = slotDetails?.location?.geo ? {
+                                    lat: Number(slotDetails.location.geo.lat),
+                                    lng: Number(slotDetails.location.geo.lng)
+                                } : null;
+
                                 return (
                                     <div key={index} className="bg-white shadow-lg shadow-slate-200/40 rounded-3xl p-6 border border-slate-100 hover:shadow-xl transition-all duration-300">
                                         <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
@@ -148,6 +163,40 @@ export default function Mybookings() {
                                                 <p className="font-bold text-slate-700 text-sm">{new Date(ele.endTime).toLocaleString()}</p>
                                             </div>
                                         </div>
+
+                                        {ele.status === "Booked" && new Date(ele.endTime) > new Date() && (ele.slotId || slotFromStore) && (
+                                            <div className="mt-4 mb-5 p-5 bg-indigo-50/50 border border-indigo-100 rounded-2xl">
+                                                <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
+                                                    <MapPin size={16} className="text-indigo-600" />
+                                                     Location & Routing Details
+                                                </h4>
+                                                <div className="grid md:grid-cols-2 gap-6">
+                                                    <div className="space-y-3">
+                                                        <div>
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Facility Name</p>
+                                                            <p className="font-bold text-slate-700 text-sm">{slotDetails.name || "N/A"}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Full Address</p>
+                                                            <p className="font-bold text-slate-700 text-sm">{slotDetails.address || "N/A"}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Area</p>
+                                                            <p className="font-bold text-slate-700 text-sm">{slotDetails.Area || ele.Area || "N/A"}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="h-48 md:h-full min-h-[12rem] rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                                                        {destination ? (
+                                                            <MyMap location={destination} height="h-full min-h-[12rem]" />
+                                                        ) : (
+                                                            <div className="flex items-center justify-center h-full bg-slate-100 text-xs text-slate-500 font-bold p-4 text-center">
+                                                                No coordinates available for routing
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {ele.status === "Booked" && (
                                             <p className="text-xs text-amber-600 font-bold flex items-center gap-2 mb-4 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl">

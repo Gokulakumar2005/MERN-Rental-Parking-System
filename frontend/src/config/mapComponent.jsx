@@ -28,7 +28,7 @@ const Routing = ({ from, to }) => {
       routingRef.current = null;
     }
 
-    routingRef.current = L.Routing.control({
+    const control = L.Routing.control({
       waypoints: [
         L.latLng(from.lat, from.lng),
         L.latLng(to.lat, to.lng),
@@ -39,11 +39,36 @@ const Routing = ({ from, to }) => {
       show: false,
       addWaypoints: false,
       routeWhileDragging: false,
-    }).addTo(map);
+    });
+
+    // Monkey patch to prevent errors if unmounted while routing request is active
+    const originalClearLines = control._clearLines;
+    if (originalClearLines) {
+      control._clearLines = function() {
+        if (this._map) {
+          originalClearLines.apply(this, arguments);
+        }
+      };
+    }
+
+    const originalRouteDone = control._routeDone;
+    if (originalRouteDone) {
+      control._routeDone = function() {
+        if (this._map) {
+          originalRouteDone.apply(this, arguments);
+        }
+      };
+    }
+
+    routingRef.current = control.addTo(map);
 
     return () => {
-      if (routingRef.current) {
-        map.removeControl(routingRef.current);
+      if (routingRef.current && map) {
+        try {
+          map.removeControl(routingRef.current);
+        } catch (e) {
+          console.warn("Failed to remove routing control cleanly:", e);
+        }
       }
     };
   }, [map, from, to]);
@@ -52,7 +77,7 @@ const Routing = ({ from, to }) => {
 };
 
 
-export default function MyMap({location}) {
+export default function MyMap({location, height = "h-screen"}) {
   const navigate = useNavigate();
   const [currentLocation, setCurrentLocation] = useState(null);
 
@@ -81,20 +106,20 @@ export default function MyMap({location}) {
 
   if (!currentLocation) {
     return (
-      <div className="flex items-center justify-center h-screen text-lg">
-        Loading map...
+      <div className={`flex items-center justify-center ${height === "h-screen" ? "h-screen" : "h-full min-h-[12rem]"} text-sm text-slate-500 font-medium`}>
+        Loading map and routing...
       </div>
     );
   }
   if (!destination) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-10">
-        <p className="text-red-500 font-semibold">
+      <div className={`flex flex-col items-center justify-center ${height === "h-screen" ? "h-screen" : "h-full min-h-[12rem]"} gap-4`}>
+        <p className="text-red-500 font-semibold text-sm">
           No destination provided.
         </p>
         <button
           onClick={() => navigate(-1)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold"
         >
           Go Back
         </button>
@@ -103,7 +128,7 @@ export default function MyMap({location}) {
   }
 
   return (
-   <div className="relative h-screen w-full">
+   <div className={`relative ${height} w-full`}>
   {/* <button
     onClick={() => navigate(-1)}
     className="absolute top-4 right-4 z-[9999] bg-blue-600 px-6 py-2 rounded-xl shadow-lg hover:bg-red-100 transition"

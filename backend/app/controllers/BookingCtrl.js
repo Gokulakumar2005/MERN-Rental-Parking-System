@@ -215,6 +215,7 @@ BookingCtrl.fetchBookings = async (req, res) => {
         const result = await paginate(BookingModel, req.query, {
             query: query,
             sort: { createdAt: -1 },
+            populate: { path: "slotId", select: "name address Area location facilities" }
         });
 
         res.status(200).json(result);
