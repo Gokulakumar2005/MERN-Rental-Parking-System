@@ -121,7 +121,7 @@ export default function Login() {
 
                     <div className="max-w-sm mx-auto">
                         <div className="text-center md:text-left mb-10 mt-4 md:mt-0">
-                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h1>
+                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome to Login Page</h1>
                             <p className="text-slate-500 mt-2 font-medium">Login to manage your bookings and spaces.</p>
                         </div>
 

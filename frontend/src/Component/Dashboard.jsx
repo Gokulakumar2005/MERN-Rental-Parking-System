@@ -4,7 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminDashboard from "./admin/AdminDashboard";
 import SearchBar from "./SearchBar";
-import { Car, CalendarDays, CreditCard, Wallet, PlusCircle, CarFront, Inbox, ClipboardList, ShieldAlert, BadgeCheck, Search, ArrowRight, RefreshCcw, AlertTriangle } from "lucide-react";
+import { fetchBookings } from "../slices/BookingSlices";
+import { FetchSlots } from "../slices/parkingSlot";
+import { Car, CalendarDays, CreditCard, Wallet, PlusCircle, CarFront, Inbox, ClipboardList, ShieldAlert, BadgeCheck, Search, ArrowRight, RefreshCcw, AlertTriangle, CalendarCheck } from "lucide-react";
 
 
 function DashBoard() {
@@ -13,11 +15,23 @@ function DashBoard() {
     const [searchQuery, setSearchQuery] = useState("");
 
     const { user, Error: reduxError } = useSelector((state) => state.auth);
+    const myBooking = useSelector((state) => state.booking?.myBooking) || [];
+    const Slot = useSelector((state) => state.slot?.Slot) || [];
+
     const [serverError, setServerError] = useState(null);
 
     useEffect(() => {
         dispatch(UserAccount());
     }, [dispatch]);
+
+    useEffect(() => {
+        if (user) {
+            dispatch(fetchBookings({ page: 1, limit: 100 }));
+            if (user.role === "vendor") {
+                dispatch(FetchSlots({ page: 1, limit: 100, vendorId: user._id }));
+            }
+        }
+    }, [dispatch, user?._id, user?.role]);
 
     useEffect(() => {
         if (reduxError) {
@@ -83,6 +97,97 @@ function DashBoard() {
         );
     }, [user?.role, searchQuery]);
 
+    const activities = useMemo(() => {
+        if (!user) return [];
+
+        const list = [];
+
+        if (user.role === "user") {
+            const userBookings = myBooking.filter(b => b.userId === user._id);
+            userBookings.forEach(b => {
+                // Booking Created Activity
+                list.push({
+                    id: `booking-${b._id}`,
+                    type: "booking",
+                    title: `Booked ${b.vehicletype} Slot`,
+                    subtitle: `Slot: #${b.BookedSlots?.join(", ") || ""} | Area: ${b.Area || "N/A"}`,
+                    rightDetail: `₹${b.Amount}`,
+                    rightDetailColor: "text-rose-600 font-bold",
+                    status: b.status,
+                    statusColor: b.status === "Booked" 
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                        : b.status === "completed"
+                        ? "bg-blue-50 text-blue-700 border-blue-100"
+                        : "bg-rose-50 text-rose-700 border-rose-100",
+                    icon: <Car size={18} />,
+                    iconBg: "bg-indigo-50 text-indigo-600 border-indigo-100",
+                    timestamp: new Date(b.createdAt)
+                });
+
+                // Payment Activity
+                list.push({
+                    id: `payment-${b._id}`,
+                    type: "payment",
+                    title: `Paid for Reservation`,
+                    subtitle: `ID: ${b.paymentId || "Wallet Payment"}`,
+                    rightDetail: `-₹${b.Amount}`,
+                    rightDetailColor: "text-slate-700 font-bold",
+                    status: "Completed",
+                    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                    icon: <CreditCard size={18} />,
+                    iconBg: "bg-emerald-50 text-emerald-600 border-emerald-100",
+                    timestamp: new Date(b.createdAt)
+                });
+            });
+        } else if (user.role === "vendor") {
+            const vendorBookings = myBooking.filter(b => b.vendorId === user._id);
+            vendorBookings.forEach(b => {
+                // Booking Received Activity
+                list.push({
+                    id: `booking-${b._id}`,
+                    type: "booking_received",
+                    title: `Received Booking`,
+                    subtitle: `${b.vehicletype} (${b.vehiclesNumber}) booked Slot #${b.BookedSlots?.join(", ") || ""}`,
+                    rightDetail: `+₹${b.Amount}`,
+                    rightDetailColor: "text-emerald-600 font-bold",
+                    status: b.status,
+                    statusColor: b.status === "Booked" 
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                        : b.status === "completed"
+                        ? "bg-blue-50 text-blue-700 border-blue-100"
+                        : "bg-rose-50 text-rose-700 border-rose-100",
+                    icon: <Inbox size={18} />,
+                    iconBg: "bg-amber-50 text-amber-600 border-amber-100",
+                    timestamp: new Date(b.createdAt)
+                });
+            });
+
+            const vendorSlots = Slot.filter(s => s.vendorId === user._id);
+            vendorSlots.forEach(s => {
+                list.push({
+                    id: `slot-${s._id}`,
+                    type: "slot_created",
+                    title: `Listed Slot: ${s.name}`,
+                    subtitle: `${s.address} | Available: ${s.totalSlot} spots`,
+                    rightDetail: `₹${s.pricing?.hourly || 0}/hr`,
+                    rightDetailColor: "text-slate-600 font-semibold",
+                    status: s.approvalStatus === "approved" ? "Active" : s.approvalStatus,
+                    statusColor: s.approvalStatus === "approved" 
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                        : s.approvalStatus === "pending"
+                        ? "bg-amber-50 text-amber-700 border-amber-100"
+                        : "bg-rose-50 text-rose-700 border-rose-100",
+                    icon: <PlusCircle size={18} />,
+                    iconBg: "bg-blue-50 text-blue-600 border-blue-100",
+                    timestamp: new Date(s.createdAt)
+                });
+            });
+        }
+
+        // Sort by timestamp descending
+        return list.sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
+    }, [user, myBooking, Slot]);
+
     if (!user) return (
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-slate-50">
             <div className="flex flex-col items-center gap-4 animate-pulse">
@@ -136,7 +241,6 @@ function DashBoard() {
                 </div>
             )}
 
-            {/* Header Section */}
 
             <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 flex flex-col md:flex-row items-center justify-between mb-8 overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-indigo-600"></div>
@@ -188,7 +292,7 @@ function DashBoard() {
                 </div>
             ) : (
                 <div className="space-y-10">
-                    {/* Wallet Section for User/Vendor */}
+                   
                     <div className="bg-white p-8 rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
                         <h2 className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-2 pl-2">Wallet Balance</h2>
@@ -200,7 +304,7 @@ function DashBoard() {
                         </div>
                     </div>
 
-                    {/* Features Grid */}
+                   
                     {filteredLinks.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in zoom-in-95 duration-300">
                             {filteredLinks.map((link, idx) => (
@@ -237,18 +341,59 @@ function DashBoard() {
             )}
 
             {user.role !== "admin" && (
-                <div className="mt-10 bg-white shadow-lg shadow-slate-200/40 border border-slate-100 rounded-3xl p-10 relative overflow-hidden">
+                <div className="mt-10 bg-white shadow-lg shadow-slate-200/40 border border-slate-100 rounded-3xl p-6 sm:p-10 relative overflow-hidden">
                     <h2 className="text-3xl font-extrabold text-slate-800 mb-8 flex items-center gap-3">
                         <ClipboardList className="text-indigo-600" size={28} />
                         Recent Activity
                     </h2>
-                    <div className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50 font-medium">
-                        <div className="mb-4 text-slate-300">
-                            <ShieldAlert size={64} />
+
+                    {activities.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50 font-medium">
+                            <div className="mb-4 text-slate-300">
+                                <ShieldAlert size={64} />
+                            </div>
+                            <p className="text-slate-500 font-bold text-lg text-center">No recent major activity to show right now.</p>
+                            <p className="text-slate-400 text-sm mt-2 text-center">Wait until some operations take place to see logs here.</p>
                         </div>
-                        <p className="text-slate-500 font-bold text-lg text-center">No recent major activity to show right now.</p>
-                        <p className="text-slate-400 text-sm mt-2 text-center">Wait until some operations take place to see logs here.</p>
-                    </div>
+                    ) : (
+                        <div className="relative border-l border-slate-100 pl-6 ml-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {activities.map((act) => (
+                                <div key={act.id} className="relative group transition-all duration-300 hover:translate-x-1">
+                                    {/* Timeline dot */}
+                                    <div className="absolute -left-[37px] top-1.5 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center group-hover:border-indigo-400 group-hover:scale-110 transition-all duration-300">
+                                        <span className="w-2 h-2 rounded-full bg-indigo-500 group-hover:bg-indigo-600"></span>
+                                    </div>
+
+                                    <div className="bg-slate-50/50 group-hover:bg-white rounded-2xl p-5 border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                        <div className="flex items-start gap-4">
+                                            <div className={`p-3 rounded-xl border flex-shrink-0 shadow-sm ${act.iconBg}`}>
+                                                {act.icon}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center flex-wrap gap-2">
+                                                    <h4 className="font-extrabold text-slate-800 text-base">{act.title}</h4>
+                                                    <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md border ${act.statusColor}`}>
+                                                        {act.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm font-semibold text-slate-500 mt-1">{act.subtitle}</p>
+                                                <span className="text-[11px] font-bold text-slate-400 mt-2 block">
+                                                    {act.timestamp.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:text-right border-t border-slate-100 sm:border-none pt-3 sm:pt-0">
+                                            <span className="text-xs font-bold text-slate-400 block sm:hidden">Details</span>
+                                            <span className={`text-base sm:text-lg ${act.rightDetailColor}`}>
+                                                {act.rightDetail}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

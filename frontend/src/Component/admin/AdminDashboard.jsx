@@ -15,13 +15,14 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { AlertTriangle, RefreshCcw, FileText } from "lucide-react";
 
 import { FetchAllUser } from "../../slices/authSlices";
 import { fetchBookings } from "../../slices/BookingSlices";
 import { FetchSlots } from "../../slices/parkingSlot";
 import StatsCard from "./StatsCard";
 import ReportGenerator from "./ReportGenerator";
+import { generateReportPDF } from "../../utils/pdfGenerator";
 
 const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"];
 
@@ -33,6 +34,14 @@ const AdminDashboard = () => {
   const { pagination: bookingPagination } = useSelector((state) => state.booking);
   const { pagination: slotPagination } = useSelector((state) => state.slot)
   const [serverError, setServerError] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState("");
+
+  const handleDownloadSingleUserPDF = () => {
+    const selectedUser = Alluser?.find((u) => u._id === selectedUserId);
+    if (selectedUser) {
+      generateReportPDF("single_user", myBooking, { user: selectedUser });
+    }
+  };
 
   useEffect(() => {
     if (authError || bookingError || slotError) {
@@ -42,9 +51,9 @@ const AdminDashboard = () => {
 
 
   useEffect(() => {
-    dispatch(FetchAllUser({ page: 1, limit: 24 }));
-    dispatch(fetchBookings({ page: 1, limit: 24 }));
-    dispatch(FetchSlots({ page: 1, limit: 24 }));
+    dispatch(FetchAllUser({ page: 1, limit: 100 }));
+    dispatch(fetchBookings({ page: 1, limit: 100 }));
+    dispatch(FetchSlots({ page: 1, limit: 100 }));
   }, [dispatch]);
 
   // Transform Data for Charts
@@ -102,6 +111,14 @@ const AdminDashboard = () => {
       .reduce((acc, curr) => acc + (curr.Amount || 0), 0) || 0;
   }, [myBooking]);
 
+  const pendingSlotsCount = useMemo(() => {
+    return Slot?.filter(s => s.approvalStatus === "pending")?.length || 0;
+  }, [Slot]);
+
+  const totalVendors = useMemo(() => {
+    return Alluser?.filter(u => u.role === "vendor")?.length || 0;
+  }, [Alluser]);
+
   return (
     <div className="space-y-12 py-8 px-4 md:px-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       {serverError && (
@@ -130,7 +147,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
         <StatsCard
           title="Total Revenue"
@@ -158,6 +175,19 @@ const AdminDashboard = () => {
           icon="📅"
           trend={8}
           color="orange"
+        />
+        <StatsCard
+          title="Pending Approvals"
+          value={pendingSlotsCount}
+          icon="🛡️"
+          color="red"
+        />
+        <StatsCard
+          title="Total Vendors"
+          value={totalVendors}
+          icon="🏪"
+          trend={2}
+          color="teal"
         />
       </div>
 
@@ -250,17 +280,72 @@ const AdminDashboard = () => {
               data={bookingReportData}
               filename="all_bookings_report.csv"
               label="Full Booking History"
+              type="bookings"
             />
             <ReportGenerator
               data={paymentReportData}
               filename="transaction_report.csv"
               label="Transaction Summary"
+              type="payments"
             />
             <ReportGenerator
               data={Alluser || []}
               filename="users_report.csv"
               label="User Directory"
+              type="users"
             />
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+              Single User Activity Report
+            </h4>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                className="flex-grow bg-white border border-gray-200 text-gray-800 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Select User Profile...</option>
+                {Alluser?.map((u) => (
+                  <option key={u._id} value={u._id}>
+                    {u.userName} ({u.role})
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleDownloadSingleUserPDF}
+                disabled={!selectedUserId}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-indigo-100 hover:shadow-indigo-200 transition-all flex items-center justify-center gap-2"
+              >
+                <FileText size={16} />
+                Download Report
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              Financial Revenue Reports
+            </h4>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => generateReportPDF("revenue_monthly", paymentReportData)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-emerald-100 hover:shadow-emerald-200 transition-all flex items-center justify-center gap-2 flex-1"
+              >
+                <FileText size={16} />
+                Monthly Revenue PDF
+              </button>
+              <button
+                onClick={() => generateReportPDF("revenue_yearly", paymentReportData)}
+                className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-teal-100 hover:shadow-teal-200 transition-all flex items-center justify-center gap-2 flex-1"
+              >
+                <FileText size={16} />
+                Yearly Revenue PDF
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-300">

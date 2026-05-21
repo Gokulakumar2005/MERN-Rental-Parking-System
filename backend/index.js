@@ -110,6 +110,7 @@ app.put("/admin/rejectSlot/:id", authenticateUser, authorizeUser(["admin"]), Par
 //payment
 app.post("/payment/create-order", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.createOrder);
 app.post("/payment/verify", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.verifyPayment);
+app.post("/payment/wallet-pay", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.walletPay);
 app.get("/user/fetch/payments", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchPayments);
 
 // notification

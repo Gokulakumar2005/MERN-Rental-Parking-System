@@ -1,7 +1,14 @@
 
 import UserModel from "../models/UserModel.js";
-// import { UserValidation, LoginValidation } from "../validations/userValidation.js";
-import {UserValidation,LoginValidation} from "../validations/UserValidation.js";
+import {
+    UserValidation,
+    LoginValidation,
+    GoogleLoginValidation,
+    UpdateProfileValidation,
+    UpdatePasswordValidation,
+    ForgotPasswordValidation,
+    ResetPasswordValidation
+} from "../validations/UserValidation.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 // import otp-generator from "otp-generator";
@@ -17,7 +24,12 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const UserCtrl = {};
 
 UserCtrl.googleLogin = async (req, res) => {
-    const { token } = req.body;
+    const body = req.body;
+    const { error, value } = GoogleLoginValidation.validate(body, { abortEarly: false });
+    if (error) {
+        return res.status(400).json({ error: error.details.map(err => err.message) });
+    }
+    const { token } = value;
     try {
         const ticket = await client.verifyIdToken({
             idToken: token,
@@ -142,9 +154,14 @@ UserCtrl.updateProfile = async (req, res) => {
         body.profilePic = req.file.path;
     }
 
+    const { error, value } = UpdateProfileValidation.validate(body, { abortEarly: false });
+    if (error) {
+        return res.status(400).json({ error: error.details.map(err => err.message) });
+    }
+
     // console.log({ "body": body, "Id": Id });
     try {
-        const response = await UserModel.findByIdAndUpdate(Id, { $set: body }, { new: true })
+        const response = await UserModel.findByIdAndUpdate(Id, { $set: value }, { new: true })
         // console.log(response);
         res.json(response);
     } catch (error) {
@@ -155,7 +172,11 @@ UserCtrl.updateProfile = async (req, res) => {
 
 
 UserCtrl.updatePassword = async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
+    const { error, value } = UpdatePasswordValidation.validate(req.body, { abortEarly: false });
+    if (error) {
+        return res.status(400).json({ error: error.details.map(err => err.message) });
+    }
+    const { oldPassword, newPassword } = value;
     try {
         const user = await UserModel.findById(req.userId);
         if (!user) return res.status(404).json({ error: "User not found" });
@@ -177,7 +198,11 @@ UserCtrl.updatePassword = async (req, res) => {
 }
 
 UserCtrl.forgotPassword = async (req, res) => {
-    const body = req.body.detail;
+    const { error, value } = ForgotPasswordValidation.validate(req.body, { abortEarly: false });
+    if (error) {
+        return res.status(400).json({ error: error.details.map(err => err.message) });
+    }
+    const body = value.detail;
     console.log({ "BOdy inside the Forgot Ctrl": body });
     try {
         const response = await UserModel.findOne({ $or: [{ email: body }, { phoneNumber: body }] });
@@ -252,7 +277,11 @@ UserCtrl.forgotPassword = async (req, res) => {
 }
 
 UserCtrl.resetPassword = async (req, res) => {
-    const { detail, newPassword } = req.body;
+    const { error, value } = ResetPasswordValidation.validate(req.body, { abortEarly: false });
+    if (error) {
+        return res.status(400).json({ error: error.details.map(err => err.message) });
+    }
+    const { detail, newPassword } = value;
     try {
         const user = await UserModel.findOne({ $or: [{ email: detail }, { phoneNumber: detail }] });
         if (!user) return res.status(404).json({ error: "User not found" });

@@ -4,10 +4,11 @@ import { SlotModel } from "../models/ParkingSlot.js";
 import razorpay from "../../config/razorpay.js";
 import UserModel from "../models/UserModel.js";
 import crypto from "crypto";
-import { createOrderSchema } from "../validations/BookingValidationSchema.js";
-import { verifyPaymentSchema } from "../validations/BookingValidationSchema.js";
+import { createOrderSchema, verifyPaymentSchema, walletPaymentSchema } from "../validations/BookingValidationSchema.js";
 import NotificationModel from "../models/NotificationModel.js";
 import { paginate } from "../utils/pagination.js";
+import { PaymentValidationSchema } from "../validations/PaymentValidation.js";
+import { NotificationValidationSchema } from "../validations/NotificationValidation.js";
 
 
 const BookingCtrl = {};
@@ -105,21 +106,20 @@ BookingCtrl.verifyPayment = async (req, res) => {
 
             const slotArray = bookingData.slotcount || [];
 
-            const payment = new PaymentModel({
-                userId: bookingData.userId,
-                VendorId: bookingData.vendorId,
+            const paymentData = {
+                userId: bookingData.userId.toString(),
+                VendorId: bookingData.vendorId.toString(),
                 slotcount: slotArray.length,
                 amount: Number(bookingData.Amount),
                 orderId: razorpay_order_id,
                 paymentId: razorpay_payment_id,
-
-                // startTime: bookingData.startTime,
-                // endTime: bookingData.endTime,
-                // status: "active",
-                // status:bookingData.status,
                 PaymentStatus: "completed"
-            });
-
+            };
+            const { error: paymentErr } = PaymentValidationSchema.validate(paymentData);
+            if (paymentErr) {
+                console.error("Payment Validation Error:", paymentErr.details);
+            }
+            const payment = new PaymentModel(paymentData);
             await payment.save();
 
 
@@ -147,16 +147,21 @@ BookingCtrl.verifyPayment = async (req, res) => {
             await UserModel.findByIdAndUpdate(VendorID, { $inc: { wallet: Amount } });
 
             // Create notification for the vendor
-            const notification = new NotificationModel({
-                recipient: VendorID,
-                sender: bookingData.userId,
+            const notifData = {
+                recipient: VendorID.toString(),
+                sender: bookingData.userId.toString(),
                 message: `New slot booked for ${bookingData.vehicletype}! Amount: ₹${Amount}`,
                 type: "booking",
                 data: {
-                    bookingId: booking._id,
-                    slotId: bookingData.slotId
+                    bookingId: booking._id.toString(),
+                    slotId: bookingData.slotId.toString()
                 }
-            });
+            };
+            const { error: notifErr } = NotificationValidationSchema.validate(notifData);
+            if (notifErr) {
+                console.error("Notification Validation Error:", notifErr.details);
+            }
+            const notification = new NotificationModel(notifData);
             await notification.save();
 
             // Emit to the vendor specifically via their user-specific room
@@ -269,16 +274,21 @@ BookingCtrl.CancelBooking = async (req, res) => {
         await updateUserWallet.save();
 
         // Create notification for the vendor
-        const cancellationNotification = new NotificationModel({
-            recipient: updatedBooking.vendorId,
-            sender: updatedBooking.userId,
-            message: `Booking cancelled for ${updatedBooking.vehicletype}. Booking ID: ${updatedBooking._id}`,
+        const cancellationNotifData = {
+            recipient: updatedBooking.vendorId.toString(),
+            sender: updatedBooking.userId.toString(),
+            message: `Booking cancelled for ${updatedBooking.vehicletype}. Booking ID: ${updatedBooking._id.toString()}`,
             type: "cancellation",
             data: {
-                bookingId: updatedBooking._id,
-                slotId: updatedBooking.slotId
+                bookingId: updatedBooking._id.toString(),
+                slotId: updatedBooking.slotId.toString()
             }
-        });
+        };
+        const { error: cancellationNotifErr } = NotificationValidationSchema.validate(cancellationNotifData);
+        if (cancellationNotifErr) {
+            console.error("Cancellation Notification Validation Error:", cancellationNotifErr.details);
+        }
+        const cancellationNotification = new NotificationModel(cancellationNotifData);
         await cancellationNotification.save();
 
         // Emit to the vendor specifically via their user-specific room
@@ -308,4 +318,135 @@ BookingCtrl.fetchAllBookingWithoutPagination = async (req, res)=> {
         res.json(error.message);
     }
 }
+
+BookingCtrl.walletPay = async (req, res) => {
+    console.log("WALLET PAY REQUEST BODY:", req.body);
+    try {
+        const { error, value } = walletPaymentSchema.validate(req.body, {
+            abortEarly: false
+        });
+
+        if (error) {
+            console.log("VALIDATION ERROR:", error.details);
+            return res.status(400).json({
+                success: false,
+                errors: error.details.map(e => e.message)
+            });
+        }
+
+        const { bookingData } = value;
+
+        // Verify slot exists
+        const slot = await SlotModel.findById(bookingData.slotId);
+        if (!slot) {
+            return res.status(400).json({
+                success: false,
+                message: "Parking slot not found"
+            });
+        }
+
+        // Verify user exists and check wallet balance
+        const user = await UserModel.findById(bookingData.userId);
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const bookingAmount = Number(bookingData.Amount);
+        if (user.wallet < bookingAmount) {
+            return res.status(400).json({
+                success: false,
+                message: `Insufficient wallet balance. Required: ₹${bookingAmount}, Available: ₹${user.wallet}`
+            });
+        }
+
+        // Deduct user wallet
+        user.wallet -= bookingAmount;
+        await user.save();
+
+        // Increment vendor wallet
+        await UserModel.findByIdAndUpdate(bookingData.vendorId, { $inc: { wallet: bookingAmount } });
+
+        const slotArray = bookingData.slotcount || [];
+
+        // Save payment record
+        const paymentData = {
+            userId: bookingData.userId.toString(),
+            VendorId: bookingData.vendorId.toString(),
+            slotcount: slotArray.length,
+            amount: bookingAmount,
+            orderId: `wallet_ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            paymentId: `wallet_pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            PaymentStatus: "completed"
+        };
+        const { error: paymentErr } = PaymentValidationSchema.validate(paymentData);
+        if (paymentErr) {
+            console.error("Payment Validation Error:", paymentErr.details);
+        }
+        const payment = new PaymentModel(paymentData);
+        await payment.save();
+
+        // Save booking record
+        const booking = new BookingModel({
+            slotId: bookingData.slotId,
+            userId: bookingData.userId,
+            vendorId: bookingData.vendorId,
+            vehicletype: bookingData.vehicletype,
+            vehiclesNumber: bookingData.vehiclesNumber,
+            Based: bookingData.Based,
+            startTime: bookingData.startTime,
+            endTime: bookingData.endTime,
+            Amount: bookingAmount,
+            Area: slot.Area,
+            BookedSlots: slotArray,
+            paymentId: payment.paymentId,
+            status: "Booked"
+        });
+        await booking.save();
+
+        // Create notification for the vendor
+        const notifData = {
+            recipient: bookingData.vendorId.toString(),
+            sender: bookingData.userId.toString(),
+            message: `New slot booked for ${bookingData.vehicletype}! Amount: ₹${bookingAmount} (Paid via Wallet)`,
+            type: "booking",
+            data: {
+                bookingId: booking._id.toString(),
+                slotId: bookingData.slotId.toString()
+            }
+        };
+        const { error: notifErr } = NotificationValidationSchema.validate(notifData);
+        if (notifErr) {
+            console.error("Notification Validation Error:", notifErr.details);
+        }
+        const notification = new NotificationModel(notifData);
+        await notification.save();
+
+        // Emit notifications & socket event
+        if (global.io) {
+            global.io.to(`user_${bookingData.vendorId}`).emit("notification", notification);
+            global.io.emit("bookingCreated", {
+                message: "new Slot Booked",
+                booking
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Booking confirmed via Wallet payment",
+            booking
+        });
+
+    } catch (error) {
+        console.error("WALLET PAY ERROR:", error);
+        res.status(500).json({
+            success: false,
+            message: "Wallet payment failed",
+            error: error.message
+        });
+    }
+};
+
 export default BookingCtrl;

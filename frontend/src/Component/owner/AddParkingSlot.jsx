@@ -591,7 +591,7 @@ export default function AddParkingSlot() {
             if (hasBlockage) {
                 passed = false;
             } else {
-                passed = Math.random() > 0.3; // 70% chance of passing for clean images
+                passed = Math.random() > 0.3; // 70% chance to pass if no blockage keywords are found, simulating a realistic AI scan outcome
             }
         }
 

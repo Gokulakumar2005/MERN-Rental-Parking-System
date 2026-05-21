@@ -14,7 +14,9 @@ import {
   History,
   Settings,
   ChevronDown,
-  ShieldCheck
+  ShieldCheck,
+  Menu,
+  X
 } from "lucide-react";
 import Notification from "./notification.jsx";
 import SwitchRole from "./SwitchRole.jsx";
@@ -25,6 +27,7 @@ export default function Navbar() {
     const dispatch = useDispatch();
     const location = useLocation();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     const { user, isLoggedIn } = useSelector((state) => state.auth);
 
@@ -32,6 +35,7 @@ export default function Navbar() {
         dispatch(logoutUser());
         navigate("/login");
         setIsProfileOpen(false);
+        setIsMobileMenuOpen(false);
     };
 
     if (!isLoggedIn) return null;
@@ -112,6 +116,16 @@ export default function Navbar() {
                 )}
             </div>
 
+            {/* Mobile Menu Toggle Button */}
+            <div className="lg:hidden flex items-center ml-auto mr-4">
+                <button 
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+            </div>
+
             {/* Right Side Actions */}
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 pr-4 border-r border-slate-100">
@@ -166,6 +180,65 @@ export default function Navbar() {
                     )}
                 </div>
             </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div className="absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-lg lg:hidden flex flex-col p-4 gap-2 z-50">
+                    {user.role === "admin" && (
+                        <>
+                            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/dashboard")}>
+                                <LayoutDashboard size={18} /> Dashboard
+                            </Link>
+                            <Link to="/Allusers" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/Allusers")}>
+                                <Users size={18} /> Users
+                            </Link>
+                            <Link to="/AllParkingSlot" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/AllParkingSlot")}>
+                                <MapPin size={18} /> Parking Slots
+                            </Link>
+                            <Link to="/AllBookings" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/AllBookings")}>
+                                <BookOpen size={18} /> Bookings
+                            </Link>
+                            <Link to="/slotApproval" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/slotApproval")}>
+                                <ShieldCheck size={18} /> Slot Approvals
+                            </Link>
+                        </>
+                    )}
+
+                    {user.role === "vendor" && (
+                        <>
+                            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/dashboard")}>
+                                <LayoutDashboard size={18} /> Dashboard
+                            </Link>
+                            <Link to="/addparkingslot" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/addparkingslot")}>
+                                <PlusCircle size={18} /> Add Slot
+                            </Link>
+                            <Link to="/mybookings" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/mybookings")}>
+                                <History size={18} /> Booked
+                            </Link>
+                            <Link to="/mySlot" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/mySlot")}>
+                                <MapPin size={18} /> My Slots
+                            </Link>
+                        </>
+                    )}
+
+                    {user.role === "user" && (
+                        <>
+                            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/dashboard")}>
+                                <LayoutDashboard size={18} /> Dashboard
+                            </Link>
+                            <Link to="/bookSlot" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/bookSlot")}>
+                                <MapPin size={18} /> Book Slot
+                            </Link>
+                            <Link to="/mybookings" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/mybookings")}>
+                                <History size={18} /> My Bookings
+                            </Link>
+                            <Link to="/mypayments" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/mypayments")}>
+                                <CreditCard size={18} /> Payments
+                            </Link>
+                        </>
+                    )}
+                </div>
+            )}
         </nav>
     );
 }

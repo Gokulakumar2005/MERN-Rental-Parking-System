@@ -1,12 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder, verifyPayment } from "../../slices/BookingSlices.jsx";
-import { resetPaymentState } from "../../slices/BookingSlices.jsx";
+import { createOrder, verifyPayment, walletPay, resetPaymentState, fetchBookings } from "../../slices/BookingSlices.jsx";
+import { UserAccount } from "../../slices/authSlices.jsx";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchBookings } from "../../slices/BookingSlices.jsx";
-import { ArrowLeft, MapPin, Car, CreditCard, Hash, Clock, CalendarDays, AlertCircle, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight, Image as ImageIcon, Bold, Bolt } from "lucide-react";
-import {toast} from "react-toastify"
+import { ArrowLeft, MapPin, Car, CreditCard, Hash, Clock, CalendarDays, AlertCircle, AlertTriangle, RefreshCcw, ChevronLeft, ChevronRight, Image as ImageIcon, Bold, Bolt, Wallet, X } from "lucide-react";
+import {toast} from "react-toastify";
 
 
 export default function SlotBookingPage() {
@@ -16,10 +15,18 @@ export default function SlotBookingPage() {
 
     const Data = location.state;
     console.log({ "Data in Slot Booking Page": Data });
-    const userId = useSelector((state) => state.auth.user._id);
-    const { myBooking, error: reduxError ,loading} = useSelector((state) => state.booking);
+    
+    const user = useSelector((state) => state.auth.user);
+    const userId = user?._id;
+    const { myBooking, error: reduxError, loading } = useSelector((state) => state.booking);
+    
     const [serverError, setServerError] = useState(null);
     const [activeImage, setActiveImage] = useState(0);
+
+    // Wallet Payment and Checkout Modal state
+    const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+    const [pendingFinalData, setPendingFinalData] = useState(null);
+    const [isWalletPaying, setIsWalletPaying] = useState(false);
 
     useEffect(() => {
         if (reduxError) {
@@ -44,6 +51,7 @@ export default function SlotBookingPage() {
 
     useEffect(() => {
         dispatch(fetchBookings());
+        dispatch(UserAccount());
     }, [dispatch]);
 
     const [Error, setError] = useState({});
@@ -60,6 +68,97 @@ export default function SlotBookingPage() {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
+
+    const handleNormalPay = async (finalData) => {
+        setIsPayModalOpen(false);
+        try {
+            const result = await dispatch(createOrder(Number(finalData.Amount)));
+
+            if (result.meta.requestStatus !== "fulfilled") {
+                return toast.error("Order creation failed");    
+            }
+
+            const order = result.payload;
+
+            if (!window.Razorpay) {
+                toast.error("Razorpay SDK not loaded");
+                return;
+            }
+
+            const options = {
+                key: "rzp_test_SZjnQX6aTQwSjC",
+                amount: order.amount,
+                currency: order.currency,
+                order_id: order.id,
+
+                name: "Parking Booking",
+                description: "Slot Booking Payment",
+
+                handler: async function (response) {
+                    const verifyRes = await dispatch(verifyPayment({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        bookingData: finalData
+                    }));
+
+                    if (verifyRes.meta.requestStatus === "fulfilled") {
+                        toast.success("✅ Booking Confirmed!");
+                        dispatch(resetPaymentState());
+                        dispatch(UserAccount());
+                        navigate("/mybookings");
+                    } else {
+                        toast.error("❌ Payment verification failed");
+                    }
+                },
+
+                prefill: {
+                    name: "User",
+                    email: "user@email.com"
+                },
+
+                theme: {
+                    color: "#6366f1"
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            console.log(error);
+            toast.error("Something Went Wrong");
+        }
+    };
+
+    const handleWalletPay = async (finalData) => {
+        const walletBalance = user?.wallet ?? 0;
+        if (walletBalance < finalData.Amount) {
+            toast.error(`Insufficient wallet balance. Required: ₹${finalData.Amount}, Available: ₹${walletBalance}`);
+            return;
+        }
+
+        setIsWalletPaying(true);
+        try {
+            const res = await dispatch(walletPay({ bookingData: finalData }));
+
+            if (res.meta.requestStatus === "fulfilled") {
+                toast.success("✅ Booking Confirmed via Wallet!");
+                setIsPayModalOpen(false);
+                dispatch(resetPaymentState());
+                dispatch(UserAccount());
+                navigate("/mybookings");
+            } else {
+                const errMsg = res.payload?.message || "Wallet payment failed";
+                toast.error(`❌ ${errMsg}`);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Something Went Wrong during Wallet Payment");
+        } finally {
+            setIsWalletPaying(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -111,73 +210,14 @@ export default function SlotBookingPage() {
         }
         const finalData = {
             ...formData,
-            Amount: amount,
+            Amount: Number(amount),
             userId,
             slotId: Data._id,
             vendorId: Data.vendorId
         };
         console.log("FINAL DATA:", finalData);
-
-        try {
-            const result = await dispatch(createOrder(Number(amount)));
-
-            if (result.meta.requestStatus !== "fulfilled") {
-                return toast.error("Order creation failed");    
-            }
-
-            const order = result.payload;
-
-            if (!window.Razorpay) {
-                toast.error("Razorpay SDK not loaded");
-                return;
-            }
-
-            const options = {
-                key: "rzp_test_SZjnQX6aTQwSjC",
-                amount: order.amount,
-                currency: order.currency,
-                order_id: order.id,
-
-                name: "Parking Booking",
-                description: "Slot Booking Payment",
-
-                handler: async function (response) {
-                    const verifyRes = await dispatch(verifyPayment({
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature,
-                        bookingData: finalData
-                    }));
-
-                    if (verifyRes.meta.requestStatus === "fulfilled") {
-                        // alert("✅ Booking Confirmed!");
-                        toast.success("✅ Booking Confirmed!")
-                        dispatch(resetPaymentState());
-                        navigate("/mybookings");
-                    } else {
-                        // alert("❌ Payment verification failed");
-                        toast.error("❌ Payment verification failed")
-                    }
-                },
-
-                prefill: {
-                    name: "User",
-                    email: "user@email.com"
-                },
-
-                theme: {
-                    color: "#6366f1"
-                }
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.open();
-
-        } catch (error) {
-            console.log(error);
-            // alert("Something went wrong");
-            toast.error("Something Went Wrong");
-        }
+        setPendingFinalData(finalData);
+        setIsPayModalOpen(true);
     };
 
     if (!Data) {
@@ -479,6 +519,101 @@ export default function SlotBookingPage() {
                     </form>
                 </div>
             </div>
+
+            {isPayModalOpen && pendingFinalData && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2rem] max-w-md w-full shadow-2xl border border-slate-100 p-6 relative animate-in zoom-in-95 duration-200">
+                       
+                        <button 
+                            onClick={() => setIsPayModalOpen(false)}
+                            className="absolute right-6 top-6 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition cursor-pointer"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 shadow-sm">
+                                <CreditCard size={28} />
+                            </div>
+                            <h3 className="text-xl font-extrabold text-slate-800">Use Wallet Or Normal Pay</h3>
+                            <p className="text-sm text-slate-400 font-bold mt-1">Select your preferred payment method</p>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6 flex justify-between items-center">
+                            <div>
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Booking Total</span>
+                                <span className="text-2xl font-black text-indigo-600">₹{pendingFinalData.Amount}</span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-1.5 shadow-sm">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span className="text-xs font-extrabold text-slate-600 uppercase">Live Pricing</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {(() => {
+                                const walletBalance = user?.wallet ?? 0;
+                                const isEnough = walletBalance >= pendingFinalData.Amount;
+
+                                return (
+                                    <button
+                                        type="button"
+                                        disabled={!isEnough || isWalletPaying || loading}
+                                        onClick={() => handleWalletPay(pendingFinalData)}
+                                        className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between cursor-pointer ${
+                                            isEnough
+                                                ? "border-indigo-100 bg-indigo-50/30 hover:bg-indigo-50 hover:border-indigo-300 shadow-sm"
+                                                : "border-slate-100 bg-slate-50/50 opacity-60 cursor-not-allowed"
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={`p-3 rounded-xl ${isEnough ? "bg-indigo-100 text-indigo-600" : "bg-slate-200 text-slate-400"}`}>
+                                                <Wallet size={22} />
+                                            </div>
+                                            <div>
+                                                <span className="font-extrabold text-slate-800 block text-base">Pay via Wallet</span>
+                                                <span className={`text-xs font-bold ${isEnough ? "text-slate-500" : "text-rose-500"}`}>
+                                                    Balance: ₹{walletBalance.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {isEnough ? (
+                                            <div className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full uppercase">
+                                                Available
+                                            </div>
+                                        ) : (
+                                            <div className="text-xs font-black bg-rose-50 text-rose-600 border border-rose-100 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                                INSUFFICIENT
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })()}
+
+                           
+                            <button
+                                type="button"
+                                disabled={isWalletPaying || loading}
+                                onClick={() => handleNormalPay(pendingFinalData)}
+                                className="w-full text-left p-4 rounded-2xl border border-indigo-100 bg-indigo-50/30 hover:bg-indigo-50 hover:border-indigo-300 shadow-sm transition-all duration-300 flex items-center justify-between cursor-pointer"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl">
+                                        <CreditCard size={22} />
+                                    </div>
+                                    <div>
+                                        <span className="font-extrabold text-slate-800 block text-base">Normal Pay</span>
+                                        <span className="text-xs font-bold text-slate-500">Pay via Card, UPI, NetBanking</span>
+                                    </div>
+                                </div>
+                                <div className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full uppercase">
+                                    Razorpay
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

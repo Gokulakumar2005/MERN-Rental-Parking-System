@@ -45,6 +45,26 @@ export const verifyPayment = createAsyncThunk(
   }
 );
 
+export const walletPay = createAsyncThunk(
+  "booking/walletPay",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        "/payment/wallet-pay",
+        payload,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
 export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (
   { page = 1, limit = 24, search = "", status = "all" },
   { rejectWithValue }
@@ -121,6 +141,17 @@ const BookingSlices = createSlice({
         state.success = true;
       })
       builder.addCase(verifyPayment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+      builder.addCase(walletPay.pending, (state) => {
+        state.loading = true;
+      })
+      builder.addCase(walletPay.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      builder.addCase(walletPay.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

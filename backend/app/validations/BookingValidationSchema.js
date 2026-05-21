@@ -43,3 +43,33 @@ export const verifyPaymentSchema = Joi.object({
     .required()
     }).required()
 });
+
+export const walletPaymentSchema = Joi.object({
+    bookingData: Joi.object({
+        userId: objectId.required(),
+        vendorId: objectId.required(),
+        slotId: objectId.required(),
+
+        vehicletype: Joi.string().required(),
+
+        vehiclesNumber: Joi.string()
+            .min(5)
+            .max(20)
+            .required(),
+
+        Based: Joi.string().required(),
+
+        startTime: Joi.date().required(),
+
+        endTime: Joi.date()
+            .greater(Joi.ref("startTime"))
+            .required(),
+
+        Amount: Joi.number().positive().required(),
+
+        slotcount: Joi.array()
+            .items(Joi.number())
+            .min(1)
+            .required()
+    }).required()
+});

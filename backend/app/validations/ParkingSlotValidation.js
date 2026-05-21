@@ -27,3 +27,29 @@ export const PslotValidation = joi.object({
 
 })
 
+export const UpdatePslotValidation = joi.object({
+    slotId: joi.string().hex().length(24).required(),
+    name: joi.string().trim().min(3).max(100).optional(),
+    address: joi.string().trim().optional(),
+    Area: joi.string().trim().optional(),
+    vehicles: joi.string().trim().optional(),
+    totalSlot: joi.number().optional(),
+    vendorId: joi.string().optional(),
+
+    pricing: joi.object({
+        hourly: joi.string().trim().optional(),
+        daily: joi.string().trim().optional(),
+        monthly: joi.string().trim().optional()
+    }).optional(),
+
+    facilities: joi.array().items(joi.string().trim()).optional(),
+
+    fullImage: joi.string().trim().allow("").optional(),
+    approvalStatus: joi.string().trim().valid("approved", "pending", "rejected").optional(),
+
+    propertyDocument: joi.object({
+        documentType: joi.string().trim().optional(),
+    }).optional(),
+})
+
+
