@@ -10,7 +10,7 @@ import path from "path";
 import "./config/node-cron/expiryBooking.js";
 import "./config/node-cron/peakHours.js";
 import "./config/node-cron/restPrice.js";
-
+import multer from "multer";
 
 // modules
 import UserCtrl from './app/controllers/User-Ctrl.js';
@@ -68,6 +68,33 @@ io.on("connection", (socket) => {
 // Socket logic
 socketHandler(io);
 
+
+
+
+app.use((err, req, res, next) => {
+
+  // Multer errors
+  if (err instanceof multer.MulterError) {
+
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        message: "File size should be less than 10MB",
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  // Other errors
+  return res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
 //Routes...
 
 app.post("/user/register", UserCtrl.register)
