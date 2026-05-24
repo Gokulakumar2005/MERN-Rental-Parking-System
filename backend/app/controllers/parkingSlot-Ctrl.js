@@ -9,31 +9,30 @@ import { NotificationValidationSchema } from "../validations/NotificationValidat
 const ParkingController = {};
 
 ParkingController.addSlot = async (req, res) => {
-    const body = req.body;
-    console.log({ "body inside Ctlr": body })
-    body.pricing = JSON.parse(body.pricing);
-    body.facilities = JSON.parse(body.facilities);
-    body.propertyDocument = JSON.parse(body.propertyDocument);
-
-    const parkingImages = req.files?.parkingImages?.map(file => file.path) || [];
-    const proof = req.files?.proof?.map(file => file.path) || [];
-    const fullImage = req.files?.fullImage?.[0]?.path || "";
-
-    if (!req.files?.parkingImages || req.files.parkingImages.length === 0) {
-        return res.status(400).json({ error: "parkingImages is required" });
-    }
-    if (!req.files?.proof || req.files.proof.length === 0) {
-        return res.status(400).json({ error: "propertyDocument proof is required" });
-    }
-    console.log({ "body": body });
-
-    const { error, value } = PslotValidation.validate(body, { abortEarly: false })
-    if (error) {
-        return res.status(400).json({ error: error.details.map(err => err.message) })
-    }
-    console.log({ "value": value });
-    console.log("FILES:", req.files);
     try {
+        const body = req.body;
+        console.log({ "body inside Ctlr": body });
+        
+        if (body.pricing) body.pricing = JSON.parse(body.pricing);
+        if (body.facilities) body.facilities = JSON.parse(body.facilities);
+        if (body.propertyDocument) body.propertyDocument = JSON.parse(body.propertyDocument);
+
+        const parkingImages = req.files?.parkingImages?.map(file => file.path) || [];
+        const proof = req.files?.proof?.map(file => file.path) || [];
+        const fullImage = req.files?.fullImage?.[0]?.path || "";
+
+        if (!req.files?.parkingImages || req.files.parkingImages.length === 0) {
+            return res.status(400).json({ error: "parkingImages is required" });
+        }
+        if (!req.files?.proof || req.files.proof.length === 0) {
+            return res.status(400).json({ error: "propertyDocument proof is required" });
+        }
+
+        const { error, value } = PslotValidation.validate(body, { abortEarly: false });
+        if (error) {
+            return res.status(400).json({ error: error.details.map(err => err.message) });
+        }
+        
         const exsistLoaction = await SlotModel.findOne({ address: value.address, location: { geo: { lat: value.lat, lng: value.lng } } });
         if (exsistLoaction) {
             return res.status(400).json({ "error": "Location already present. So, Can you try Another Location..." })

@@ -121,6 +121,13 @@ app.put("/api/notifications/read-all", authenticateUser, NotificationCtrl.markAl
 
 // chat 
 app.get("/api/chat/:roomId", ChatController.getMessages);
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err);
+  res.status(500).json({ error: err.message || "Internal Server Error" });
+});
+
 server.listen(port, () => {
   console.log(`server is running on ${port}`)
 });
