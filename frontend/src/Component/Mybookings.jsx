@@ -19,17 +19,15 @@ export default function Mybookings() {
     // console.log({Userdetails:user})
 
     const handlePageChange = (page) => {
-        dispatch(fetchBookings({ page, limit: 24 }));
+        dispatch(fetchBookings({ page, limit: 5 }));
     };
 
     useEffect(() => {
-        dispatch(fetchBookings({ page: 1, limit: 24 }));
+        dispatch(fetchBookings({ page: 1, limit: 5 }));
         dispatch(FetchSlots({ page: 1, limit: 100 }));
     }, [dispatch]);
 
-    const CommonId_Bookings = Array.isArray(myBooking) && user?._id
-        ? myBooking.filter((ele) => ele.userId === user._id || ele.vendorId === user._id)
-        : [];
+    const CommonId_Bookings = Array.isArray(myBooking) ? myBooking : [];
     console.log({ "common_id_bookings": CommonId_Bookings });
 
     useEffect(() => {
@@ -94,7 +92,7 @@ export default function Mybookings() {
                         <button
                             onClick={() => {
                                 setServerError(null);
-                                dispatch(fetchBookings({ page: 1, limit: 24 }));
+                                dispatch(fetchBookings({ page: 1, limit: 5 }));
                             }}
                             className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"
                         >

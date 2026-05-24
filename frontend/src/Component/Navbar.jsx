@@ -89,8 +89,8 @@ export default function Navbar() {
                         <Link to="/addparkingslot" className={navLinkClass("/addparkingslot")}>
                             <PlusCircle size={18} /> Add Slot
                         </Link>
-                        <Link to="/mybookings" className={navLinkClass("/mybookings")}>
-                            <History size={18} /> Booked
+                        <Link to="/receivedbookings" className={navLinkClass("/mybookings")}>
+                            <History size={18} /> Recent Bookings
                         </Link>
                         <Link to="/mySlot" className={navLinkClass("/mySlot")}>
                             <MapPin size={18} /> My Slots

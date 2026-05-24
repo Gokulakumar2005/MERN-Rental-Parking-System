@@ -26,15 +26,18 @@ export default function MySlot() {
 
     const handlePageChange = (page) => {
         if (user?._id) {
-            dispatch(FetchSlots({ page, limit: 24, vendorId: user._id }));
+            dispatch(FetchSlots({ page, limit: 5, vendorId: user._id, search }));
         }
     };
 
     useEffect(() => {
-        if (user?._id) {
-            dispatch(FetchSlots({ page: 1, limit: 24, vendorId: user._id }));
-        }
-    }, [dispatch, user?._id]);
+        const timeoutId = setTimeout(() => {
+            if (user?._id) {
+                dispatch(FetchSlots({ page: 1, limit: 5, vendorId: user._id, search }));
+            }
+        }, 500);
+        return () => clearTimeout(timeoutId);
+    }, [search, dispatch, user?._id]);
 
     useEffect(() => {
         if (reduxError) {
@@ -42,15 +45,7 @@ export default function MySlot() {
         }
     }, [reduxError]);
 
-
-    const CommonId = user
-        ? Slot.filter((ele) =>
-            String(ele.vendorId) === String(user._id) &&
-            (ele.name.toLowerCase().includes(search.toLowerCase()) ||
-                ele.address.toLowerCase().includes(search.toLowerCase()))
-        )
-        : [];
-    console.log({ "Common ID ": CommonId });
+    const CommonId = Array.isArray(Slot) ? Slot : [];
 
     const handleDelete = (id) => {
         toast(({ closeToast }) => (
@@ -124,7 +119,7 @@ export default function MySlot() {
                             onClick={() => {
                                 setServerError(null);
                                 if (user?._id) {
-                                    dispatch(FetchSlots({ page: 1, limit: 24, vendorId: user._id }));
+                                    dispatch(FetchSlots({ page: 1, limit: 5, vendorId: user._id, search }));
                                 }
                             }}
                             className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 active:scale-95 transition-all shadow-md shadow-rose-200"

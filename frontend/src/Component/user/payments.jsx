@@ -22,10 +22,10 @@ export default function Payments() {
 
     const fetchPayment = async (page = 1) => {
         try {
-            const response = await axios.get("/user/fetch/payments", { headers: { Authorization: localStorage.getItem("token") }, params: { page, limit: 24 } });
+            const response = await axios.get("/user/fetch/payments", { headers: { Authorization: localStorage.getItem("token") }, params: { page, limit: 5 } });
             const data = response.data;
-            setpayment(data);
-            setPagination(response.data?.pagination || {});
+            setpayment(data.data || []);
+            setPagination(data.pagination || {});
             setServerError(null);
         } catch (error) {
             console.log(error.response?.data);
@@ -36,7 +36,7 @@ export default function Payments() {
 
     useEffect(() => {
         fetchPayment(1);
-        dispatch(fetchBookings({ page: 1, limit: 24 }));
+        dispatch(fetchBookings({ page: 1, limit: 5 }));
     }, [dispatch]);
 
     return (

@@ -88,6 +88,21 @@ export const fetchBookings = createAsyncThunk("booking/fetchBookings", async (
   }
 })
 
+export const fetchVendorReceivedBookings = createAsyncThunk("booking/fetchVendorReceivedBookings", async (
+  { page = 1, limit = 24, search = "", status = "all" },
+  { rejectWithValue }
+) => {
+  try {
+    const response = await axios.get("/vendor/receivedBookings", {
+      headers: { Authorization: localStorage.getItem("token") },
+      params: { page, limit, search, status },
+    });
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data);
+  }
+});
+
 export const CancelBooking = createAsyncThunk("booking/CancelBooking", async (id, { rejectWithValue }) => {
   try {
     const response = await axios.put(`/user/cancelBooking/${id}`, id, { headers: { Authorization: localStorage.getItem("token") } });
@@ -102,11 +117,18 @@ const BookingSlices = createSlice({
   name: "booking",
   initialState: {
     myBooking: [],
+    vendorReceivedBookings: [],
     loading: false,
     order: null,
     success: false,
     error: null,
     pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      pageSize: 10,
+    },
+    vendorReceivedPagination: {
       currentPage: 1,
       totalPages: 1,
       totalItems: 0,
@@ -169,6 +191,20 @@ const BookingSlices = createSlice({
       state.loading = true;
       state.error = null;
     })
+
+    builder.addCase(fetchVendorReceivedBookings.fulfilled, (state, action) => {
+      state.loading = false;
+      state.vendorReceivedBookings = action.payload?.data || [];  
+      state.vendorReceivedPagination = action.payload?.pagination || {};
+    });
+    builder.addCase(fetchVendorReceivedBookings.rejected, (state, action) => {
+      state.error = action.payload;
+      state.loading = false;  
+    });
+    builder.addCase(fetchVendorReceivedBookings.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
 
     builder.addCase(CancelBooking.fulfilled, (state, action) => {
       const updatedBooking = action.payload.booking;

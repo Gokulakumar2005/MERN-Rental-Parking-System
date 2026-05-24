@@ -198,14 +198,20 @@ BookingCtrl.verifyPayment = async (req, res) => {
 
 BookingCtrl.fetchBookings = async (req, res) => {
     const { search, status } = req.query;
+    const userId = req.userId;
     try {
-        const query = {};
+        const query = {
+            $or: [{ userId: userId }, { vendorId: userId }]
+        };
 
         if (search) {
-            query.$or = [
-                { vehiclesNumber: { $regex: search, $options: "i" } },
-                { Area: { $regex: search, $options: "i" } }
-            ];
+            query.$and = query.$and || [];
+            query.$and.push({
+                $or: [
+                    { vehiclesNumber: { $regex: search, $options: "i" } },
+                    { Area: { $regex: search, $options: "i" } }
+                ]
+            });
         }
 
         if (status && status !== "all") {
@@ -227,16 +233,17 @@ BookingCtrl.fetchBookings = async (req, res) => {
 
 
 BookingCtrl.fetchPayments = async (req, res) => {
-    // const body = req.body;
-    // console.log({ "Body inside the Ctrl": req.userId })
     const userId = req.userId;
     try {
-        const response = await PaymentModel.find({ userId })
-        // console.log({ "response inside the ctrl": response })
+        const query = { userId };
+        const response = await paginate(PaymentModel, req.query, {
+            query: query,
+            sort: { createdAt: -1 }
+        });
         res.status(200).json(response);
     } catch (error) {
         console.log(error);
-        res.json(error.message);
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -447,6 +454,37 @@ BookingCtrl.walletPay = async (req, res) => {
             message: "Wallet payment failed",
             error: error.message
         });
+    }
+};
+BookingCtrl.vendorReceivedBookings = async (req, res) => {
+    const { search, status } = req.query;
+    const vendorId = req.userId;
+    try {
+        const query = { vendorId };
+
+        if (search) {
+            query.$or = [
+                { vehiclesNumber: { $regex: search, $options: "i" } },
+                { vehicletype: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        if (status && status !== "all") {
+            query.status = status;
+        }
+
+        const result = await paginate(BookingModel, req.query, {
+            query: query,
+            sort: { createdAt: -1 },
+            populate: [
+                { path: "slotId", select: "name address Area location facilities" },
+                { path: "userId", select: "userName email phoneNumber profilePic" }
+            ]
+        });
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };
 

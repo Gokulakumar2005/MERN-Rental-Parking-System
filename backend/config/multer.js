@@ -7,7 +7,7 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     return {
       folder: "parking-slots", // better name
-      allowed_formats: ["jpg", "png", "jpeg"],
+      allowed_formats: ["jpg", "png", "jpeg", "pdf"],
       public_id: Date.now() + "-" + file.originalname.split(".")[0],
     };
   },

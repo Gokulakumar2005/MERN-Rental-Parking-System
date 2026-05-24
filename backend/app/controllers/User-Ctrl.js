@@ -41,19 +41,7 @@ UserCtrl.googleLogin = async (req, res) => {
         let user = await UserModel.findOne({ email });
 
         if (!user) {
-            // Check if this is the first user (admin)
-            const usersCount = await UserModel.countDocuments();
-            const role = usersCount === 0 ? 'admin' : 'user';
-
-            user = new UserModel({
-                userName: name,
-                email: email,
-                role: role,
-                profilePic: picture,
-                wallet: 0,
-                // password and phoneNumber are optional now
-            });
-            await user.save();
+            return res.status(404).json({ error: "User not found. Please register first to use Google Login." });
         }
 
         const tokenData = { userId: user._id, role: user.role };

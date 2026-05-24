@@ -95,6 +95,7 @@ app.put("/update/vendor/slot", upload.fields([
   { name: "fullImage", maxCount: 1 },
 ]), authenticateUser, authorizeUser(["admin", "vendor"]), ParkingController.updateSlot)
 app.delete("/vendor/delete/slot/:id", authenticateUser, authorizeUser(["vendor"]), ParkingController.deleteSlot)
+app.get("/vendor/receivedBookings", authenticateUser, authorizeUser(["vendor", "admin"]), BookingCtrl.vendorReceivedBookings);
 // User
 app.get("/user/fetchSlots", authenticateUser, authorizeUser(["admin", "user", "vendor"]), ParkingController.fetchSlots)
 app.get("/user/myBookings", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchBookings);

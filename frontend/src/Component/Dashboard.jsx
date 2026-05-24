@@ -80,7 +80,7 @@ function DashBoard() {
             color: "purple"
         },
         {
-            to: "/mybookings",
+            to: "/receivedbookings",
             title: "Bookings Received",
             description: "Keep track of the slots booked by your customers.",
             icon: <Inbox size={32} />,

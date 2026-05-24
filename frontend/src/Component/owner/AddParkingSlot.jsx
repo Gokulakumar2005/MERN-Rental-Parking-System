@@ -973,7 +973,7 @@ export default function AddParkingSlot() {
                             {validationErrors.facilities && <p className={errorClass}><AlertCircle size={14} />{validationErrors.facilities}</p>}
                         </div>
 
-                        {/* Full Image Upload with background validation */}
+                        
                         <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-4">
                             <label className={labelClass}>
                                 <span className="flex items-center gap-2"><Image size={16} className="text-indigo-600" /> Full Image</span>
@@ -996,7 +996,8 @@ export default function AddParkingSlot() {
                                     }}
                                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
                                 />
-                            </div>
+
+                            </div> <p className="text-xs text-slate-400 font-medium mt-1">Please upload the single Image for Admin Verification</p>
                             
                             {validationErrors.fullImage && (
                                 <p className={errorClass}><AlertCircle size={14} />{validationErrors.fullImage}</p>
@@ -1017,6 +1018,7 @@ export default function AddParkingSlot() {
                                     }
                                     className="w-full px-4 py-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-600 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
                                 />
+                                 <p className="text-xs text-slate-400 font-medium mt-1">Please upload the PakingImages upto 5 Images  </p>
                             </div>
                             {validationErrors.parkingImages && <p className={errorClass}><AlertCircle size={14} />{validationErrors.parkingImages}</p>}
                         </div>
@@ -1052,10 +1054,12 @@ export default function AddParkingSlot() {
                                     <input
                                         type="file"
                                         name="proof"
+                                        accept="application/pdf"
                                         multiple
                                         onChange={handlePropertyProof}
                                         className="w-full px-4 py-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-600 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
                                     />
+                                    <p className="text-xs text-slate-400 font-medium mt-1">Please upload the document (PDF format only)</p>
                                     {validationErrors.proof && <p className={errorClass}><AlertCircle size={14} />{validationErrors.proof}</p>}
                                 </div>
                             </div>
