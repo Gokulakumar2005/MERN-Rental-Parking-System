@@ -224,6 +224,7 @@ UserCtrl.forgotPassword = async (req, res) => {
                 host: 'smtp.gmail.com',
                 port: 587,
                 secure: false, // true for 465, false for other ports
+                connectionTimeout: 10000, // 10 seconds timeout
                 auth: {
                     user: process.env.EMAIL_USER, // Need to set EMAIL_USER and EMAIL_PASS if not present
                     pass: process.env.EMAIL_PASS
