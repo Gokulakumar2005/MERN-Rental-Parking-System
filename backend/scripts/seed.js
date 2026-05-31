@@ -12,7 +12,7 @@ import { PaymentModel } from "../app/models/PaymentModel.js";
 import NotificationModel from "../app/models/NotificationModel.js";
 import { ChatModel } from "../app/models/chatModel.js";
 
-const RECORD_COUNT = 1000;
+const RECORD_COUNT = 50;
 
 const indianCities = [
     { name: "Bangalore", areas: ["Koramangala", "Indiranagar", "Whitefield", "HSR Layout", "JP Nagar", "Jayanagar", "Basavangudi", "Malleshwaram", "BTM Layout", "Electronic City"] },
@@ -66,11 +66,11 @@ async function seed() {
         // ──────────────────────────────────────────
         // 1. USERS (1000)
         // ──────────────────────────────────────────
-        console.log("👤 Seeding 1000 Users...");
+        console.log(`👤 Seeding ${RECORD_COUNT} Users...`);
         const hashedPassword = await bcrypt.hash("Password@123", 10);
         const userDocs = [];
-        const roles = ["user", "vendor", "admin"];
-        const roleWeights = [0.6, 0.35, 0.05];
+        const roles = ["user", "vendor"];
+        const roleWeights = [0.6, 0.40];
 
         for (let i = 0; i < RECORD_COUNT; i++) {
             const rand = Math.random();
@@ -109,7 +109,7 @@ async function seed() {
         // ──────────────────────────────────────────
         // 2. PARKING SLOTS (1000)
         // ──────────────────────────────────────────
-        console.log("🅿️  Seeding 1000 Parking Slots...");
+        console.log(`🅿️  Seeding ${RECORD_COUNT} Parking Slots...`);
         const slotDocs = [];
 
         for (let i = 0; i < RECORD_COUNT; i++) {
@@ -166,7 +166,7 @@ async function seed() {
         // ──────────────────────────────────────────
         // 3. BOOKINGS (1000)
         // ──────────────────────────────────────────
-        console.log("📅 Seeding 1000 Bookings...");
+        console.log(`📅 Seeding ${RECORD_COUNT} Bookings...`);
         const bookingDocs = [];
 
         for (let i = 0; i < RECORD_COUNT; i++) {
@@ -214,7 +214,7 @@ async function seed() {
         // ──────────────────────────────────────────
         // 4. PAYMENTS (1000)
         // ──────────────────────────────────────────
-        console.log("💳 Seeding 1000 Payments...");
+        console.log(`💳 Seeding ${RECORD_COUNT} Payments...`);
         const paymentDocs = [];
 
         for (let i = 0; i < RECORD_COUNT; i++) {
@@ -236,7 +236,7 @@ async function seed() {
         // ──────────────────────────────────────────
         // 5. NOTIFICATIONS (1000)
         // ──────────────────────────────────────────
-        console.log("🔔 Seeding 1000 Notifications...");
+        console.log(`🔔 Seeding ${RECORD_COUNT} Notifications...`);
         const notifDocs = [];
         const notifMessages = {
             booking: ["Your parking slot has been booked!", "New booking received for your slot.", "Booking confirmed — enjoy your spot!"],
@@ -268,7 +268,7 @@ async function seed() {
         // ──────────────────────────────────────────
         // 6. CHAT MESSAGES (1000)
         // ──────────────────────────────────────────
-        console.log("💬 Seeding 1000 Chat Messages...");
+        console.log(`💬 Seeding ${RECORD_COUNT} Chat Messages...`);
         const chatDocs = [];
         const chatMessages = [
             "Hi, is my parking slot confirmed?",

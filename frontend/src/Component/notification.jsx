@@ -36,7 +36,7 @@ export default function NotificationDropdown() {
             socketRef.current.emit("joinUserRoom", user._id);
 
             socketRef.current.on("connect", () => {
-                console.log("Socket connected");
+                // console.log("Socket connected");
             });
 
             socketRef.current.on("notification", (notification) => {

@@ -34,7 +34,7 @@ export const FetchSlots = createAsyncThunk("VendorSlots/FetchSlots", async (
                 vendorId
             },
         });
-        console.log({ "response inside the slices": response.data });
+        // console.log({ "response inside the slices": response.data });
         return response.data;
     } catch (error) {
         const msg = error?.response?.data?.error;

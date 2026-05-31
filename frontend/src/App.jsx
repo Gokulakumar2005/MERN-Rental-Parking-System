@@ -42,8 +42,8 @@ import AllContacts from "./Component/admin/AllContacts.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
-  console.log("VITE_GOOGLE_CLIENT_ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
-  console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
+  // console.log("VITE_GOOGLE_CLIENT_ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  // console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
 
   const dispatch = useDispatch();
   const { isLoggedIn } = useSelector((state) => {
