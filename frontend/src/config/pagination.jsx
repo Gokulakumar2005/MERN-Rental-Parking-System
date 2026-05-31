@@ -1,5 +1,5 @@
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
-    if (!totalPages || totalPages <= 1) return null;
+    if (totalPages === 0) return null;
 
     return (
         <div className="flex justify-center items-center gap-6 mt-12">

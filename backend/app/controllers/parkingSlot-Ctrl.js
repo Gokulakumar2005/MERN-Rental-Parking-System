@@ -328,6 +328,7 @@ ParkingController.fetchSlots = async (req, res) => {
         const response = await paginate(SlotModel, req.query, {
             query,
             sort: { createdAt: -1 },
+            populate: { path: "vendorId", select: "userName email phoneNumber profilePic" }
         });
 
         res.json(response);

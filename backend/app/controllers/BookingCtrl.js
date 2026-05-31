@@ -200,9 +200,12 @@ BookingCtrl.fetchBookings = async (req, res) => {
     const { search, status } = req.query;
     const userId = req.userId;
     try {
-        const query = {
-            $or: [{ userId: userId }, { vendorId: userId }]
-        };
+        let query = {};
+        if (req.role !== "admin") {
+            query = {
+                $or: [{ userId: userId }, { vendorId: userId }]
+            };
+        }
 
         if (search) {
             query.$and = query.$and || [];

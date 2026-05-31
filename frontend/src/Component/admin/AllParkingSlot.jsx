@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { FetchSlots } from "../../slices/parkingSlot";
 import Pagination from "../../config/pagination";
 import SearchBar from "../SearchBar";
-import { MapPin, Info, LayoutGrid, Award, ShieldCheck, Car, Activity, AlertTriangle, RefreshCcw } from "lucide-react";
-
+import { MapPin, Info, LayoutGrid, Award, ShieldCheck, Car, Activity, AlertTriangle, RefreshCcw, X, Mail, Phone, User } from "lucide-react";
 import debounce from "lodash/debounce";
 import { useLocation } from "react-router-dom";
 
@@ -21,6 +20,7 @@ export default function AllParkingSlots() {
 
     const [search, setSearch] = useState(initialSearch);
     const [vehicleType, setVehicleType] = useState("all");
+    const [selectedVendor, setSelectedVendor] = useState(null);
 
     const debouncedFetch = useCallback(
         debounce((searchQuery, vehicleFilter) => {
@@ -173,11 +173,15 @@ export default function AllParkingSlots() {
                                     <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
                                         <div className="max-w-[70%]">
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Vendor</p>
-                                            {/* <p className="text-xs font-medium text-gray-600 truncate" title={ele.vendorId}>{ele.vendorId}</p> */}
+                                            <p className="text-xs font-medium text-gray-600 truncate" title={ele.vendorId?.userName || "Unknown"}>{ele.vendorId?.userName || "Unknown"}</p>
                                         </div>
-                                        {/* <button className="p-3 bg-gray-50 text-gray-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm">
-                                            <Info size={18} />
-                                        </button> */}
+                                        <button 
+                                            onClick={() => setSelectedVendor(ele.vendorId)}
+                                            className="p-2.5 bg-gray-50 text-gray-500 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                                        >
+                                            <span className="text-xs font-bold">Details</span>
+                                            <Info size={14} />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -194,6 +198,41 @@ export default function AllParkingSlots() {
                 {totalPages > 1 && (
                     <div className="flex justify-center mt-8 w-fit mx-auto">
                         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                    </div>
+                )}
+
+                {/* Vendor Details Modal */}
+                {selectedVendor && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 relative animate-in zoom-in-95 duration-200">
+                            <button 
+                                onClick={() => setSelectedVendor(null)}
+                                className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-full transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                            <div className="text-center mb-6">
+                                <div className="w-20 h-20 mx-auto bg-indigo-50 rounded-full mb-4 overflow-hidden border-4 border-white shadow-md flex items-center justify-center text-indigo-300">
+                                    {selectedVendor.profilePic ? (
+                                        <img src={selectedVendor.profilePic} alt="vendor profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={40} />
+                                    )}
+                                </div>
+                                <h3 className="text-xl font-black text-slate-800">{selectedVendor.userName || "Unknown"}</h3>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Slot Owner</p>
+                            </div>
+                            <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white rounded-lg shadow-sm text-slate-400"><Mail size={16} /></div>
+                                    <p className="text-sm font-semibold text-slate-600 truncate" title={selectedVendor.email}>{selectedVendor.email || "No Email"}</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white rounded-lg shadow-sm text-slate-400"><Phone size={16} /></div>
+                                    <p className="text-sm font-semibold text-slate-600 truncate">{selectedVendor.phoneNumber || "No Phone Number"}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

@@ -22,6 +22,7 @@ import {
     Calendar,
     Activity
 } from "lucide-react";
+import Pagination from "../../config/pagination";
 
 // Canvas Helper component to overlay bounding boxes on the fullImage
 function SlotScannerCanvas({ imageUrl, status }) {
@@ -108,13 +109,19 @@ function SlotScannerCanvas({ imageUrl, status }) {
 
 export default function SlotApproval() {
     const dispatch = useDispatch();
-    const { Slot, loading, error } = useSelector((state) => state.slot);
+    const { Slot, loading, error, pagination } = useSelector((state) => state.slot);
     const [activeTab, setActiveTab] = useState("pending"); // "pending", "approved", "rejected"
     const [selectedSlotForModal, setSelectedSlotForModal] = useState(null);
     const [actionLoadingId, setActionLoadingId] = useState(null);
 
+    const { currentPage = 1, totalPages = 1 } = pagination || {};
+
     const loadSlots = () => {
-        dispatch(FetchSlots({ page: 1, limit: 100, approvalStatus: activeTab }));
+        dispatch(FetchSlots({ page: 1, limit: 10, approvalStatus: activeTab }));
+    };
+
+    const handlePageChange = (page) => {
+        dispatch(FetchSlots({ page, limit: 10, approvalStatus: activeTab }));
     };
 
     useEffect(() => {
@@ -432,6 +439,9 @@ export default function SlotApproval() {
                                 </div>
                             </div>
                         ))}
+                        <div className="mt-6">
+                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                        </div>
                     </div>
                 )}
             </div>
