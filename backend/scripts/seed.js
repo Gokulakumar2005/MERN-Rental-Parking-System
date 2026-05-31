@@ -155,6 +155,7 @@ async function seed() {
                         faker.image.urlPicsumPhotos({ width: 800, height: 600 })
                     ),
                 },
+                approvalStatus: "approved",
                 createdAt: randomDate(10),
             });
         }

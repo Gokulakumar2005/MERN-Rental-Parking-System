@@ -318,7 +318,7 @@ ParkingController.fetchSlots = async (req, res) => {
         if (approvalStatus) {
             query.approvalStatus = approvalStatus;
         } else if (req.role === "user") {
-            query.approvalStatus = { $in: ["approved", null, undefined] };
+            query.approvalStatus = { $in: ["approved", null] };
         }
 
         if (vendorId) {
