@@ -222,8 +222,8 @@ UserCtrl.forgotPassword = async (req, res) => {
         if (sendtogmail !== undefined) {
             let transporter = nodemailer.createTransport({
                 host: 'smtp.gmail.com',
-                port: 587,
-                secure: false, // true for 465, false for other ports
+                port: 465,
+                secure: true, // try 465 secure to bypass firewall
                 connectionTimeout: 10000, // 10 seconds timeout
                 auth: {
                     user: process.env.EMAIL_USER, // Need to set EMAIL_USER and EMAIL_PASS if not present
