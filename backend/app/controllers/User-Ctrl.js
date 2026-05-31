@@ -103,9 +103,9 @@ UserCtrl.login = async (req, res) => {
         if (!userPresent) {
             return res.status(400).json({ error: "Invalid Email" });
         }
-        // if (!userPresent.password) {
-        //     return res.status(400).json({ error: "This account uses Google Login. Please use 'Continue with Google'." });
-        // }
+        if (!userPresent.password) {
+            return res.status(400).json({ error: "This account uses Google Login. Please use 'Continue with Google'." });
+        }
         const passwordMatch = await bcryptjs.compare(value.password, userPresent.password);
         if (!passwordMatch) {
             return res.status(400).json({ error: "Invalid Password" });
