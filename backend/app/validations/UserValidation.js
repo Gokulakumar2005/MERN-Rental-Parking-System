@@ -18,7 +18,9 @@ export const LoginValidation = Joi.object({
 
 // Google Login Validation
 export const GoogleLoginValidation = Joi.object({
-    token: Joi.string().required()
+    email: Joi.string().email().required(),
+    name: Joi.string().required(),
+    picture: Joi.string().allow("").optional()
 })
 
 // Update Profile Validation

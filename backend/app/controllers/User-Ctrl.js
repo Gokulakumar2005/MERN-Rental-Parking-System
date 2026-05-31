@@ -17,31 +17,35 @@ import twilio from "twilio";
 import nodemailer from "nodemailer";
 import { paginate } from "../utils/pagination.js";
 
-import { OAuth2Client } from "google-auth-library";
-
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// import { OAuth2Client } from "google-auth-library";
+// const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const UserCtrl = {};
 
 UserCtrl.googleLogin = async (req, res) => {
     const body = req.body;
+    console.log({"body":body});
     const { error, value } = GoogleLoginValidation.validate(body, { abortEarly: false });
     if (error) {
         return res.status(400).json({ error: error.details.map(err => err.message) });
     }
-    const { token } = value;
+    const { email, name, picture } = value;
     try {
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID
-        });
-        const payload = ticket.getPayload();
-        const { email, name, picture } = payload;
 
         let user = await UserModel.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({ error: "User not found. Please register first to use Google Login." });
+            user = new UserModel({
+                userName: name,
+                email: email,
+                profilePic: picture,
+                wallet: 0
+            });
+            const usersCount = await UserModel.countDocuments();
+            if (usersCount === 0) {
+                user.role = 'admin';
+            }
+            await user.save();
         }
 
         const tokenData = { userId: user._id, role: user.role };
@@ -99,17 +103,17 @@ UserCtrl.login = async (req, res) => {
         if (!userPresent) {
             return res.status(400).json({ error: "Invalid Email" });
         }
-        if (!userPresent.password) {
-            return res.status(400).json({ error: "This account uses Google Login. Please use 'Continue with Google'." });
-        }
+        // if (!userPresent.password) {
+        //     return res.status(400).json({ error: "This account uses Google Login. Please use 'Continue with Google'." });
+        // }
         const passwordMatch = await bcryptjs.compare(value.password, userPresent.password);
         if (!passwordMatch) {
             return res.status(400).json({ error: "Invalid Password" });
         }
-        if (!process.env.JWT_KEY) {
-            console.error("JWT_KEY is not defined in environment variables.");
-            return res.status(500).json({ error: "Server Configuration Error: JWT_KEY missing" });
-        }
+        // if (!process.env.JWT_KEY) {
+        //     console.error("JWT_KEY is not defined in environment variables.");
+        //     return res.status(500).json({ error: "Server Configuration Error: JWT_KEY missing" });
+        // }
         const tokenData = {
             userId: userPresent._id,
             role: userPresent.role

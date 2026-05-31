@@ -240,7 +240,7 @@ export default function Register() {
                                         name="phoneNumber"
                                         onChange={handleChange}
                                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder-slate-400"
-                                        placeholder="+1 (555) 000-0000"
+                                        placeholder="1234567890"
                                         onBlur={() => {
                                             if (FormData.phoneNumber.trim().length === 0) {
                                                 setError({ ...Error, phoneNumber: "Phone Number is required" });

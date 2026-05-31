@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 
 import { Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 import { MapPin, ShieldCheck, MessageCircle, Briefcase, Mail, Lock, ChevronLeft, Car } from "lucide-react";
 
 export default function Login() {
@@ -212,7 +213,13 @@ export default function Login() {
                             <div className="flex justify-center w-full">
                                 <GoogleLogin
                                     onSuccess={(credentialResponse) => {
-                                        dispatch(GoogleLoginUser({ credential: credentialResponse.credential, redirect }));
+                                        const decoded = jwtDecode(credentialResponse.credential);
+                                        dispatch(GoogleLoginUser({ 
+                                            email: decoded.email,
+                                            name: decoded.name,
+                                            picture: decoded.picture,
+                                            redirect 
+                                        }));
                                     }}
                                     onError={() => {
                                         console.log('Login Failed');

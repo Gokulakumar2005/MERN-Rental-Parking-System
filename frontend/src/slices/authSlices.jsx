@@ -16,9 +16,9 @@ export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormD
         return rejectWithValue(msg);
     }
 })
-export const GoogleLoginUser = createAsyncThunk("auth/GoogleLoginUser", async ({ credential, redirect }, { rejectWithValue }) => {
+export const GoogleLoginUser = createAsyncThunk("auth/GoogleLoginUser", async ({ email, name, picture, redirect }, { rejectWithValue }) => {
     try {
-        const response = await axios.post("/user/google-login", { token: credential });
+        const response = await axios.post("/user/google-login", { email, name, picture });
         localStorage.setItem("token", response.data.token);
         const userResponse = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
         redirect();
