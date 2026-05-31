@@ -38,8 +38,6 @@ export default function Navbar() {
         setIsMobileMenuOpen(false);
     };
 
-    if (!isLoggedIn) return null;
-
     const navLinkClass = (path) => `
         flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300
         ${location.pathname === path 
@@ -50,7 +48,7 @@ export default function Navbar() {
     return (
         <nav className="sticky top-0 z-[100] bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-3 flex justify-between items-center">
            
-            <Link to="/dashboard" className="flex items-center gap-2.5 group">
+            <Link to={isLoggedIn ? "/dashboard" : "/home"} className="flex items-center gap-2.5 group">
                 <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-200 group-hover:scale-110 transition-transform duration-300">
                     <Car size={22} fill="currentColor" className="fill-indigo-300" />
                 </div>
@@ -61,7 +59,15 @@ export default function Navbar() {
 
         
             <div className="hidden lg:flex items-center gap-2">
-                {user.role === "admin" && (
+                {!isLoggedIn && (
+                    <>
+                        <Link to="/home" className={navLinkClass("/home")}>Home</Link>
+                        <Link to="/home#about" className={navLinkClass("/home#about")}>About</Link>
+                        <Link to="/home#contact" className={navLinkClass("/home#contact")}>Contact</Link>
+                    </>
+                )}
+
+                {isLoggedIn && user?.role === "admin" && (
                     <>
                         <Link to="/dashboard" className={navLinkClass("/dashboard")}>
                             <LayoutDashboard size={18} /> Dashboard
@@ -78,10 +84,13 @@ export default function Navbar() {
                         <Link to="/slotApproval" className={navLinkClass("/slotApproval")}>
                             <ShieldCheck size={18} /> Slot Approvals
                         </Link>
+                        <Link to="/admin/contacts" className={navLinkClass("/admin/contacts")}>
+                            <User size={18} /> Inbox
+                        </Link>
                     </>
                 )}
 
-                {user.role === "vendor" && (
+                {isLoggedIn && user?.role === "vendor" && (
                     <>
                         <Link to="/dashboard" className={navLinkClass("/dashboard")}>
                             <LayoutDashboard size={18} /> Dashboard
@@ -98,7 +107,7 @@ export default function Navbar() {
                     </>
                 )}
 
-                {user.role === "user" && (
+                {isLoggedIn && user?.role === "user" && (
                     <>
                         <Link to="/dashboard" className={navLinkClass("/dashboard")}>
                             <LayoutDashboard size={18} /> Dashboard
@@ -128,17 +137,24 @@ export default function Navbar() {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 pr-4 border-r border-slate-100">
-                    <Notification />
-                    {user.role !== "admin" && <SwitchRole />}
-                </div>
+                {!isLoggedIn ? (
+                    <div className="flex items-center gap-3">
+                        <Link to="/login" className="px-4 py-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Sign In</Link>
+                        <Link to="/register" className="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-500 shadow-md transition-colors">Sign Up</Link>
+                    </div>
+                ) : (
+                    <>
+                        <div className="flex items-center gap-2 pr-4 border-r border-slate-100">
+                            <Notification />
+                            {user?.role !== "admin" && <SwitchRole />}
+                        </div>
 
-                {/* Profile Dropdown */}
-                <div className="relative">
-                    <button 
-                        onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        className="flex items-center gap-2.5 pl-2 pr-1 py-1 rounded-full border border-slate-200 hover:border-indigo-300 hover:bg-slate-50 transition-all cursor-pointer group"
-                    >
+                        {/* Profile Dropdown */}
+                        <div className="relative">
+                            <button 
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                className="flex items-center gap-2.5 pl-2 pr-1 py-1 rounded-full border border-slate-200 hover:border-indigo-300 hover:bg-slate-50 transition-all cursor-pointer group"
+                            >
                         <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-xs border border-indigo-200 uppercase">
                             {user.username?.substring(0, 2) || "U"}
                         </div>
@@ -179,12 +195,22 @@ export default function Navbar() {
                         </>
                     )}
                 </div>
+                </>
+                )}
             </div>
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
                 <div className="absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-lg lg:hidden flex flex-col p-4 gap-2 z-50">
-                    {user.role === "admin" && (
+                    {!isLoggedIn && (
+                        <>
+                            <Link to="/home" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/home")}>Home</Link>
+                            <Link to="/home#about" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/home#about")}>About</Link>
+                            <Link to="/home#contact" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/home#contact")}>Contact</Link>
+                        </>
+                    )}
+
+                    {isLoggedIn && user?.role === "admin" && (
                         <>
                             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/dashboard")}>
                                 <LayoutDashboard size={18} /> Dashboard
@@ -201,10 +227,13 @@ export default function Navbar() {
                             <Link to="/slotApproval" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/slotApproval")}>
                                 <ShieldCheck size={18} /> Slot Approvals
                             </Link>
+                            <Link to="/admin/contacts" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/admin/contacts")}>
+                                <User size={18} /> Inbox
+                            </Link>
                         </>
                     )}
 
-                    {user.role === "vendor" && (
+                    {isLoggedIn && user?.role === "vendor" && (
                         <>
                             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/dashboard")}>
                                 <LayoutDashboard size={18} /> Dashboard
@@ -221,7 +250,7 @@ export default function Navbar() {
                         </>
                     )}
 
-                    {user.role === "user" && (
+                    {isLoggedIn && user?.role === "user" && (
                         <>
                             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={navLinkClass("/dashboard")}>
                                 <LayoutDashboard size={18} /> Dashboard

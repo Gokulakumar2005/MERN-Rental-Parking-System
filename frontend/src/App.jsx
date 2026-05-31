@@ -1,7 +1,7 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -31,6 +31,12 @@ import SlotApproval from "./Component/admin/SlotApproval.jsx";
 import Navbar from "./Component/Navbar.jsx";
 import PrivateRoutes from "./Component/privateRoutes.jsx";
 
+// new pages
+import Home from "./Component/guest/Home.jsx";
+import About from "./Component/guest/About.jsx";
+import Contact from "./Component/guest/Contact.jsx";
+import AllContacts from "./Component/admin/AllContacts.jsx";
+
 
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -38,7 +44,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 function App() {
   console.log("VITE_GOOGLE_CLIENT_ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
   console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
-  const navigate = useNavigate();
+
   const dispatch = useDispatch();
   const { isLoggedIn } = useSelector((state) => {
     return state.auth;
@@ -49,8 +55,6 @@ function App() {
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(UserAccount());
-    } else {
-      navigate("/login")
     }
   }, [dispatch]);
 
@@ -78,8 +82,12 @@ function App() {
         <ToastContainer />
         <div className="max-w-[1600px] mx-auto">
           <Routes>
-            {/* <Route path="/dashboard" element={<PrivateRoutes> <DashBoard /> </PrivateRoutes>}>DashBoard</Route> */}
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Navigate to="/home" />} />
+            
+            {/* Guest Routes */}
+            <Route path="/home" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
 
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
@@ -103,6 +111,7 @@ function App() {
             <Route path="/AllParkingSlot" element={<PrivateRoutes><AllParkingSlots /></PrivateRoutes>} />
             <Route path="/AllBookings" element={<PrivateRoutes><AllBookings /></PrivateRoutes>} />
             <Route path="/slotApproval" element={<PrivateRoutes><SlotApproval /></PrivateRoutes>} />
+            <Route path="/admin/contacts" element={<PrivateRoutes><AllContacts /></PrivateRoutes>} />
           </Routes>
         </div>
       </div>

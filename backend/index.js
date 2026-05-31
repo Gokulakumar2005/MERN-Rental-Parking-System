@@ -23,6 +23,7 @@ import { upload } from './config/multer.js';
 // import socketHandler from './app/sockets/sockets.js';
 import socketHandler from "./app/Sockets/sockets.js";
 import NotificationCtrl from './app/controllers/Notification-Ctrl.js';
+import ContactCtrl from './app/controllers/Contact-Ctrl.js';
 
 
 const app = express();
@@ -140,6 +141,11 @@ app.post("/payment/create-order", authenticateUser, authorizeUser(["user", "admi
 app.post("/payment/verify", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.verifyPayment);
 app.post("/payment/wallet-pay", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.walletPay);
 app.get("/user/fetch/payments", authenticateUser, authorizeUser(["user", "admin", "vendor"]), BookingCtrl.fetchPayments);
+
+// contacts
+app.post("/api/contact", ContactCtrl.submitForm);
+app.get("/admin/contacts", authenticateUser, authorizeUser(["admin"]), ContactCtrl.getForms);
+app.put("/admin/contacts/:id/read", authenticateUser, authorizeUser(["admin"]), ContactCtrl.markAsRead);
 
 // notification
 app.get("/api/notifications", authenticateUser, NotificationCtrl.fetchNotifications);
