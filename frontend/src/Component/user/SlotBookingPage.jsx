@@ -164,6 +164,11 @@ export default function SlotBookingPage() {
         e.preventDefault();
         const amount = calculateAmount();
 
+        if (!userId) {
+            toast.error("User session not fully loaded. Please wait or log in again.");
+            return;
+        }
+
         const error = {};
 
         if (formData.vehicletype.trim().length === 0) {
@@ -213,7 +218,7 @@ export default function SlotBookingPage() {
             Amount: Number(amount),
             userId,
             slotId: Data._id,
-            vendorId: Data.vendorId
+            vendorId: Data.vendorId?._id || Data.vendorId
         };
         console.log("FINAL DATA:", finalData);
         setPendingFinalData(finalData);
