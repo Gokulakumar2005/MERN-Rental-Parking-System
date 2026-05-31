@@ -146,7 +146,7 @@ UserCtrl.updateProfile = async (req, res) => {
         body.profilePic = req.file.path;
     }
 
-    const { error, value } = UpdateProfileValidation.validate(body, { abortEarly: false });
+    const { error, value } = UpdateProfileValidation.validate(body, { abortEarly: false, stripUnknown: true });
     if (error) {
         return res.status(400).json({ error: error.details.map(err => err.message) });
     }
