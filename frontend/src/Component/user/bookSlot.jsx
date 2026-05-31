@@ -225,7 +225,7 @@ export default function BookSlot() {
                                         <div className="border-t border-slate-100 bg-slate-50 p-5">
                                             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Facilities</p>
                                             <div className="flex flex-wrap gap-2 mb-4">
-                                                {ele.facilities.map((f, i) => (
+                                                {ele.facilities?.map((f, i) => (
                                                     <span key={i} className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 shadow-sm">{f}</span>
                                                 ))}
                                             </div>
@@ -247,12 +247,12 @@ export default function BookSlot() {
                                                         />
 
                     
-                                                        {ele.parkingImages.length > 1 && (
+                                                        {ele.parkingImages?.length > 1 && (
                                                             <>
                                                                 <button
                                                                     onClick={() => {
                                                                         const curr = activeImage[ele._id] || 0;
-                                                                        const prev = (curr - 1 + ele.parkingImages.length) % ele.parkingImages.length;
+                                                                        const prev = (curr - 1 + ele.parkingImages?.length) % ele.parkingImages?.length;
                                                                         setActiveImage({ ...activeImage, [ele._id]: prev });
                                                                     }}
                                                                     className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 text-slate-800 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 hover:bg-white transition-all active:scale-95 cursor-pointer"
@@ -262,7 +262,7 @@ export default function BookSlot() {
                                                                 <button
                                                                     onClick={() => {
                                                                         const curr = activeImage[ele._id] || 0;
-                                                                        const next = (curr + 1) % ele.parkingImages.length;
+                                                                        const next = (curr + 1) % ele.parkingImages?.length;
                                                                         setActiveImage({ ...activeImage, [ele._id]: next });
                                                                     }}
                                                                     className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-indigo-600 text-white rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 hover:bg-indigo-700 transition-all active:scale-95 cursor-pointer"
@@ -274,13 +274,13 @@ export default function BookSlot() {
                                                         )}
 
                                                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest">
-                                                            Image {(activeImage[ele._id] || 0) + 1} of {ele.parkingImages.length}
+                                                            Image {(activeImage[ele._id] || 0) + 1} of {ele.parkingImages?.length || 1}
                                                         </div>
                                                     </div>
 
                                            
                                                     <div className="flex gap-3 overflow-x-auto mt-4 pb-2 scrollbar-thin scrollbar-thumb-slate-200">
-                                                        {ele.parkingImages.map((img, i) => (
+                                                        {ele.parkingImages?.map((img, i) => (
                                                             <div
                                                                 key={i}
                                                                 onClick={() => setActiveImage({ ...activeImage, [ele._id]: i })}
