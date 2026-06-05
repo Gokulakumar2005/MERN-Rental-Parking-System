@@ -49,7 +49,7 @@ UserCtrl.googleLogin = async (req, res) => {
         }
 
         const tokenData = { userId: user._id, role: user.role };
-        const jwtToken = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
+        const jwtToken = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "1d" });
 
         res.json({ token: jwtToken });
     } catch (error) {
@@ -118,7 +118,7 @@ UserCtrl.login = async (req, res) => {
             userId: userPresent._id,
             role: userPresent.role
         };
-        const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "7d" });
+        const token = jwt.sign(tokenData, process.env.JWT_KEY, { expiresIn: "1d" });
         res.json({ token });
     } catch (error) {
         console.error("LOGIN ERROR:", error);
