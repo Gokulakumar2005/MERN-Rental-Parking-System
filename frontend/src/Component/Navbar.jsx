@@ -126,14 +126,16 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu Toggle Button */}
-            <div className="lg:hidden flex items-center ml-auto mr-4">
-                <button 
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
-                >
-                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-            </div>
+            {isLoggedIn && (
+                <div className="lg:hidden flex items-center ml-auto mr-4">
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
+                    >
+                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
+            )}
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4">
