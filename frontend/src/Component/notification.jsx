@@ -18,7 +18,7 @@ export default function NotificationDropdown() {
     const fetchNotifications = async () => {
         try {
             const res = await axios.get("/api/notifications", { headers: { Authorization: localStorage.getItem("token") } });
-            setNotifications(res.data);
+            setNotifications(Array.isArray(res.data) ? res.data : []);
             setServerError(null);
         } catch (err) {
             console.error("Failed to fetch notifications", err);
@@ -85,7 +85,7 @@ export default function NotificationDropdown() {
         }
     };
 
-    const unreadCount = notifications.filter((ele) => !ele.isRead).length;
+    const unreadCount = Array.isArray(notifications) ? notifications.filter((ele) => !ele.isRead).length : 0;
 
     if (!isLoggedIn) return null;
 
