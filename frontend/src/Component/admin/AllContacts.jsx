@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import axios from "../../config/axiosInstance";
 import Pagination from "../../config/pagination";
 import SearchBar from "../SearchBar";
 import { Mail, Inbox, User, HelpCircle, MessageSquare, Check, X, RefreshCcw, AlertTriangle } from "lucide-react";
@@ -20,7 +20,7 @@ export default function AllContacts() {
         setError(null);
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get(`http://localhost:3030/admin/contacts`, {
+            const res = await axios.get(`/admin/contacts`, {
                 params: { page, limit, search: searchQuery, status: statusFilter },
                 headers: { Authorization: token }
             });
@@ -61,7 +61,7 @@ export default function AllContacts() {
     const markAsRead = async (id) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:3030/admin/contacts/${id}/read`, {}, {
+            await axios.put(`/admin/contacts/${id}/read`, {}, {
                 headers: { Authorization: token }
             });
             toast.success("Marked as read");

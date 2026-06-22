@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../../config/axiosInstance';
 import { Mail, MessageSquare, User, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -21,7 +21,7 @@ export default function Contact() {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post('http://localhost:3030/api/contact', formData);
+            await axios.post('/api/contact', formData);
             setSubmitted(true);
             toast.success("Message sent successfully!");
         } catch (err) {
