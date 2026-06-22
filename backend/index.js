@@ -38,7 +38,7 @@ app.use(express.json());
 // }))
 app.use(cors({
   origin: [
-    "https://mern-rental-parking-system-frontend.onrender.com/home",
+    "https://mern-rental-parking-system-frontend.onrender.com",
     "http://localhost:5173"
   ],
   credentials: true
@@ -53,7 +53,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "https://mern-rental-parking-system-frontend.onrender.com/home",
+      "https://mern-rental-parking-system-frontend.onrender.com",
       "http://localhost:5173"
     ],
     methods: ["GET", "POST"],
