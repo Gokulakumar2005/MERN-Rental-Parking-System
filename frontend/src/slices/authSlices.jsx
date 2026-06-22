@@ -60,7 +60,6 @@ export const UserAccount = createAsyncThunk("auth/UserAccount", async (_, { reje
 
     try {
         const response = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
-        // console.log(response.data);
         return response.data;
     } catch (error) {
         let errorData = error.response?.data?.error;
