@@ -29,7 +29,7 @@ import ContactCtrl from './app/controllers/Contact-Ctrl.js';
 
 const app = express();
 const port = process.env.PORT || 3030;
-ConfigureDb();
+
 app.use(express.json());
 // app.use(cors());
 // app.use(cors({
@@ -162,8 +162,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
-server.listen(port, () => {
-  console.log(`server is running on ${port}`)
+ConfigureDb().then(() => {
+  server.listen(port, () => {
+    console.log(`server is running on ${port}`)
+  });
+}).catch((err) => {
+  console.error("Failed to connect to database. Server not started.", err);
+  process.exit(1);
 });
 
 
