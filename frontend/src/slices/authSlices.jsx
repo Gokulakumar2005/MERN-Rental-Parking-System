@@ -11,7 +11,8 @@ export const RegisterUser = createAsyncThunk('auth/RegisterUser', async ({ FormD
         toast.success("successfully registered");
         return response.data;
     } catch (err) {
-        const msg = err.response?.data?.error || err.message || "Something went wrong";
+        let errorData = err.response?.data?.error;
+        const msg = Array.isArray(errorData) ? errorData[0] : (errorData || err.message || "Something went wrong");
         console.log(msg);
         return rejectWithValue(msg);
     }
@@ -25,7 +26,8 @@ export const GoogleLoginUser = createAsyncThunk("auth/GoogleLoginUser", async ({
         toast.success("successfully logged in with google");
         return userResponse.data;
     } catch (err) {
-        const msg = err.response?.data?.error || err.message || "Something went wrong";
+        let errorData = err.response?.data?.error;
+        const msg = Array.isArray(errorData) ? errorData[0] : (errorData || err.message || "Something went wrong");
         return rejectWithValue(msg);
     }
 })
@@ -41,7 +43,8 @@ export const LoginUser = createAsyncThunk("auth/LoginUser", async ({ formData, r
         return userResponse.data;
 
     } catch (err) {
-      const msg =  err.message|| err.response?.data?.error || "Something went wrong";
+      let errorData = err.response?.data?.error;
+      const msg = Array.isArray(errorData) ? errorData[0] : (errorData || err.message || "Something went wrong");
     //   alert(msg);
       if (loginRedirect) {
         loginRedirect();
@@ -59,8 +62,9 @@ export const UserAccount = createAsyncThunk("auth/UserAccount", async (_, { reje
         const response = await axios.get("/user/account", { headers: { Authorization: localStorage.getItem("token") } });
         // console.log(response.data);
         return response.data;
-    } catch (err) {
-        const msg = err.response?.data?.error || err.message || "Something went wrong";
+    } catch (error) {
+        let errorData = error.response?.data?.error;
+        const msg = Array.isArray(errorData) ? errorData[0] : (errorData || error.message || "Something went wrong");
         console.log(msg);
         return rejectWithValue(msg);
     }
@@ -80,7 +84,8 @@ export const UpdateProfile = createAsyncThunk("auth/UpdateProfile", async ({ for
         console.log(response.data);
         return response.data;
     } catch (error) {
-        const msg = err.response?.data?.error || err.message || "Something went wrong";
+        let errorData = error.response?.data?.error;
+        const msg = Array.isArray(errorData) ? errorData[0] : (errorData || error.message || "Something went wrong");
         console.log(msg);
         return rejectWithValue(msg);
     }
@@ -104,7 +109,8 @@ export const switchRole = createAsyncThunk(
       return response.data
 
     } catch (error) {
-      const msg = error.response?.data?.error || error.message
+      let errorData = error.response?.data?.error;
+      const msg = Array.isArray(errorData) ? errorData[0] : (errorData || error.message || "Something went wrong");
       return rejectWithValue(msg)
     }
   }
@@ -126,7 +132,8 @@ export const FetchAllUser = createAsyncThunk("auth/FetchAllUser", async (
         console.log({ "response": response.data });
         return response.data;
     } catch (error) {
-        const msg = error.response?.data?.error || error.message || "Something went wrong";
+        let errorData = error.response?.data?.error;
+        const msg = Array.isArray(errorData) ? errorData[0] : (errorData || error.message || "Something went wrong");
         console.log(msg);
         return rejectWithValue(msg);
     }
