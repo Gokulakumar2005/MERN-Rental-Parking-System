@@ -6,8 +6,6 @@ import cors from "cors";
 import { Server } from "socket.io";
 import http from "http"
 import morgan from "morgan";
-import fs from "fs";
-import path from "path";
 import "./config/node-cron/expiryBooking.js";
 import "./config/node-cron/peakHours.js";
 import "./config/node-cron/restPrice.js";
@@ -21,7 +19,6 @@ import { authenticateUser } from './app/middlewares/authenticateUser.js';
 import ChatController from './app/controllers/chatCtrl.js';
 import { authorizeUser } from './app/middlewares/authorize.js';
 import { upload } from './config/multer.js';
-// import socketHandler from './app/sockets/sockets.js';
 import socketHandler from "./app/Sockets/sockets.js";
 import NotificationCtrl from './app/controllers/Notification-Ctrl.js';
 import ContactCtrl from './app/controllers/Contact-Ctrl.js';
@@ -31,11 +28,7 @@ const app = express();
 const port = process.env.PORT || 3030;
 
 app.use(express.json());
-// app.use(cors());
-// app.use(cors({
-//   origin:"https://mern-rental-parking-system.onrender.com",
-//   credentials:true
-// }))
+
 app.use(cors({
   origin: [
     "https://mern-rental-parking-system-frontend.onrender.com",
@@ -170,55 +163,3 @@ ConfigureDb().then(() => {
   console.error("Failed to connect to database. Server not started.", err);
   process.exit(1);
 });
-
-
-// Area: Kukatpally PeakHour: 22
-// Area: T Nagar PeakHour: 2
-// Area: Chromepet PeakHour: 22
-// Area: Juhu PeakHour: 3
-// Area: Madhapur PeakHour: 23
-// Area: Andheri PeakHour: 0
-// Area: Connaught Place PeakHour: 4
-// Area: Guindy PeakHour: 21
-// Area: HSR Layout PeakHour: 3
-// Area: Electronic City PeakHour: 3
-// Area: HITEC City PeakHour: 7
-// Area: Nehru Place PeakHour: 19
-// Area: Dilsukhnagar PeakHour: 2
-// Area: Whitefield PeakHour: 2
-// Area: Jubilee Hills PeakHour: 0
-// Area: Lajpat Nagar PeakHour: 1
-// Area: Porur PeakHour: 7
-// Area: Saket PeakHour: 11
-// Area: Hauz Khas PeakHour: 22
-// Area: Secunderabad PeakHour: 17
-// Area: Dadar PeakHour: 0
-// Area: Adyar PeakHour: 21
-// Area: Thiruvanmiyur PeakHour: 6
-// Area: Dwarka PeakHour: 7
-// Area: Malad PeakHour: 17
-// Area: Gachibowli PeakHour: 2
-// Area: Goregaon PeakHour: 0
-// Area: Thane PeakHour: 18
-// Area: Powai PeakHour: 7
-// Area: Rohini PeakHour: 0
-// Area: Tambaram PeakHour: 6
-// Area: Bandra PeakHour: 5
-// Area: Ameerpet PeakHour: 3
-// Area: Jayanagar PeakHour: 21
-// Area: Malleshwaram PeakHour: 19
-// Area: Anna Nagar PeakHour: 20
-// Area: Navi Mumbai PeakHour: 7
-// Area: Pitampura PeakHour: 7
-// Area: Karol Bagh PeakHour: 7
-// Area: Koramangala PeakHour: 10
-// Area: Borivali PeakHour: 5
-// Area: JP Nagar PeakHour: 13
-// Area: BTM Layout PeakHour: 2
-// Area: Janakpuri PeakHour: 14
-// Area: Indiranagar PeakHour: 11
-// Area: Mylapore PeakHour: 4
-// Area: Banjara Hills PeakHour: 20
-// Area: Velachery PeakHour: 15
-// Area: LB Nagar PeakHour: 20
-// Area: Basavangudi PeakHour: 17
