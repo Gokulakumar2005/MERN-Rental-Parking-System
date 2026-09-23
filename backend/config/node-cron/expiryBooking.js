@@ -7,19 +7,18 @@ cron.schedule("* * * * *", async () => {
     try {
         console.log("Checking expired bookings...");
 
-        const expiredBookings = await BookingModel.find({
+        const result = await BookingModel.updateMany({
             endTime: { $lt: new Date() },
             status: "Booked"
+        }, {
+            $set: { status: "Expired" }
         });
 
-        for (let booking of expiredBookings) {
-            booking.status = "Expired";
-            await booking.save();
-
-            console.log("Booking expired:", booking._id);
+        if (result.modifiedCount > 0) {
+            console.log("Bookings expired:", result.modifiedCount);
         }
 
     } catch (error) {
         console.log("Cron Error:", error.message);
     }
-});
+}, { noOverlap: true });
